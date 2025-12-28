@@ -67,7 +67,7 @@ def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_m
             return json.loads(json_match.group(0))
         raise ValueError("No valid JSON object found in the AI response.")
     except Exception as e:
-        print(f"Gemini API call or JSON parsing failed: {e}")
+        print(f"CRITICAL GEMINI ERROR: {str(e)}") # Print explicitly for Azure Logs
         return None
 
 # ----------------------------- MAIN API ROUTES -----------------------------
