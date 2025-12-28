@@ -12,14 +12,15 @@ import re
 # from sklearn.metrics.pairwise import cosine_similarity
 
 from youtube_transcript_api import YouTubeTranscriptApi
-import spacy
+# import spacy
 import random
 
 # --- Load the NLP models once when the server starts ---
 print("Loading NLP models...")
 # video_search_model = SentenceTransformer('all-MiniLM-L6-v2')
 video_search_model = None # Placeholder
-quiz_model = spacy.load("en_core_web_md")
+# quiz_model = spacy.load("en_core_web_md")
+quiz_model = None # Placeholder
 print("NLP models loaded.")
 
 my_courses_bp = Blueprint('my_courses', __name__)
@@ -82,6 +83,9 @@ def get_transcript_for_lesson(lesson_id: str) -> str:
     return ""
 """
 def generate_quiz_with_nlp(text: str, num_questions: int = 5) -> dict:
+    if not quiz_model:
+        return {"quiz": []}
+        
     doc = quiz_model(text)
     
     candidate_sents = [sent for sent in doc.sents if 10 < len(sent.text.split()) < 50 and sent.ents]

@@ -20,18 +20,8 @@ gunicorn
 google-generativeai
 # sentence-transformers (Disabled for Lite Deployment)
 # scikit-learn (Disabled)
-spacy
+# spacy (Disabled for Lite Deployment to fix 'blis' error)
 numpy<2.0
 # scipy (Disabled)
 # torch (Disabled)
 # torchvision (Disabled)
-
-# --- YouTube & APIs ---
-youtube-transcript-api
-requests
-
-# --- Utilities ---
-python-dotenv
-
-# --- SpaCy Model (Direct Link for Deployment) ---
-https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.7.1/en_core_web_md-3.7.1-py3-none-any.whl
