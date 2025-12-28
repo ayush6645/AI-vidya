@@ -14,7 +14,7 @@ google-auth
 google-auth-oauthlib
 googleapis-common-protos
 google-cloud-secret-manager
-gunicorn
+gunicorn==20.1.0
 
 # --- AI & Data Science ---
 google-generativeai
