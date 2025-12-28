@@ -15,17 +15,20 @@ def register():
         confirm_password = request.form.get('confirm_password', '').strip()
 
         if password != confirm_password:
-            return jsonify({'status': 'error', 'message': 'Passwords do not match.'}), 400
+            flash('Passwords do not match.', 'error')
+            return render_template('register.html')
 
         try:
             users_ref = db.collection('users')
-            email_check = users_ref.where('email', '==', email).limit(1).stream()
+            email_check = users_ref.where(filter=FieldFilter('email', '==', email)).limit(1).stream()
             if next(email_check, None):
-                return jsonify({'status': 'error', 'message': 'An account with this email already exists.'}), 409
+                flash('An account with this email already exists.', 'error')
+                return render_template('register.html')
 
-            username_check = users_ref.where('username', '==', username).limit(1).stream()
+            username_check = users_ref.where(filter=FieldFilter('username', '==', username)).limit(1).stream()
             if next(username_check, None):
-                return jsonify({'status': 'error', 'message': 'This username is already taken.'}), 409
+                flash('This username is already taken.', 'error')
+                return render_template('register.html')
                 
             hashed_password = generate_password_hash(password)
             
@@ -42,10 +45,11 @@ def register():
             
             users_ref.document(email).set(new_user_data)
 
-            # Return a success JSON response
-            return jsonify({'status': 'success', 'message': 'Registration successful! You can now log in.'}), 201
+            flash('Registration successful! Please log in.', 'success')
+            return redirect(url_for('login.login'))
 
         except Exception as e:
-            return jsonify({'status': 'error', 'message': f'A server error occurred: {e}'}), 500
+            flash(f'A server error occurred: {e}', 'error')
+            return render_template('register.html')
 
     return render_template('register.html')

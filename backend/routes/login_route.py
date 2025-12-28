@@ -31,12 +31,14 @@ def login():
             logger.debug(f"Parsed values - login_type: {login_type}, login_value: {login_value}, auth_type: {auth_type}, auth_value: {auth_value}")
 
             if not all([login_type, login_value, auth_type, auth_value]):
-                return jsonify({'status': 'error', 'message': 'Please fill all fields'}), 400
+                if request.is_json:
+                    return jsonify({'status': 'error', 'message': 'Please fill all fields'}), 400
+                else:
+                    flash('Please fill all fields', 'error')
+                    return render_template('login.html')
 
             users_ref = db.collection('users')
-            user_query = None
-
-            # Map login types to database fields
+            # ... (mapping logic) ...
             field_map = {
                 'loginUsername': 'username',
                 'loginEmail': 'email', 
@@ -45,7 +47,11 @@ def login():
 
             db_field = field_map.get(login_type)
             if not db_field:
-                return jsonify({'status': 'error', 'message': 'Invalid login type'}), 400
+                 if request.is_json:
+                    return jsonify({'status': 'error', 'message': 'Invalid login type'}), 400
+                 else:
+                    flash('Invalid login type', 'error')
+                    return render_template('login.html')
 
             # Query Firestore for the user
             query = users_ref.where(filter=FieldFilter(db_field, '==', login_value))
@@ -53,7 +59,11 @@ def login():
             
             if not user_docs:
                 logger.warning(f"User not found with {db_field}: {login_value}")
-                return jsonify({'status': 'error', 'message': 'Invalid credentials. Please try again.'}), 401
+                if request.is_json:
+                    return jsonify({'status': 'error', 'message': 'Invalid credentials. Please try again.'}), 401
+                else:
+                    flash('Invalid credentials. Please try again.', 'error')
+                    return render_template('login.html')
 
             user_doc = user_docs[0]
             user_data = user_doc.to_dict()
@@ -61,7 +71,11 @@ def login():
             # Check password
             if not check_password_hash(user_data.get('password_hash', ''), auth_value):
                 logger.warning(f"Password mismatch for user: {user_doc.id}")
-                return jsonify({'status': 'error', 'message': 'Invalid credentials. Please try again.'}), 401
+                if request.is_json:
+                    return jsonify({'status': 'error', 'message': 'Invalid credentials. Please try again.'}), 401
+                else:
+                    flash('Invalid credentials. Please try again.', 'error')
+                    return render_template('login.html')
 
             # Login successful - set session
             session['user_id'] = user_doc.id
@@ -70,19 +84,26 @@ def login():
             
             logger.info(f"User {user_doc.id} logged in successfully")
             
-            return jsonify({
-                'status': 'success', 
-                'message': 'Login successful!',
-                'user': {
-                    'id': user_doc.id,
-                    'username': user_data.get('username'),
-                    'name': session['name']
-                }
-            }), 200
+            if request.is_json:
+                return jsonify({
+                    'status': 'success', 
+                    'message': 'Login successful!',
+                    'user': {
+                        'id': user_doc.id,
+                        'username': user_data.get('username'),
+                        'name': session['name']
+                    }
+                }), 200
+            else:
+                return redirect(url_for('dashboard.show_dashboard'))
 
         except Exception as e:
             logger.error(f"Login error: {str(e)}", exc_info=True)
-            return jsonify({'status': 'error', 'message': 'A server error occurred. Please try again later.'}), 500
+            if request.is_json:
+                return jsonify({'status': 'error', 'message': 'A server error occurred. Please try again later.'}), 500
+            else:
+                flash('A server error occurred. Please try again later.', 'error')
+                return render_template('login.html')
         
     return render_template('login.html')
 

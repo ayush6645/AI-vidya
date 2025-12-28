@@ -259,8 +259,61 @@
       <p>Enter your credentials to continue your journey.</p>
     </div>
 
+    <style>
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        body {
+          padding: 15px;
+          height: auto;
+          min-height: 100vh;
+          overflow-y: auto;
+        }
+
+        .login-card {
+          padding: 30px 20px;
+          max-width: 100%;
+          margin: 20px 0;
+        }
+
+        .card-header h2 {
+          font-size: 1.5rem;
+        }
+
+        .toggle-switch label {
+          padding: 6px 10px;
+          font-size: 0.9rem;
+        }
+      }
+
+      .alert {
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+
+      .alert-error {
+        background: rgba(220, 53, 69, 0.2);
+        border: 1px solid #dc3545;
+        color: #ff6b6b;
+      }
+
+      .alert-success {
+        background: rgba(40, 167, 69, 0.2);
+        border: 1px solid #28a745;
+        color: #5ddc79;
+      }
+    </style>
+
     {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}{% for category, message in messages %}{% endfor %}{% endif %}
+    {% if messages %}
+    {% for category, message in messages %}
+    <div class="alert alert-{{ category }}">
+      {{ message }}
+    </div>
+    {% endfor %}
+    {% endif %}
     {% endwith %}
 
     <form method="POST" action="/login">
