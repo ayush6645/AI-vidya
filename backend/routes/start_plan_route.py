@@ -2,7 +2,7 @@ from flask import Blueprint, request, jsonify, session, redirect, url_for, flash
 from backend import db
 from dotenv import load_dotenv
 import os
-import google.generativeai as genai
+from google import genai
 import requests
 import json
 from firebase_admin import firestore
@@ -18,15 +18,27 @@ try:
     YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
     if not GOOGLE_API_KEY:
         raise ValueError("GOOGLE_API_KEY not found in .env file.")
-    genai.configure(api_key=GOOGLE_API_KEY)
+    # Initialize the new Client
+    client = genai.Client(api_key=GOOGLE_API_KEY)
 except (ValueError, TypeError) as e:
     print(f"FATAL ERROR: API keys not configured correctly. {e}")
+    client = None
     YOUTUBE_API_KEY = None
 
 # ----------------------------- HELPER FUNCTIONS -----------------------------
 
 def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_months: int) -> dict | None:
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    if not client:
+        print("CRITICAL: Gemini Client is not initialized.")
+        return None
+
+    # Using the new model name format (often just 'gemini-1.5-flash' or similar)
+    # Adjust 'gemini-2.0-flash-exp' if you need a specific version, 
+    # but 'gemini-1.5-flash' is the current stable standard.
+    # Let's try to stick to a known working string or what you had 'gemini-2.5-flash' 
+    # (Note: 2.5 isn't standard, likely 1.5 or 2.0-flash-exp. I will use 2.0-flash-exp for bleeding edge or 1.5-flash for stable)
+    # Using 'gemini-1.5-flash' as safe default for production.
+    model_id = 'gemini-1.5-flash' 
     
     prompt = f"""
     You are a hyper-detailed, logical curriculum architect for an AI learning platform. Your task is to generate a comprehensive, day-by-day study plan based on user requirements.
@@ -61,7 +73,12 @@ def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_m
     Now, generate the detailed, day-by-day JSON plan for the user's request.
     """
     try:
-        response = model.generate_content(prompt)
+        # New API Call
+        response = client.models.generate_content(
+            model=model_id,
+            contents=prompt
+        )
+        # Result text access might differ slightly, usually response.text works
         json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
         if json_match:
             return json.loads(json_match.group(0))

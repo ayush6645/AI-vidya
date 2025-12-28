@@ -17,7 +17,7 @@ google-cloud-secret-manager
 gunicorn==20.1.0
 
 # --- AI & Data Science ---
-google-generativeai
+google-genai
 # sentence-transformers (Disabled for Lite Deployment)
 # scikit-learn (Disabled)
 # spacy (Disabled for Lite Deployment to fix 'blis' error)
