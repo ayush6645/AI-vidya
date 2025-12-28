@@ -1,14 +1,18 @@
 # D:\AI_Edu_Bot_Project\backend\__init__.py
 
 from flask import Flask, render_template, session, redirect, url_for
-from dotenv import load_dotenv
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+except ImportError:
+    pass # dotenv is not installed, assuming env vars are set by the platform
+
 import os
 import firebase_admin
 from firebase_admin import credentials, firestore
 
 # --- Firebase Initialization ---
-# --- Firebase Initialization ---
-load_dotenv()
+
 import json
 
 if os.path.exists("serviceAccountKey.json"):
