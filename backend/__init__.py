@@ -7,9 +7,23 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # --- Firebase Initialization ---
+# --- Firebase Initialization ---
 load_dotenv()
-cred = credentials.Certificate("serviceAccountKey.json")
-firebase_admin.initialize_app(cred)
+import json
+
+if os.path.exists("serviceAccountKey.json"):
+    cred = credentials.Certificate("serviceAccountKey.json")
+elif os.environ.get('FIREBASE_CREDENTIALS'):
+    # Load from environment variable (for Render/Heroku)
+    cred_dict = json.loads(os.environ.get('FIREBASE_CREDENTIALS'))
+    cred = credentials.Certificate(cred_dict)
+else:
+    # Fallback or error if neither exists
+    print("Warning: No Firebase credentials found! (serviceAccountKey.json or FIREBASE_CREDENTIALS var)")
+    cred = None
+
+if cred:
+    firebase_admin.initialize_app(cred)
 db = firestore.client()
 
 # --- Import Blueprints ---

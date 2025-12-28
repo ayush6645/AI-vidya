@@ -1,6 +1,5 @@
 '''
 from flask import Flask, render_template
-from backend.db.db_config import mysql  # Import from your config
 import os
 from dotenv import load_dotenv
 
@@ -12,17 +11,8 @@ app = Flask(__name__, static_folder='Web_App', template_folder='Web_App')
 # Set a secret key for session management
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'your-default-secret-key-123!')
 
-# MySQL Configuration - MUST come before initialization
-app.config['MYSQL_HOST'] = os.environ.get('MYSQL_HOST', 'localhost')
-app.config['MYSQL_USER'] = os.environ.get('MYSQL_USER', 'root')
-app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', '')
-app.config['MYSQL_DB'] = os.environ.get('MYSQL_DB', 'aividya')
-app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
-app.config['MYSQL_PORT'] = 3306  # Explicit port for XAMPP
-app.config['MYSQL_UNIX_SOCKET'] = None  # Important for XAMPP
+# MySQL Configuration removed - Using Firebase Firestore
 
-# Initialize MySQL with the app - CRITICAL STEP
-mysql.init_app(app)
 
 # Import blueprints AFTER mysql is initialized
 from backend.routes.login_route import login_bp
