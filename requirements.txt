@@ -23,10 +23,10 @@ scikit-learn
 spacy
 numpy<2.0
 scipy
-# CPU-only PyTorch to save space on Render
+# CPU-only PyTorch (Updated for modern Python support)
 --find-links https://download.pytorch.org/whl/torch_stable.html
-torch==2.1.2+cpu
-torchvision==0.16.2+cpu
+torch==2.5.1+cpu
+torchvision==0.20.1+cpu
 
 # --- YouTube & APIs ---
 youtube-transcript-api
