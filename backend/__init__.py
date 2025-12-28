@@ -48,10 +48,15 @@ from .routes.logout_route import logout_bp
 from .routes.my_courses_route import my_courses_bp
 
 # --- Create Flask App ---
+base_dir = os.path.abspath(os.path.dirname(__file__))
+# Go up one level from 'backend' to project root, then into 'Web_App'
+template_dir = os.path.join(os.path.dirname(base_dir), 'Web_App')
+static_dir = os.path.join(os.path.dirname(base_dir), 'Web_App')
+
 app = Flask(
     __name__,
-    static_folder='../Web_App',
-    template_folder='../Web_App'
+    static_folder=static_dir,
+    template_folder=template_dir
 )
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'aividya-super-secret-key-default')
 
