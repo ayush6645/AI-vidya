@@ -25,3 +25,10 @@ numpy<2.0
 # scipy (Disabled)
 # torch (Disabled)
 # torchvision (Disabled)
+
+# --- YouTube & APIs ---
+youtube-transcript-api
+requests
+
+# --- Utilities ---
+python-dotenv
