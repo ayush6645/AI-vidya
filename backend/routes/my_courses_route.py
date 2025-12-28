@@ -7,15 +7,18 @@ import os
 import re
 
 # --- Imports for Data Science & New Features ---
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
+# --- Imports for Data Science & New Features ---
+# from sentence_transformers import SentenceTransformer
+# from sklearn.metrics.pairwise import cosine_similarity
+
 from youtube_transcript_api import YouTubeTranscriptApi
 import spacy
 import random
 
 # --- Load the NLP models once when the server starts ---
 print("Loading NLP models...")
-video_search_model = SentenceTransformer('all-MiniLM-L6-v2')
+# video_search_model = SentenceTransformer('all-MiniLM-L6-v2')
+video_search_model = None # Placeholder
 quiz_model = spacy.load("en_core_web_md")
 print("NLP models loaded.")
 
@@ -40,15 +43,20 @@ def get_semantically_best_video(lesson: dict) -> str:
         if not search_results:
             return ""
 
-        lesson_embedding = video_search_model.encode([lesson_text])
-        video_texts = [f"{item['snippet']['title']}: {item['snippet']['description']}" for item in search_results]
-        video_embeddings = video_search_model.encode(video_texts)
-
-        similarities = cosine_similarity(lesson_embedding, video_embeddings)[0]
-        best_match_index = similarities.argmax()
-        best_video_id = search_results[best_match_index]['id']['videoId']
+        # Use the first result as default since semantic search is disabled on deployment
+        best_video_id = search_results[0]['id']['videoId']
+        
+        # --- Semantic logic disabled for deployment compatibility ---
+        # if video_search_model:
+        #     lesson_embedding = video_search_model.encode([lesson_text])
+        #     video_texts = [f"{item['snippet']['title']}: {item['snippet']['description']}" for item in search_results]
+        #     video_embeddings = video_search_model.encode(video_texts)
+        #     similarities = cosine_similarity(lesson_embedding, video_embeddings)[0]
+        #     best_match_index = similarities.argmax()
+        #     best_video_id = search_results[best_match_index]['id']['videoId']
         
         # Return an embeddable URL
+
         return f"https://www.youtube.com/embed/{best_video_id}"
 
     except Exception as e:

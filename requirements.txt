@@ -18,15 +18,13 @@ gunicorn
 
 # --- AI & Data Science ---
 google-generativeai
-sentence-transformers
-scikit-learn
+# sentence-transformers (Disabled for Lite Deployment)
+# scikit-learn (Disabled)
 spacy
 numpy<2.0
-scipy
-# CPU-only PyTorch (Updated for modern Python support)
---find-links https://download.pytorch.org/whl/torch_stable.html
-torch==2.5.1+cpu
-torchvision==0.20.1+cpu
+# scipy (Disabled)
+# torch (Disabled)
+# torchvision (Disabled)
 
 # --- YouTube & APIs ---
 youtube-transcript-api
