@@ -1,6 +1,7 @@
-from flask import Blueprint, request, render_template, url_for, jsonify
+from flask import Blueprint, request, render_template, url_for, jsonify, flash
 from werkzeug.security import generate_password_hash
 from backend import db
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 register_bp = Blueprint('register', __name__)
 
