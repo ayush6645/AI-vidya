@@ -121,7 +121,7 @@ We love open source! If you have direct improvements:
   <p>Made with ❤️ by <b>Ayush Gupta</b></p>
   <p>
     <a href="https://github.com/ayush6645">GitHub</a> • 
-    <a href="#">LinkedIn</a> • 
-    <a href="#">Twitter</a>
+    <a href="https://www.linkedin.com/in/gyan-gupta-b2832a347/">LinkedIn</a> • 
+    <a href="https://www.instagram.com/ayuxh._x0r/">Instagram</a>
   </p>
 </div>
