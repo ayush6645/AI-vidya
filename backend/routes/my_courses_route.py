@@ -488,7 +488,7 @@ def get_transcript(lesson_id):
         return jsonify({'status': 'error', 'message': 'A server error occurred while trying to fetch the transcript.'}), 500
 
 
-import google.generativeai as genai
+from google import genai
 
 # ... (all your existing imports) ...
 import json
@@ -498,8 +498,9 @@ def generate_llm_summary(video_title: str, video_description: str) -> str:
     if not GOOGLE_API_KEY:
         return "Summary generation is currently disabled by the administrator."
 
-    genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    # New Client Initialization
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+    model_id = 'gemini-1.5-flash'
     
     prompt = f"""
     You are an expert content analyst. Based on the following video title and description, generate a concise, single-paragraph summary of about 100-150 words.
@@ -511,7 +512,10 @@ def generate_llm_summary(video_title: str, video_description: str) -> str:
     **Generated Summary:**
     """
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model=model_id,
+            contents=prompt
+        )
         return response.text
     except Exception as e:
         print(f"LLM Summary Generation Failed: {e}")
@@ -530,7 +534,8 @@ def generate_summary_and_quiz_from_lesson(title: str, description: str) -> dict:
         return {"summary": "Content generation is disabled by the administrator.", "quiz": []}
 
     genai.configure(api_key=GOOGLE_API_KEY)
-    model = genai.GenerativeModel('gemini-2.5-flash')
+    client = genai.Client(api_key=GOOGLE_API_KEY)
+    model_id = 'gemini-1.5-flash'
 
     # A more sophisticated prompt for a combined task
     prompt = f"""
@@ -550,7 +555,10 @@ def generate_summary_and_quiz_from_lesson(title: str, description: str) -> dict:
     {{"summary": "Your detailed summary here...", "quiz": [{{"question": "...", "options": ["...", "...", "..."], "answer": "..."}}]}}
     """
     try:
-        response = model.generate_content(prompt)
+        response = client.models.generate_content(
+            model=model_id,
+            contents=prompt
+        )
         
         # Use regex to find and parse the JSON object
         json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
