@@ -27,8 +27,15 @@ else:
     cred = None
 
 if cred:
-    firebase_admin.initialize_app(cred)
-db = firestore.client()
+    try:
+        firebase_admin.initialize_app(cred)
+        db = firestore.client()
+    except Exception as e:
+        print(f"Error initializing Firebase: {e}")
+        db = None
+else:
+    print("Firestore skipped (no credentials).")
+    db = None
 
 # --- Import Blueprints ---
 from .routes.register_route import register_bp
