@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AIvidya - Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    /* --- General Setup --- */
+    :root {
+      --background-dark: #0D0D1A;
+      --background-main: #121224;
+      --sidebar-bg: #1A1A2E;
+      --card-bg: #1A1A2E;
+      --primary-blue: #00A3FF;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B0B0C0;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --positive-green: #39FF14;
+      --glow-color: rgba(0, 163, 255, 0.25);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+      /* ✨ FIX: Removed 'overflow: hidden;' which was causing content to disappear on some screen sizes. */
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* --- Sidebar --- */
+    .sidebar {
+      width: 250px;
+      background-color: var(--sidebar-bg);
+      padding: 25px 15px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .sidebar-header {
+      padding: 0 10px 25px 10px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-blue);
+    }
+
+    .nav-links {
+      flex-grow: 1;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar a i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .sidebar a:hover {
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.05);
+      transform: translateX(5px);
+    }
+
+    .sidebar a.active {
+      background-color: var(--primary-blue);
+      color: var(--text-primary);
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0, 163, 255, 0.2);
+    }
+
+    .sidebar a.active:hover {
+      transform: translateX(0);
+    }
+
+    .sidebar .logout {
+      margin-top: auto;
+    }
+
+    /* --- Main Content Area --- */
+    .main-content {
+      flex-grow: 1;
+      background-color: var(--background-main);
+      padding: 25px 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+      overflow-y: auto;
+    }
+
+    /* --- Header --- */
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      animation: fadeInUp 0.5s ease forwards;
+    }
+
+    .search-bar {
+      position: relative;
+      width: 350px;
+    }
+
+    .search-bar i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-secondary);
+    }
+
+    .search-bar input {
+      width: 100%;
+      padding: 12px 12px 12px 40px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      color: var(--text-primary);
+      font-size: 1rem;
+    }
+
+    .search-bar input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .header-profile {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+    }
+
+    .header-profile i {
+      font-size: 1.4rem;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: color 0.3s ease;
+    }
+
+    .header-profile i:hover {
+      color: var(--primary-blue);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .user-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: var(--primary-blue);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* --- Generic Card Style for Hover Effects --- */
+    .card {
+      background-color: var(--card-bg);
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px var(--glow-color);
+    }
+
+    /* --- Main Grid Layout --- */
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      opacity: 0;
+      animation: fadeInUp 0.5s ease 0.2s forwards;
+    }
+
+    .hero-section {
+      padding: 30px;
+    }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      background-color: rgba(255, 215, 0, 0.1);
+      color: #FFD700;
+      border-radius: 20px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      margin-bottom: 20px;
+    }
+
+    .hero-section h2 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+
+    .hero-section h2 span {
+      color: var(--primary-blue);
+    }
+
+    .hero-section p {
+      color: var(--text-secondary);
+      margin-bottom: 25px;
+      max-width: 90%;
+    }
+
+    .hero-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .profile-card {
+      padding: 30px;
+      text-align: center;
+    }
+
+    .profile-avatar-wrapper {
+      position: relative;
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 15px auto;
+    }
+
+    .profile-avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-color: var(--primary-blue);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5rem;
+      font-weight: 600;
+    }
+
+    .level-badge {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      background-color: #FFD700;
+      color: #000;
+      font-weight: 700;
+      font-size: 0.8rem;
+      padding: 4px 8px;
+      border-radius: 8px;
+      border: 2px solid var(--card-bg);
+    }
+
+    .profile-card h3 {
+      font-size: 1.2rem;
+      margin-bottom: 15px;
+      font-weight: 500;
+    }
+
+    .profile-stats {
+      display: flex;
+      justify-content: space-around;
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-item .value {
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+
+    .stat-item .label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .btn {
+      padding: 12px 25px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary {
+      background-color: var(--primary-blue);
+      color: var(--text-primary);
+    }
+
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+
+    .btn-secondary {
+      background-color: transparent;
+      color: var(--text-primary);
+      border-color: var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--primary-blue);
+      border-color: var(--primary-blue);
+    }
+
+    .edit-btn {
+      width: 100%;
+      background-color: var(--primary-blue);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      opacity: 0;
+      animation: fadeInUp 0.5s ease 0.4s forwards;
+    }
+
+    .stat-card {
+      padding: 20px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .stat-card .icon-wrapper {
+      width: 50px;
+      height: 50px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      transition: transform 0.3s ease;
+    }
+
+    .stat-card:hover .icon-wrapper {
+      transform: scale(1.1) rotate(-5deg);
+    }
+
+    .stat-card .info .title {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-bottom: 4px;
+    }
+
+    .stat-card .info .value {
+      font-size: 1.7rem;
+      font-weight: 600;
+    }
+
+    .stat-card .info .change {
+      font-size: 0.8rem;
+      color: var(--positive-green);
+    }
+
+    .icon-plans {
+      background-color: rgba(138, 43, 226, 0.2);
+      color: #9370DB;
+    }
+
+    .icon-topics {
+      background-color: rgba(60, 179, 113, 0.2);
+      color: #3CB371;
+    }
+
+    .icon-accuracy {
+      background-color: rgba(255, 69, 0, 0.2);
+      color: #FF4500;
+    }
+
+    .icon-hours {
+      background-color: rgba(30, 144, 255, 0.2);
+      color: #1E90FF;
+    }
+
+    /* Action Grid */
+    .action-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      opacity: 0;
+      animation: fadeInUp 0.5s ease 0.6s forwards;
+    }
+
+    .action-card {
+      padding: 25px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .action-card .icon-wrapper {
+      font-size: 1.8rem;
+      margin-bottom: 15px;
+      color: var(--primary-blue);
+    }
+
+    .action-card h4 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+    }
+
+    .action-card p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      flex-grow: 1;
+      margin-bottom: 20px;
+    }
+
+    .action-card a {
+      color: var(--primary-blue);
+      text-decoration: none;
+      font-weight: 600;
+      transition: letter-spacing 0.3s ease;
+    }
+
+    .action-card:hover a {
+      letter-spacing: 0.5px;
+    }
+
+    /* --- Responsive Design --- */
+    @media (max-width: 1400px) {
+      .content-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 1200px) {
+      .main-content {
+        padding: 20px;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 992px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        width: 100%;
+        height: auto;
+        flex-direction: row;
+        justify-content: center;
+        overflow-x: auto;
+        padding: 10px;
+      }
+
+      .sidebar-header {
+        display: none;
+      }
+
+      .nav-links {
+        display: flex;
+        flex-grow: 0;
+      }
+
+      .sidebar a {
+        flex-shrink: 0;
+      }
+
+      .sidebar .logout {
+        margin-left: 20px;
+        margin-top: 0;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .main-header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+      }
+
+      .search-bar {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">AI-vidya</div>
+    <nav class="nav-links">
+      <a href="{{ url_for('dashboard.show_dashboard') }}" class="active"><i
+          class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
+      <a href="{{ url_for('start_plan.show_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
+          Plan</span></a>
+      <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
+          Courses</span></a>
+      <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+      <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+    </nav>
+    <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+        class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+  </div>
+
+  <main class="main-content">
+    <header class="main-header">
+      <div class="search-bar">
+        <i class="fa-solid fa-search"></i>
+        <input type="text" placeholder="Search courses, topics...">
+      </div>
+      <div class="header-profile">
+        <i class="fa-regular fa-bell"></i>
+        <div class="user-info">
+          <div class="user-avatar">
+            {{ (name or 'U')[0] | upper }}
+          </div>
+          <span>{{ name or 'User' }}</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-grid">
+      <section class="hero-section card">
+        <div class="ai-badge">
+          <i class="fa-solid fa-star"></i>
+          <span>AI-Powered Learning</span>
+        </div>
+        <h2>Continue Your <span>Learning Journey</span></h2>
+        <p>Track your progress, explore new courses, and achieve your learning goals with AI-powered insights.</p>
+        <div class="hero-buttons">
+          {% if last_plan %}
+            <a href="{{ url_for('my_courses.course_details', plan_id=last_plan.id) }}" class="btn btn-primary">Continue Learning</a>
+          {% else %}
+            <a href="{{ url_for('start_plan.show_start_plan') }}" class="btn btn-primary">Start a Plan</a>
+          {% endif %}
+          <a href="#" class="btn btn-secondary">View Progress</a>
+        </div>
+      </section>
+
+      <aside class="profile-card card">
+        <div class="profile-avatar-wrapper">
+          <div class="profile-avatar">
+            {{ (name or 'U')[0] | upper }}
+          </div>
+          <div class="level-badge">L3</div>
+        </div>
+        <h3>Welcome back, {{ name or 'User' }}! 👋</h3>
+        <div class="profile-stats">
+          <div class="stat-item">
+            <div class="value">1250</div>
+            <div class="label">XP Points</div>
+          </div>
+          <div class="stat-item">
+            <div class="value">7</div>
+            <div class="label">Day Streak</div>
+          </div>
+          <div class="stat-item">
+            <div class="value">3</div>
+            <div class="label">Level</div>
+          </div>
+        </div>
+        <button class="btn edit-btn" id="editProfileBtn">Edit Profile</button>
+      </aside>
+    </div>
+
+    <section class="stats-grid">
+      <div class="stat-card card">
+        <div class="icon-wrapper icon-plans"><i class="fa-solid fa-layer-group"></i></div>
+        <div class="info">
+          <div class="title">Total Plans Created</div>
+          <div class="value">{{ plan_count | default('0') }}</div>
+          <div class="change">+15% vs last month</div>
+        </div>
+      </div>
+      <div class="stat-card card">
+        <div class="icon-wrapper icon-topics"><i class="fa-solid fa-check-circle"></i></div>
+        <div class="info">
+          <div class="title">Completed Topics</div>
+          <div class="value">{{ completed_topics_count | default('0') }}</div>
+           <div class="change">Feature Comming soon</div>
+        </div>
+      </div>
+      <div class="stat-card card">
+        <div class="icon-wrapper icon-accuracy"><i class="fa-solid fa-bullseye"></i></div>
+        <div class="info">
+          <div class="title">Quiz Accuracy</div>
+          <div class="value">N/A</div>
+          <div class="change">Feature coming soon</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="action-grid">
+      <div class="action-card card">
+        <div class="icon-wrapper"><i class="fa-solid fa-play"></i></div>
+        <h4>Start New Plan</h4>
+        <p>Create a personalized learning plan with AI assistance.</p>
+        <a href="{{ url_for('start_plan.show_start_plan') }}">Get Started &rarr;</a>
+      </div>
+      <div class="action-card card">
+        <div class="icon-wrapper"><i class="fa-solid fa-book"></i></div>
+        <h4>Browse Courses</h4>
+        <p>Explore our comprehensive library of courses.</p>
+        <a href="{{ url_for('my_courses.list_my_courses') }}">View Courses &rarr;</a>
+      </div>
+      <div class="action-card card">
+        <div class="icon-wrapper"><i class="fa-solid fa-vial"></i></div>
+        <h4>Take Quiz</h4>
+        <p>Test your knowledge and earn XP points.</p>
+        <a href="#">Start Quiz &rarr;</a>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const editProfileButton = document.getElementById('editProfileBtn');
+      if (editProfileButton) {
+        editProfileButton.addEventListener('click', function () {
+          window.location.href = "{{ url_for('settings.show_settings') }}";
+        });
+      }
+    });
+  </script>
+</body>
+
+</html>

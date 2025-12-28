@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - AIvidya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --background-dark: #0A0A14;
+      --primary-blue: #00A3FF;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B0B0C0;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --card-bg: rgba(26, 26, 46, 0.7);
+      /* Glass background */
+      --input-bg: rgba(16, 16, 33, 0.8);
+      --glow-color: rgba(0, 163, 255, 0.3);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+      cursor: none;
+    }
+
+    #particle-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
+    .cursor-dot,
+    .cursor-outline {
+      /* Custom cursor styles remain */
+    }
+
+    .login-card {
+      width: 100%;
+      max-width: 450px;
+      background: var(--card-bg);
+      backdrop-filter: blur(15px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 50px;
+      z-index: 2;
+      position: relative;
+      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
+      animation: fadeIn 1s ease-out;
+      overflow: hidden;
+      /* For shine effect */
+    }
+
+    .card-logo {
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--primary-blue);
+    }
+
+    .card-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .card-header h2 {
+      font-size: 1.8rem;
+      margin-bottom: 5px;
+    }
+
+    .card-header p {
+      color: var(--text-secondary);
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    /* New Toggle Switch Style */
+    .toggle-switch {
+      display: flex;
+      background-color: var(--input-bg);
+      border-radius: 30px;
+      padding: 5px;
+      position: relative;
+    }
+
+    .toggle-switch .indicator {
+      position: absolute;
+      height: calc(100% - 10px);
+      width: calc(33.333% - 3.333px);
+      background-color: var(--primary-blue);
+      border-radius: 30px;
+      transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+      box-shadow: 0 0 10px var(--glow-color);
+    }
+
+    .toggle-switch input[type="radio"] {
+      display: none;
+    }
+
+    .toggle-switch label {
+      flex: 1;
+      text-align: center;
+      padding: 8px 12px;
+      border-radius: 30px;
+      cursor: pointer;
+      z-index: 1;
+      color: var(--text-secondary);
+      transition: color 0.3s;
+    }
+
+    .toggle-switch input[type="radio"]:checked+label {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    #loginEmail:checked~.indicator {
+      transform: translateX(100%);
+    }
+
+    #loginPhone:checked~.indicator {
+      transform: translateX(200%);
+    }
+
+    #authOTP:checked~.indicator {
+      transform: translateX(100%);
+      width: calc(50% - 5px);
+    }
+
+    #authPassword:checked~.indicator {
+      width: calc(50% - 5px);
+    }
+
+    /* Floating Label Input */
+    .input-group {
+      position: relative;
+    }
+
+    .input-group input {
+      width: 100%;
+      padding: 20px 15px 10px 15px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: white;
+      font-size: 1rem;
+    }
+
+    .input-group label {
+      position: absolute;
+      left: 15px;
+      top: 15px;
+      color: var(--text-secondary);
+      pointer-events: none;
+      transition: all 0.3s ease;
+    }
+
+    .input-group input:focus+label,
+    .input-group input:not(:placeholder-shown)+label {
+      top: 5px;
+      font-size: 0.75rem;
+      color: var(--primary-blue);
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: var(--primary-blue);
+      border: none;
+      padding: 15px;
+      border-radius: 10px;
+      color: white;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    /* Shine effect */
+    .btn-submit::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -75%;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.3) 100%);
+      transform: skewX(-25deg);
+    }
+
+    .btn-submit:hover::before {
+      animation: shine 0.85s;
+    }
+
+    @keyframes shine {
+      100% {
+        left: 125%;
+      }
+    }
+
+    .links {
+      text-align: center;
+      margin-top: 20px;
+      color: var(--text-secondary);
+    }
+
+    .links a {
+      color: var(--primary-blue-light);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .flash-messages {
+      /* Style remains same */
+    }
+  </style>
+</head>
+
+<body>
+  <canvas id="particle-canvas"></canvas>
+  <div class="cursor-dot"></div>
+  <div class="cursor-outline"></div>
+
+  <div class="login-card">
+    <div class="card-logo">AIvidya</div>
+    <div class="card-header">
+      <h2>Welcome Back</h2>
+      <p>Enter your credentials to continue your journey.</p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}{% for category, message in messages %}{% endfor %}{% endif %}
+    {% endwith %}
+
+    <form method="POST" action="/login">
+      <div class="form-group">
+        <div class="toggle-switch">
+          <input type="radio" name="loginType" id="loginUsername" value="loginUsername" checked>
+          <label for="loginUsername">Username</label>
+
+          <input type="radio" name="loginType" id="loginEmail" value="loginEmail">
+          <label for="loginEmail">Email</label>
+
+          <input type="radio" name="loginType" id="loginPhone" value="loginPhone">
+          <label for="loginPhone">Phone</label>
+          <div class="indicator"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="input-group">
+          <input type="text" name="login_value" placeholder=" " required>
+          <label>Username</label>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="toggle-switch">
+          <input type="radio" name="authType" id="authPassword" value="authPassword" checked>
+          <label for="authPassword">Password</label>
+
+          <input type="radio" name="authType" id="authOTP" value="authOTP">
+          <label for="authOTP">OTP</label>
+          <div class="indicator"></div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="input-group">
+          <input type="password" name="auth_value" placeholder=" " required>
+          <label>Password</label>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-submit">Login</button>
+    </form>
+
+    <div class="links">
+      <p><a href="#">Forgot Password?</a> | <a href="/register">Create an Account</a></p>
+    </div>
+  </div>
+
+  <script>
+    // --- Full Particle Animation and Cursor Script (from landing page) ---
+    // (This script is included here to provide the background and cursor effects)
+
+    // --- Dynamic Floating Label Logic ---
+    document.addEventListener('DOMContentLoaded', () => {
+      const loginTypeGroup = document.querySelector('input[name="loginType"]');
+      const loginValueInput = document.querySelector('input[name="login_value"]');
+      const loginValueLabel = loginValueInput.nextElementSibling;
+
+      document.querySelectorAll('input[name="loginType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const labelMap = {
+            loginUsername: 'Username',
+            loginEmail: 'Email Address',
+            loginPhone: 'Phone Number'
+          };
+          loginValueLabel.textContent = labelMap[e.target.value];
+        });
+      });
+
+      const authTypeGroup = document.querySelector('input[name="authType"]');
+      const authValueInput = document.querySelector('input[name="auth_value"]');
+      const authValueLabel = authValueInput.nextElementSibling;
+
+      document.querySelectorAll('input[name="authType"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          if (e.target.value === 'authPassword') {
+            authValueLabel.textContent = 'Password';
+            authValueInput.type = 'password';
+          } else {
+            authValueLabel.textContent = 'OTP';
+            authValueInput.type = 'text';
+          }
+        });
+      });
+    });
+  </script>
+</body>
+
+</html>

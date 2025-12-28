@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Edu Bot - ChatBot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    header {
+      padding: 20px 40px;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 0 15px rgba(0, 224, 255, 0.2);
+    }
+
+    header h1 {
+      color: #00e0ff;
+    }
+
+    .container {
+      display: flex;
+      flex: 1;
+    }
+
+    .sidebar {
+      width: 250px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .sidebar a {
+      color: #fff;
+      text-decoration: none;
+      padding: 12px;
+      margin: 6px 0;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar a:hover,
+    .sidebar a.active {
+      background: rgba(0, 173, 181, 0.2);
+      transform: translateX(5px);
+      box-shadow: 0 4px 15px rgba(0,173,181,0.3);
+    }
+
+    .toggle-history-btn {
+      background: rgba(0,224,255,0.2);
+      border: none;
+      color: #00e0ff;
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+
+    .chat-history {
+      width: 220px;
+      background: rgba(255,255,255,0.04);
+      border-right: 1px solid rgba(255,255,255,0.05);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .chat-history h3 {
+      margin-bottom: 10px;
+      font-size: 16px;
+      color: #00e0ff;
+    }
+
+    .month-group {
+      margin-bottom: 15px;
+    }
+
+    .month-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+      color: #00adb5;
+    }
+
+    .history-item {
+      background: rgba(0, 0, 0, 0.3);
+      padding: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 14px;
+      transition: background 0.3s;
+    }
+
+    .history-item:hover {
+      background: rgba(0, 224, 255, 0.1);
+    }
+
+    .chat-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      padding: 20px;
+    }
+
+    .chat-tools {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .chat-tools .profile-info {
+      font-weight: 600;
+      color: #00e0ff;
+    }
+
+    .chat-tools button {
+      background: rgba(0,224,255,0.1);
+      border: none;
+      color: #fff;
+      padding: 8px 16px;
+      margin-left: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: background 0.3s;
+    }
+
+    .chat-tools button:hover {
+      background: rgba(0,224,255,0.3);
+    }
+
+    .messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 40px 10px 120px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
+    .message {
+      max-width: 70%;
+      padding: 12px 16px;
+      border-radius: 15px;
+      position: relative;
+      word-wrap: break-word;
+    }
+
+    .message.user {
+      background: #00adb5;
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 0;
+    }
+
+    .message.ai {
+      background: #2f3542;
+      color: #ddd;
+      align-self: flex-start;
+      border-bottom-left-radius: 0;
+    }
+
+    .timestamp {
+      font-size: 10px;
+      color: #aaa;
+      margin-top: 4px;
+      text-align: right;
+    }
+
+    .input-area {
+      position: fixed;
+      bottom: 0;
+      left: 470px;
+      right: 20px;
+      background: rgba(0, 0, 0, 0.5);
+      padding: 20px 25px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      backdrop-filter: blur(10px);
+      border-radius: 20px 20px 0 0;
+    }
+
+    .input-area input {
+      flex: 1;
+      padding: 16px;
+      border-radius: 20px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+      background: rgba(255,255,255,0.1);
+      color: #fff;
+    }
+
+    .input-area input:focus {
+      outline: 2px solid #00e0ff;
+    }
+
+    .input-area button {
+      background: #00e0ff;
+      border: none;
+      padding: 14px 20px;
+      border-radius: 50%;
+      color: #000;
+      cursor: pointer;
+      font-size: 20px;
+      transition: 0.3s ease;
+    }
+
+    .input-area button:hover {
+      background: #00c3e0;
+    }
+
+    .quick-replies {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+
+    .quick-replies button {
+      padding: 12px 16px;
+      background: rgba(0, 224, 255, 0.1);
+      border: none;
+      border-radius: 20px;
+      color: #00e0ff;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .quick-replies button:hover {
+      background: rgba(0, 224, 255, 0.3);
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+      }
+
+      .chat-history {
+        width: 100%;
+        order: 2;
+        border: none;
+        border-top: 1px solid rgba(255,255,255,0.05);
+      }
+
+      .sidebar {
+        flex-direction: row;
+        overflow-x: auto;
+        width: 100%;
+        border: none;
+      }
+
+      .sidebar a {
+        flex: 1;
+        text-align: center;
+      }
+
+      .input-area {
+        left: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>AI Edu Bot Chat</h1>
+  </header>
+
+  <div class="container">
+    <div class="sidebar">
+      <button class="toggle-history-btn" onclick="toggleHistory()">📁 Toggle History</button>
+      <a href="dashboard.html">🏠 Dashboard</a>
+      <a href="start_plan.html">📥 Start Plan</a>
+      <a href="my_course.html">📚 My Courses</a>
+      <a href="calender.html">📅 Calendar</a>
+      <a href="progress.html">📊 Progress</a>
+      <a href="notes.html">📝 Notes</a>
+      <a href="quizzes.html">🧪 Quizzes</a>
+      <a href="chatbot.html" class="active">💬 ChatBot</a>
+      <a href="settings.html">⚙️ Settings</a>
+      <a href="logout.html">🚪 Logout</a>
+    </div>
+
+    <div class="chat-history" id="chatHistory">
+      <h3>Previous Chats</h3>
+      <div class="month-group">
+        <div class="month-title">April 2025</div>
+        <div class="history-item">Intro to AI - Apr 6</div>
+        <div class="history-item">ML Quiz - Apr 7</div>
+        <div class="history-item">AI Summary - Apr 8</div>
+      </div>
+    </div>
+
+    <div class="chat-area">
+      <div class="chat-tools">
+        <div class="profile-info">👤 Gyan | Premium User</div>
+        <div>
+          <button>Clear Chat</button>
+          <button>Export Chat</button>
+        </div>
+      </div>
+
+      <div class="messages">
+        <div class="message ai">
+          Hi Gyan! How can I assist you today?
+          <div class="timestamp">Today, 3:45 PM</div>
+        </div>
+        <div class="message user">
+          Explain neural networks in simple terms.
+          <div class="timestamp">Today, 3:46 PM</div>
+        </div>
+      </div>
+
+      <div class="quick-replies">
+        <button>Explain this topic again</button>
+        <button>Give me a quiz</button>
+        <button>Summarize my notes</button>
+        <button>Set a reminder</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="input-area">
+    <input type="text" placeholder="Ask me anything..." />
+    <button title="Send">➤</button>
+  </div>
+
+  <script>
+    function toggleHistory() {
+      const historyPanel = document.getElementById("chatHistory");
+      historyPanel.style.display = (historyPanel.style.display === "none") ? "flex" : "none";
+    }
+  </script>
+</body>
+</html>

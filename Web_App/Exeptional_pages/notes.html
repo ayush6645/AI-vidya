@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Edu Bot - Notes</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+  <style>
+    * {
+      box-sizing: border-box;
+      padding: 0;
+      margin: 0;
+    }
+  
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
+      color: #fff;
+      display: flex;
+    }
+  
+    nav {
+      min-width: 240px;
+      height: 100vh;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      padding: 25px 20px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      border-right: 1px solid rgba(255,255,255,0.1);
+      box-shadow: 2px 0 15px rgba(0, 173, 181, 0.1);
+      display: flex;
+      flex-direction: column;
+    }
+  
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      padding: 12px 18px;
+      margin-bottom: 12px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+  
+    nav a:hover,
+    nav a.active {
+      background: rgba(0, 173, 181, 0.2);
+      transform: translateX(6px);
+      box-shadow: 0 0 8px rgba(0, 173, 181, 0.5);
+    }
+  
+    main {
+      margin-left: 260px;
+      padding: 30px;
+      width: 100%;
+    }
+  
+    header {
+      margin-bottom: 20px;
+    }
+  
+    header h1 {
+      color: #72f0ff;
+    }
+  
+    header p {
+      color: #ccc;
+    }
+  
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 20px 0;
+      flex-wrap: wrap;
+    }
+  
+    .top-bar input {
+      padding: 10px;
+      border-radius: 10px;
+      border: 2px solid #00adb5;
+      background: rgba(255, 255, 255, 0.05);
+      color: #fff;
+      min-width: 240px;
+    }
+  
+    .note-creator {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(10px);
+      border: 2px solid #00adb5;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 10px rgba(0, 173, 181, 0.2);
+    }
+  
+    .note-creator input,
+    .note-creator textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #00adb5;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.08);
+  color: rgb(219, 221, 226); /* Light blue-gray for textarea */
+}
+
+.note-creator select {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 2px solid #00adb5;
+  border-radius: 10px;
+  background: rgba(238, 233, 233, 0.08);
+  color: #a09f9c; /* Soft yellow for dropdown text */
+}
+
+.note-creator option {
+  background: rgb(245, 242, 242);
+  color: #130473;
+}
+
+.note-creator option:hover {
+  background-color: #00adb5;
+  color: #000;
+}
+
+  
+    .note-creator label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.9rem;
+    }
+  
+    .note-creator button {
+      width: 100%;
+      padding: 12px;
+      background: #00adb5;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      margin-top: 15px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+  
+    .note-creator button:hover {
+      background: #72f0ff;
+      box-shadow: 0 0 10px #72f0ff;
+    }
+  
+    .important-notes {
+      margin-bottom: 30px;
+    }
+  
+    .important-scroll {
+      display: flex;
+      gap: 15px;
+      overflow-x: auto;
+      padding: 10px 0;
+    }
+  
+    .important-scroll .note-card {
+      min-width: 250px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid #00adb5;
+      border-radius: 16px;
+      padding: 15px;
+      box-shadow: 0 0 15px rgba(0, 173, 181, 0.3);
+    }
+  
+    .note-list .note-item {
+      background: rgba(255, 255, 255, 0.05);
+      border: 2px solid #00adb5;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+  
+    .note-item h3 {
+      color: #72f0ff;
+    }
+  
+    .note-item .badge {
+      background: #00adb5;
+      padding: 4px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      margin-right: 10px;
+    }
+  
+    .note-item .timestamp {
+      font-size: 0.75rem;
+      color: #aaa;
+    }
+  
+    .note-item p.preview {
+      color: #ccc;
+      margin-top: 10px;
+    }
+  
+    .note-item .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+    }
+  
+    .note-item .actions button {
+      background: transparent;
+      color: #72f0ff;
+      border: 1px solid #00adb5;
+      padding: 6px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: 0.2s ease;
+    }
+  
+    .note-item .actions button:hover {
+      background: #00adb5;
+      color: #000;
+    }
+  
+    .fab {
+      display: none;
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background: #00adb5;
+      border-radius: 50%;
+      width: 55px;
+      height: 55px;
+      color: #fff;
+      font-size: 30px;
+      border: none;
+      box-shadow: 0 0 10px #00adb5;
+      z-index: 999;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+  
+    .fab:hover {
+      background: #72f0ff;
+      box-shadow: 0 0 15px #72f0ff;
+    }
+  
+    @media (max-width: 768px) {
+      .fab {
+        display: block;
+      }
+  
+      main {
+        margin-left: 0;
+        padding: 20px;
+      }
+  
+      nav {
+        display: none;
+      }
+    }
+  </style>
+  
+</head>
+<body>
+  <nav>
+    <a href="dashboard.html">🏠 Dashboard</a>
+    <a href="start_plan.html">📥 Start Plan</a>
+    <a href="my_course.html">📚 My Courses</a>
+    <a href="calender.html">📅 Calendar</a>
+    <a href="progress.html">📊 Progress</a>
+    <a href="notes.html" class="active">📝 Notes</a>
+    <a href="quizzes.html">🧪 Quizzes</a>
+    <a href="chatbot.html">💬 ChatBot</a>
+    <a href="settings.html">⚙️ Settings</a>
+    <a href="logout.html">🚪 Logout</a>
+  </nav>
+  <main>
+    <header>
+      <h1>📝 Study Notes</h1>
+      <p>Capture your ideas and thoughts while learning.</p>
+    </header>
+    <div class="top-bar">
+      <input type="text" placeholder="Search notes..." />
+    </div>
+    <section class="note-creator">
+      <input type="text" placeholder="Enter note title..." />
+      <select>
+        <option>Programming</option>
+        <option>AI</option>
+        <option>Math</option>
+        <option>Custom</option>
+      </select>
+      <textarea rows="5" placeholder="Write your note here..."></textarea>
+      <label><input type="checkbox" /> ⭐ Mark as Important</label>
+      <button>➕ Add Note</button>
+    </section>
+    <section class="important-notes">
+      <h3>⭐ Important Notes</h3>
+      <div class="important-scroll">
+        <div class="note-card">
+          <h4>AI Algorithms</h4>
+          <p>Deep learning vs. traditional ML...</p>
+        </div>
+        <div class="note-card">
+          <h4>Python Tips</h4>
+          <p>Use list comprehensions for cleaner code...</p>
+        </div>
+      </div>
+    </section>
+    <section class="note-list">
+      <div class="note-item">
+        <h3>Intro to Python <span class="badge">Programming</span></h3>
+        <div class="timestamp">Added on April 8, 2025</div>
+        <p class="preview">Python is a versatile language...</p>
+        <div class="actions">
+          <button>✏️ Edit</button>
+          <button>🗑️ Delete</button>
+          <button>⭐ Mark</button>
+        </div>
+      </div>
+    </section>
+  </main>
+  <button class="fab">➕</button>
+</body>
+</html>
+
+
+
+

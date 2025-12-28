@@ -1,0 +1,38 @@
+# --- Core Web Framework ---
+Flask
+Werkzeug
+Jinja2
+itsdangerous
+click
+MarkupSafe
+
+# --- Google & Firebase ---
+firebase-admin
+google-cloud-firestore
+google-api-python-client
+google-auth
+google-auth-oauthlib
+googleapis-common-protos
+google-cloud-secret-manager
+gunicorn
+
+# --- AI & Data Science ---
+google-generativeai
+sentence-transformers
+scikit-learn
+spacy
+numpy<2.0
+scipy
+torch
+torchvision
+thinc
+
+# --- YouTube & APIs ---
+youtube-transcript-api
+requests
+
+# --- Utilities ---
+python-dotenv
+
+# --- SpaCy Model (Direct Link for Deployment) ---
+https://github.com/explosion/spacy-models/releases/download/en_core_web_md-3.7.1/en_core_web_md-3.7.1-py3-none-any.whl

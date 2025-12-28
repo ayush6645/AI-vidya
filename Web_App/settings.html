@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Settings - AIvidya</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <style>
+    :root {
+      --background-dark: #0D0D1A;
+      --background-main: #121224;
+      --sidebar-bg: #1A1A2E;
+      --card-bg: #1A1A2E;
+      --input-bg: #101021;
+      --primary-blue: #00A3FF;
+      --text-primary: #FFFFFF;
+      --text-secondary: #B0B0C0;
+      --border-color: rgba(255, 255, 255, 0.1);
+      --glow-color: rgba(0, 163, 255, 0.25);
+      --danger-red: #f44336;
+      --danger-red-glow: rgba(244, 67, 54, 0.25);
+      --success-green: #28a745;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: var(--background-dark);
+      color: var(--text-primary);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* --- Sidebar --- */
+    .sidebar {
+      width: 250px;
+      background-color: var(--sidebar-bg);
+      padding: 25px 15px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      border-right: 1px solid var(--border-color);
+    }
+
+    .sidebar-header {
+      padding: 0 10px 25px 10px;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--primary-blue);
+    }
+
+    .nav-links {
+      flex-grow: 1;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      padding: 15px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-weight: 500;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar a i {
+      width: 20px;
+      text-align: center;
+      font-size: 1.1rem;
+    }
+
+    .sidebar a:hover {
+      color: var(--text-primary);
+      background-color: rgba(255, 255, 255, 0.05);
+      transform: translateX(5px);
+    }
+
+    .sidebar a.active {
+      background-color: var(--primary-blue);
+      color: var(--text-primary);
+      font-weight: 600;
+      box-shadow: 0 4px 15px rgba(0, 163, 255, 0.2);
+    }
+
+    .sidebar a.active:hover {
+      transform: translateX(0);
+    }
+
+    .sidebar .logout {
+      margin-top: auto;
+    }
+
+    /* --- Main Content --- */
+    main {
+      flex: 1;
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      align-items: center;
+    }
+
+    .main-container {
+      width: 100%;
+      max-width: 1000px;
+    }
+
+    .page-title {
+      font-size: 2.8rem;
+      font-weight: 700;
+      margin-bottom: 40px;
+    }
+
+    .page-title span {
+      color: var(--primary-blue);
+    }
+
+    /* --- ✨ NEW: Tabbed Settings Layout --- */
+    .settings-layout {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 40px;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 20px;
+      min-height: 600px;
+    }
+
+    /* Tab Navigation */
+    .settings-nav {
+      border-right: 1px solid var(--border-color);
+      padding-right: 20px;
+    }
+
+    .settings-nav .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 15px;
+      border-radius: 10px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 1px solid transparent;
+    }
+
+    .settings-nav .nav-link:hover {
+      background-color: var(--input-bg);
+      color: var(--text-primary);
+    }
+
+    .settings-nav .nav-link.active {
+      color: var(--text-primary);
+      background-color: var(--primary-blue);
+      font-weight: 600;
+    }
+
+    .settings-nav .nav-link i {
+      width: 20px;
+      text-align: center;
+    }
+
+    /* Tab Content */
+    .settings-content .tab-pane {
+      display: none;
+      padding: 10px 20px;
+      animation: fadeIn 0.5s;
+    }
+
+    .settings-content .tab-pane.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .pane-header {
+      margin-bottom: 30px;
+    }
+
+    .pane-header h2 {
+      font-size: 1.8rem;
+      font-weight: 600;
+    }
+
+    .pane-header p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      margin-top: 5px;
+    }
+
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      flex: 1;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 500;
+      margin-bottom: 8px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px 15px;
+      border-radius: 10px;
+      border: 1px solid var(--border-color);
+      background: var(--input-bg);
+      color: white;
+      font-size: 1rem;
+      transition: all 0.3s;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-blue);
+      box-shadow: 0 0 10px var(--glow-color);
+    }
+
+    .form-group input:read-only {
+      background-color: rgba(0, 0, 0, 0.2);
+      cursor: not-allowed;
+    }
+
+    .pane-footer {
+      margin-top: 30px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      background: var(--primary-blue);
+      border: none;
+      padding: 12px 25px;
+      border-radius: 10px;
+      color: white;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 4px 20px rgba(0, 163, 255, 0.3);
+    }
+
+    /* Profile Picture Section */
+    .profile-pic-section {
+      display: flex;
+      align-items: center;
+      gap: 25px;
+    }
+
+    .avatar-upload-wrapper {
+      position: relative;
+    }
+
+    .avatar-preview {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background-color: var(--primary-blue);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 600;
+    }
+
+    .avatar-upload-wrapper .overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, 0.5);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      cursor: pointer;
+    }
+
+    .avatar-upload-wrapper:hover .overlay {
+      opacity: 1;
+    }
+
+    .btn-secondary {
+      background-color: var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--text-secondary);
+    }
+
+    /* Danger Zone */
+    .account-action {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px;
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    .account-action.danger {
+      border-color: var(--danger-red);
+    }
+
+    .btn-danger {
+      background-color: var(--danger-red);
+    }
+
+    .btn-danger:hover {
+      box-shadow: 0 4px 20px var(--danger-red-glow);
+    }
+
+    /* Modal Styles */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(5px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-box {
+      background-color: var(--card-bg);
+      padding: 40px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      text-align: center;
+      max-width: 450px;
+    }
+
+    .modal-box h3 {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+      color: var(--danger-red);
+    }
+
+    .modal-box p {
+      color: var(--text-secondary);
+      margin-bottom: 30px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    /* ✨ NEW: Toast Notification */
+    .toast-notification {
+      position: fixed;
+      bottom: 30px;
+      right: 30px;
+      background-color: var(--success-green);
+      color: white;
+      padding: 15px 25px;
+      border-radius: 10px;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      z-index: 2000;
+      opacity: 0;
+      transform: translateY(20px);
+      visibility: hidden;
+      transition: all 0.4s ease;
+    }
+
+    .toast-notification.show {
+      opacity: 1;
+      transform: translateY(0);
+      visibility: visible;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+    <div class="sidebar-header">AI-vidya</div>
+    <nav class="nav-links">
+      <a href="{{ url_for('dashboard.show_dashboard') }}"><i
+          class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
+      <a href="{{ url_for('start_plan.show_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
+          Plan</span></a>
+      <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
+          Courses</span></a>
+      <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+      <a href="{{ url_for('settings.show_settings') }}" class="active"><i
+          class="fa-solid fa-gear"></i><span>Settings</span></a>
+    </nav>
+    <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+        class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+  </div>
+
+  <main>
+    <div class="main-container">
+      <h1 class="page-title">Account <span>Settings</span></h1>
+
+      <div class="settings-layout">
+        <nav class="settings-nav">
+          <div class="nav-link active" data-tab="profile">
+            <i class="fa-solid fa-user"></i><span>Profile</span>
+          </div>
+          <div class="nav-link" data-tab="password">
+            <i class="fa-solid fa-lock"></i><span>Password</span>
+          </div>
+          <div class="nav-link" data-tab="account">
+            <i class="fa-solid fa-shield-halved"></i><span>Account</span>
+          </div>
+        </nav>
+
+        <div class="settings-content">
+          <div class="tab-pane active" id="profile">
+            <div class="pane-header">
+              <h2>Profile Information</h2>
+              <p>Update your personal details and profile picture.</p>
+            </div>
+            <form id="profile-form">
+              <div class="form-group" style="margin-bottom: 25px;">
+                <label>Profile Picture</label>
+                <div class="profile-pic-section">
+                  <div class="avatar-upload-wrapper">
+                    <div class="avatar-preview">{{ (user.first_name or 'U')[0] | upper }}</div>
+                    <div class="overlay"><i class="fa-solid fa-camera"></i></div>
+                  </div>
+                  <div>
+                    <button type="button" class="btn btn-secondary">Upload new picture</button>
+                    <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 8px;">PNG or JPG, max 2MB.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="first-name">First Name</label>
+                  <input type="text" id="first-name" name="first_name" value="{{ user.first_name or '' }}">
+                </div>
+                <div class="form-group">
+                  <label for="last-name">Last Name</label>
+                  <input type="text" id="last-name" name="last_name" value="{{ user.last_name or '' }}">
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" value="{{ user.email or '' }}" readonly>
+              </div>
+              <div class="pane-footer">
+                <button type="submit" class="btn">Save Changes</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="tab-pane" id="password">
+            <div class="pane-header">
+              <h2>Password Management</h2>
+              <p>Choose a strong and unique password for better security.</p>
+            </div>
+            <form id="password-form">
+              <div class="form-group">
+                <label for="current-password">Current Password</label>
+                <input type="password" id="current-password" name="current_password" required>
+              </div>
+              <div class="form-row">
+                <div class="form-group">
+                  <label for="new-password">New Password</label>
+                  <input type="password" id="new-password" name="new_password" required>
+                </div>
+                <div class="form-group">
+                  <label for="confirm-password">Confirm New Password</label>
+                  <input type="password" id="confirm-password" name="confirm_password" required>
+                </div>
+              </div>
+              <div class="pane-footer">
+                <button type="submit" class="btn">Change Password</button>
+              </div>
+            </form>
+          </div>
+
+          <div class="tab-pane" id="account">
+            <div class="pane-header">
+              <h2>Account Actions</h2>
+              <p>Manage your account data and permanent actions.</p>
+            </div>
+            <div class="account-action">
+              <div>
+                <strong>Export Your Data</strong>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">Download a copy of all your plans and notes.
+                </p>
+              </div>
+              <button type="button" class="btn btn-secondary">Export Data</button>
+            </div>
+            <div class="account-action danger">
+              <div>
+                <strong>Delete Your Account</strong>
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">This action is permanent and cannot be
+                  undone.</p>
+              </div>
+              <button type="button" class="btn btn-danger" id="delete-account-btn">Delete Account</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="modal-overlay" id="delete-modal">
+  </div>
+
+  <div class="toast-notification" id="toast">
+    <i class="fa-solid fa-circle-check"></i>
+    <span id="toast-message"></span>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.settings-nav .nav-link');
+      const panes = document.querySelectorAll('.settings-content .tab-pane');
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toast-message');
+
+      // --- Tab Switching Logic ---
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetPaneId = tab.dataset.tab;
+
+          tabs.forEach(t => t.classList.remove('active'));
+          tab.classList.add('active');
+
+          panes.forEach(pane => {
+            if (pane.id === targetPaneId) {
+              pane.classList.add('active');
+            } else {
+              pane.classList.remove('active');
+            }
+          });
+        });
+      });
+
+      // --- Toast Notification Logic ---
+      function showToast(message) {
+        toastMessage.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => {
+          toast.classList.remove('show');
+        }, 3000); // Hide after 3 seconds
+      }
+
+      // Example: Show toast on form submission (replace with your actual API logic)
+      document.getElementById('profile-form').addEventListener('submit', (e) => {
+        e.preventDefault(); // Prevent actual form submission for this demo
+        showToast('Profile updated successfully!');
+        // Your backend fetch call would go here
+      });
+      document.getElementById('password-form').addEventListener('submit', (e) => {
+        e.preventDefault();
+        showToast('Password changed successfully!');
+        // Your backend fetch call would go here
+      });
+
+
+      // --- Modal Logic (Unchanged) ---
+      const deleteModal = document.getElementById('delete-modal');
+      const deleteAccountBtn = document.getElementById('delete-account-btn');
+      if (deleteAccountBtn) {
+        deleteAccountBtn.addEventListener('click', () => deleteModal.classList.add('active'));
+      }
+      // Add other modal event listeners if you have them
+    });
+  </script>
+</body>
+
+</html>

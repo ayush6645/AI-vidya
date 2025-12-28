@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI-Vidya - Architect Your Future</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        /* --- OPTION 3: Minimalist Icon & Text --- */
+.logo {
+    font-size: 1.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    color: var(--text-primary);
+    
+    /* Use flexbox to align icon and text */
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: color 0.3s ease;
+}
+
+.logo:hover {
+    color: var(--primary-blue);
+}
+
+/* This creates the icon before the text */
+.logo::before {
+    content: '';
+    display: block;
+    width: 30px;
+    height: 30px;
+    border: 3px solid var(--primary-blue);
+    border-radius: 8px;
+    transition: transform 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.logo:hover::before {
+    transform: rotate(45deg) scale(1.1);
+}
+        :root {
+            --background-dark: #0A0A14;
+            --background-main: #121224;
+            --card-bg: #1A1A2E;
+            --input-bg: #101021;
+            --primary-blue: #00A3FF;
+            --primary-blue-light: #40C4FF;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0C0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --glow-color: rgba(0, 163, 255, 0.3);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-dark); /* Fallback background */
+            color: var(--text-primary);
+            overflow-x: hidden;
+            cursor: none;
+        }
+        
+        /* Centered Custom Cursor for Desktops */
+        .cursor-dot, .cursor-outline { display: none; }
+        @media (pointer: fine) {
+            .cursor-dot {
+                display: block;
+                width: 8px;
+                height: 8px;
+                background-color: var(--primary-blue);
+                border-radius: 50%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+            }
+            .cursor-outline {
+                display: block;
+                width: 40px;
+                height: 40px;
+                border: 2px solid var(--primary-blue);
+                border-radius: 50%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 9999;
+                transition: transform 0.2s ease-out, opacity 0.2s;
+                transform: translate(-50%, -50%);
+            }
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        
+        main, .main-footer {
+            position: relative;
+            z-index: 2;
+            background-color: transparent;
+        }
+
+        /* --- Header & Navigation --- */
+        .main-header { position: fixed; top: 0; left: 0; width: 100%; padding: 20px 0; z-index: 1000; transition: background-color 0.4s ease, backdrop-filter 0.4s ease; }
+        .main-header.scrolled { background-color: rgba(10, 10, 20, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
+        .navbar { display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary-blue); text-decoration: none; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; margin: 0 15px; font-weight: 500; transition: color 0.3s ease; }
+        .nav-links a:hover { color: var(--text-primary); }
+        .nav-actions .btn { font-size: 0.9rem; padding: 10px 22px; }
+        .btn { background: var(--primary-blue); border: none; border-radius: 30px; color: white; cursor: pointer; transition: all 0.3s ease; text-decoration: none; font-weight: 600; }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 4px 20px var(--glow-color); }
+        .btn-secondary { background: transparent; border: 1px solid var(--primary-blue); }
+        .btn-secondary:hover { background: var(--primary-blue); }
+
+        /* --- Hero Section --- */
+        .hero { min-height: 100vh; display: flex; align-items: center; text-align: center; position: relative; overflow: hidden; padding-top: 80px; }
+        .hero-content { z-index: 1; }
+        .hero h1 { font-size: 4.5rem; font-weight: 700; line-height: 1.2; margin-bottom: 20px; text-shadow: 0 0 20px rgba(0, 163, 255, 0.3); }
+        .hero h1 span { color: var(--primary-blue); }
+        .hero p { font-size: 1.2rem; color: var(--text-secondary); max-width: 700px; margin: 0 auto 40px auto; }
+        .hero .btn { font-size: 1.2rem; padding: 18px 45px; }
+
+        /* General Section Styling */
+        .section { padding: 120px 0; }
+        .section-header { text-align: center; margin-bottom: 80px; }
+        .section-header h2 { font-size: 3rem; font-weight: 600; margin-bottom: 15px; }
+        .section-header h2 span { color: var(--primary-blue); }
+        .section-header p { max-width: 600px; margin: auto; color: var(--text-secondary); font-size: 1.1rem; }
+
+        /* Horizontal Scroll Section */
+        .horizontal-scroll-section { height: 100vh; display: flex; align-items: center; }
+        .horizontal-scroll-wrapper { position: sticky; top: 0; height: 100vh; width: 100%; overflow: hidden; }
+        .features-track { display: flex; height: 100%; align-items: center; padding-left: 100px; }
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 40px;
+            border-radius: 20px;
+            text-align: left;
+            width: 400px;
+            height: auto;
+            margin-right: 40px;
+            flex-shrink: 0;
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+        }
+        .feature-card:hover {
+             box-shadow: 0 20px 40px rgba(0, 163, 255, 0.15);
+             transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) scale(1.05);
+        }
+        .feature-card .icon { font-size: 2.5rem; color: var(--primary-blue); margin-bottom: 20px; }
+        .feature-card h3 { font-size: 1.5rem; margin-bottom: 10px; }
+        .feature-card p { color: var(--text-secondary); font-size: 1rem; line-height: 1.7; }
+        .features-header-card { text-align: left; }
+
+        /* How It Works Timeline */
+        .timeline { position: relative; max-width: 800px; margin: 0 auto; }
+        .timeline::after { content: ''; position: absolute; width: 3px; background-color: var(--border-color); top: 0; bottom: 0; left: 50%; margin-left: -1.5px; }
+        .timeline-item { padding: 10px 40px; position: relative; width: 50%; }
+        .timeline-item::after { content: ''; position: absolute; width: 25px; height: 25px; right: -12.5px; background-color: var(--background-dark); border: 3px solid var(--primary-blue); top: 15px; border-radius: 50%; z-index: 1; }
+        .timeline-item.left { left: 0; }
+        .timeline-item.right { left: 50%; }
+        .timeline-item.left::before { content: " "; height: 0; position: absolute; top: 22px; width: 0; z-index: 1; right: 30px; border: medium solid var(--border-color); border-width: 10px 0 10px 10px; border-color: transparent transparent transparent var(--border-color); }
+        .timeline-item.right::before { content: " "; height: 0; position: absolute; top: 22px; width: 0; z-index: 1; left: 30px; border: medium solid var(--border-color); border-width: 10px 10px 10px 0; border-color: transparent var(--border-color) transparent transparent; }
+        .timeline-item.right::after { left: -12.5px; }
+        .timeline-content { padding: 20px 30px; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 15px; }
+        .timeline-content h3 { font-size: 1.3rem; margin-bottom: 10px; color: var(--primary-blue-light); }
+        .timeline-content p { color: var(--text-secondary); }
+
+        /* Promise Section */
+        .promise-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 30px; align-items: center; }
+        .promise-item { display: flex; gap: 20px; align-items: flex-start; }
+        .promise-item .icon { font-size: 1.8rem; color: var(--primary-blue); margin-top: 5px; }
+        .promise-item h3 { font-size: 1.3rem; margin-bottom: 5px; }
+        .promise-item p { color: var(--text-secondary); }
+
+        /* Final CTA Section */
+        .cta-section { background: linear-gradient(45deg, var(--primary-blue), #3b5998); border-radius: 20px; padding: 60px; text-align: center; }
+        .cta-section h2 { font-size: 2.5rem; margin-bottom: 20px; }
+        .cta-section .btn { background: var(--text-primary); color: var(--background-dark); font-size: 1.1rem; padding: 15px 40px; }
+        .cta-section .btn:hover { transform: translateY(-3px) scale(1.05); }
+
+        /* Extended Footer */
+        .main-footer { padding: 80px 0; background-color: var(--background-main); }
+        .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 40px; text-align: left; }
+        .footer-about h3 { font-size: 1.8rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 15px; }
+        .footer-about p { color: var(--text-secondary); margin-bottom: 20px; line-height: 1.7; }
+        .social-icons a { color: var(--text-secondary); margin-right: 15px; font-size: 1.2rem; transition: color 0.3s ease; }
+        .social-icons a:hover { color: var(--primary-blue); }
+        .footer-column h4 { font-size: 1.2rem; margin-bottom: 20px; color: var(--text-primary); }
+        .footer-column ul { list-style: none; padding: 0; }
+        .footer-column ul li { margin-bottom: 12px; }
+        .footer-column ul a { color: var(--text-secondary); text-decoration: none; transition: color 0.3s ease; }
+        .footer-column ul a:hover { color: var(--primary-blue); }
+        .footer-bottom { border-top: 1px solid var(--border-color); margin-top: 40px; padding-top: 30px; text-align: center; color: var(--text-secondary); font-size: 0.9rem; }
+        
+        /* On-Scroll Animation */
+        .hidden { opacity: 0; transform: translateY(30px); transition: opacity 0.8s, transform 0.8s; }
+        .visible { opacity: 1; transform: translateY(0); }
+    </style>
+</head>
+<body>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <canvas id="particle-canvas"></canvas>
+
+    <header class="main-header" id="main-header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">AI-Vidya </a>
+                <div class="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#how-it-works">How It Works</a>
+                    <a href="#promise">Our Promise</a>
+                </div>
+                <div class="nav-actions">
+                    <a href="{{ url_for('login.login') }}" class="btn btn-secondary">Sign In</a>
+                    <a href="{{ url_for('register.register') }}" class="btn">Get Started Free</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h1>Architect Your <span>Future</span></h1>
+                    <p>Stop searching, start learning. Get structured, day-by-day study plans on any topic, generated by AI and tailored just for you. Your path to mastery begins here.</p>
+                    <a href="{{ url_for('start_plan.show_start_plan') }}" class="btn">Create Your First Plan <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </section>
+
+        <section class="section horizontal-scroll-section" id="features">
+            <div class="horizontal-scroll-wrapper">
+                <div class="features-track">
+                    <div class="feature-card features-header-card">
+                         <div class="icon"><i class="fa-solid fa-star-of-life"></i></div>
+                        <h2>Why Choose <span>AI-Vidya?</span></h2>
+                        <p>Our platform is built with cutting-edge technology to provide a learning experience that is effective, personalized, and engaging.</p>
+                    </div>
+                     <div class="feature-card">
+                        <div class="icon"><i class="fa-solid fa-robot"></i></div>
+                        <h3>AI-Powered Plans</h3>
+                        <p>Receive a comprehensive, day-by-day syllabus on any topic imaginable, from quantum physics to Python, tailored to your skill level and timeline.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon"><i class="fa-solid fa-chart-pie"></i></div>
+                        <h3>Track Your Progress</h3>
+                        <p>Visually track your completion with progress bars for each course. Mark lessons as complete and stay motivated on your learning journey.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon"><i class="fa-solid fa-lightbulb"></i></div>
+                        <h3>Take Smart Notes</h3>
+                        <p>For every lesson, there's a dedicated space to write and save your notes, keeping your insights organized and connected to your curriculum.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section" id="how-it-works" style="background-color: var(--background-main);">
+            <div class="container">
+                <div class="section-header hidden">
+                    <h2>Get Started in <span>Minutes</span></h2>
+                    <p>Our intuitive process makes it easy to go from a learning goal to a structured plan.</p>
+                </div>
+                <div class="timeline">
+                    <div class="timeline-item left hidden">
+                        <div class="timeline-content">
+                            <h3>1. Tell Us Your Goal</h3>
+                            <p>Describe the topic you want to learn, your current skill level, and your desired timeline.</p>
+                        </div>
+                    </div>
+                     <div class="timeline-item right hidden">
+                        <div class="timeline-content">
+                            <h3>2. Get Your Custom Plan</h3>
+                            <p>Our AI analyzes your request and instantly generates a detailed, day-by-day curriculum for review.</p>
+                        </div>
+                    </div>
+                     <div class="timeline-item left hidden">
+                        <div class="timeline-content">
+                            <h3>3. Start Learning</h3>
+                            <p>Save your plan, track progress, take notes, and begin your personalized journey immediately.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section" id="promise">
+            <div class="container">
+                <div class="section-header hidden">
+                    <h2>Our <span>Promise</span></h2>
+                    <p>We are committed to providing a learning environment that is not just powerful, but also secure, ethical, and supportive of your growth.</p>
+                </div>
+                <div class="promise-grid">
+                    <div class="promise-item hidden">
+                        <div class="icon"><i class="fa-solid fa-lock"></i></div>
+                        <div class="promise-text">
+                            <h3>Privacy First</h3>
+                            <p>Your data is yours. We are committed to protecting your privacy and will never share your personal learning data without your consent.</p>
+                        </div>
+                    </div>
+                     <div class="promise-item hidden">
+                        <div class="icon"><i class="fa-solid fa-hand-holding-heart"></i></div>
+                        <div class="promise-text">
+                            <h3>Ethical AI</h3>
+                            <p>Our AI is designed to be a helpful and unbiased companion. We continually work to ensure fairness and transparency in our algorithms.</p>
+                        </div>
+                    </div>
+                     <div class="promise-item hidden">
+                        <div class="icon"><i class="fa-solid fa-arrows-spin"></i></div>
+                        <div class="promise-text">
+                            <h3>Constant Improvement</h3>
+                            <p>The world of knowledge is always expanding, and so are we. We are dedicated to constantly updating our platform with new features and improvements.</p>
+                        </div>
+                    </div>
+                     <div class="promise-item hidden">
+                        <div class="icon"><i class="fa-solid fa-headset"></i></div>
+                        <div class="promise-text">
+                            <h3>Community & Support</h3>
+                            <p>You're not learning alone. We are building a community of learners and are always here to support you on your educational journey.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="container">
+                <div class="cta-section hidden">
+                    <h2>Ready to Architect Your Future?</h2>
+                    <a href="{{ url_for('register.register') }}" class="btn">Sign Up for Free</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-about">
+                    <h3>AI-Vidya</h3>
+                    <p>Your personal AI learning companion, designed to create tailored educational paths to help you master any skill.</p>
+                    <div class="social-icons">
+                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" aria-label="Github"><i class="fab fa-github"></i></a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4>Company</h4>
+                    <ul>
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">Careers</a></li>
+                        <li><a href="#">Blog</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Resources</h4>
+                    <ul>
+                        <li><a href="#">Help Center</a></li>
+                        <li><a href="#">Community</a></li>
+                        <li><a href="#">Contact Us</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Legal</h4>
+                    <ul>
+                        <li><a href="#">Privacy Policy</a></li>
+                        <li><a href="#">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2025 AI-Vidya. All Rights Reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const cursorDot = document.querySelector('.cursor-dot');
+            const cursorOutline = document.querySelector('.cursor-outline');
+            if(cursorDot && window.matchMedia("(pointer: fine)").matches){
+                window.addEventListener('mousemove', (e) => {
+                    const posX = e.clientX;
+                    const posY = e.clientY;
+                    cursorDot.style.left = `${posX}px`;
+                    cursorDot.style.top = `${posY}px`;
+                    cursorOutline.animate({
+                        left: `${posX}px`,
+                        top: `${posY}px`
+                    }, { duration: 500, fill: "forwards" });
+                });
+            }
+
+            const header = document.querySelector('.main-header');
+            window.addEventListener('scroll', () => {
+                header.classList.toggle('scrolled', window.scrollY > 50);
+            });
+
+            const track = document.querySelector('.features-track');
+            const scrollSection = document.querySelector('.horizontal-scroll-section');
+            if(track && scrollSection){
+                window.addEventListener('scroll', () => {
+                    const rect = scrollSection.getBoundingClientRect();
+                    const scrollableDist = track.scrollWidth - window.innerWidth;
+                    if(rect.top <= 0 && rect.bottom >= window.innerHeight){
+                         const percentageScrolled = -rect.top / (scrollSection.scrollHeight - window.innerHeight);
+                         track.style.transform = `translateX(-${percentageScrolled * scrollableDist}px)`;
+                    }
+                });
+            }
+
+            const canvas = document.getElementById('particle-canvas');
+            if(canvas){
+                const ctx = canvas.getContext('2d');
+                let animationFrameId;
+                
+                function setCanvasSize() {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                }
+                setCanvasSize();
+
+                let particles = [];
+                
+                class Particle {
+                    constructor(x, y, dirX, dirY, size, color) {
+                        this.x = x; this.y = y; this.dirX = dirX; this.dirY = dirY;
+                        this.size = size; this.color = color;
+                    }
+                    draw() {
+                        ctx.beginPath();
+                        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                        ctx.fillStyle = this.color;
+                        ctx.fill();
+                    }
+                    update() {
+                        if (this.x > canvas.width || this.x < 0) this.dirX = -this.dirX;
+                        if (this.y > canvas.height || this.y < 0) this.dirY = -this.dirY;
+                        this.x += this.dirX;
+                        this.y += this.dirY;
+                        this.draw();
+                    }
+                }
+
+                function init() {
+                    particles = [];
+                    let numParticles = (window.innerWidth * window.innerHeight) / 9000;
+                    for (let i = 0; i < numParticles; i++) {
+                        let size = (Math.random() * 2) + 1;
+                        let x = Math.random() * innerWidth;
+                        let y = Math.random() * innerHeight;
+                        let dirX = (Math.random() * .4) - .2;
+                        let dirY = (Math.random() * .4) - .2;
+                        particles.push(new Particle(x, y, dirX, dirY, size, 'rgba(0, 163, 255, 0.5)'));
+                    }
+                }
+
+                function connect() {
+                    for(let a=0; a<particles.length; a++){
+                        for(let b=a; b<particles.length; b++){
+                            let distance = ((particles[a].x - particles[b].x) ** 2)
+                                        + ((particles[a].y - particles[b].y) ** 2);
+                            if(distance < (canvas.width/7) * (canvas.height/7)){
+                                let opacityValue = 1 - (distance/20000);
+                                ctx.strokeStyle = `rgba(0, 163, 255, ${opacityValue})`;
+                                ctx.lineWidth = 1;
+                                ctx.beginPath();
+                                ctx.moveTo(particles[a].x, particles[a].y);
+                                ctx.lineTo(particles[b].x, particles[b].y);
+                                ctx.stroke();
+                            }
+                        }
+                    }
+                }
+
+                function animate() {
+                    animationFrameId = requestAnimationFrame(animate);
+                    ctx.clearRect(0,0,innerWidth, innerHeight);
+                    particles.forEach(p => p.update());
+                    connect();
+                }
+                
+                let resizeTimer;
+                window.addEventListener('resize', () => {
+                    clearTimeout(resizeTimer);
+                    resizeTimer = setTimeout(() => {
+                        cancelAnimationFrame(animationFrameId);
+                        setCanvasSize();
+                        init();
+                        animate();
+                    }, 250);
+                });
+
+                init();
+                animate();
+            }
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            }, { threshold: 0.2 });
+
+            document.querySelectorAll('.hidden').forEach(el => observer.observe(el));
+        });
+    </script>
+</body>
+</html>

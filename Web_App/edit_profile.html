@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Edit Profile - AIvidya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #00adb5;
+            --secondary-color: #00e0ff;
+            --danger-color: #e53935;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #0f0f0f, #1a1a2e);
+            color: #fff;
+        }
+
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 250px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 12px;
+            margin: 6px 0;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a.active,
+        .sidebar a:hover {
+            background: rgba(0, 173, 181, 0.2);
+            transform: translateX(5px);
+        }
+
+        main {
+            flex: 1;
+            padding: 40px;
+        }
+
+        h1 {
+            color: var(--secondary-color);
+            margin-bottom: 30px;
+        }
+
+        .profile-section {
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: var(--secondary-color);
+            border-bottom: 1px solid var(--primary-color);
+            padding-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            background: #222;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .danger-zone p {
+            color: #aaa;
+            margin-bottom: 15px;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.6);
+        }
+
+        .modal-content {
+            background: #1e1e3f;
+            padding: 30px;
+            border: 1px solid var(--primary-color);
+            width: 80%;
+            max-width: 500px;
+            border-radius: 16px;
+            text-align: center;
+        }
+
+        .modal-content p {
+            margin-bottom: 20px;
+        }
+
+        .modal-content input {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <div class="sidebar">
+            <a href="{{ url_for('dashboard.show_dashboard') }}">🏠 Dashboard</a>
+            <a href="{{ url_for('start_plan.show_start_plan') }}">📥 Start Plan</a>
+            <a href="{{ url_for('my_courses.list_my_courses') }}">📚 My Courses</a>
+            <a href="{{ url_for('my_courses.show_quizzes_page') }}">✏️ Quizzes</a>
+            <a href="{{ url_for('profile.edit_profile') }}" class="active">⚙️ Settings</a>
+            <a href="/logout">🚪 Logout</a>
+        </div>
+        <main>
+            <h1>Settings</h1>
+
+            <section class="profile-section">
+                <h2>Profile Information</h2>
+                <form id="profile-form" method="POST" action="{{ url_for('profile.update_profile') }}">
+                    <label for="first_name">First Name</label>
+                    <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}">
+                    <br><br>
+                    <label for="last_name">Last Name</label>
+                    <input type="text" id="last_name" name="last_name" value="{{ user.last_name }}">
+                    <br><br>
+                    <label for="phone_number">Phone Number</label>
+                    <input type="tel" id="phone_number" name="phone_number" value="{{ user.phone_number }}">
+                    <br><br>
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                </form>
+            </section>
+
+            <section class="profile-section danger-zone" style="border-color: var(--danger-color);">
+                <h2>Danger Zone</h2>
+                <p>These actions are irreversible. Please be certain.</p>
+                <button class="btn btn-danger" id="deleteAllPlansBtn">Delete All My Plans</button>
+                <button class="btn btn-danger" id="deleteAccountBtn">Delete My Account</button>
+            </section>
+        </main>
+    </div>
+
+    <div id="confirmationModal" class="modal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Confirm Action</h2>
+            <p id="modalText">To confirm, please type 'yes' below:</p>
+            <input type="text" id="confirmationInput" placeholder="Type here">
+            <br><br>
+            <button class="btn btn-danger" id="modalConfirmBtn">Confirm</button>
+            <button class="btn" id="modalCancelBtn" style="background-color: #555;">Cancel</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const modal = document.getElementById('confirmationModal');
+            const modalConfirmBtn = document.getElementById('modalConfirmBtn');
+            const modalCancelBtn = document.getElementById('modalCancelBtn');
+            const confirmationInput = document.getElementById('confirmationInput');
+            let currentAction = null;
+
+            function showModal(action, title, text) {
+                document.getElementById('modalTitle').textContent = title;
+                document.getElementById('modalText').textContent = text;
+                currentAction = action;
+                modal.style.display = 'flex';
+            }
+
+            function hideModal() {
+                modal.style.display = 'none';
+                confirmationInput.value = '';
+                currentAction = null;
+            }
+
+            document.getElementById('deleteAllPlansBtn').addEventListener('click', () => {
+                showModal('delete_plans', 'Delete All Plans?',
+                    "This will permanently delete all your study plans. To confirm, type 'yes' below."
+                    );
+            });
+            document.getElementById('deleteAccountBtn').addEventListener('click', () => {
+                showModal('delete_account', 'Delete Your Account?',
+                    "This will permanently delete your account and all associated data. To confirm, type 'yes' below."
+                    );
+            });
+
+            modalCancelBtn.addEventListener('click', hideModal);
+
+            modalConfirmBtn.addEventListener('click', async () => {
+                if (confirmationInput.value.toLowerCase() !== 'yes' || !currentAction) return;
+
+                let endpoint = '';
+                if (currentAction === 'delete_plans') endpoint =
+                    "{{ url_for('profile.delete_all_plans') }}";
+                if (currentAction === 'delete_account') endpoint =
+                    "{{ url_for('profile.delete_account') }}";
+
+                try {
+                    const response = await fetch(endpoint, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
+                    if (!response.ok) throw new Error(data.message);
+
+                    alert(data.message); // Show success message from backend
+                    window.location.href = (currentAction === 'delete_account') ?
+                        "{{ url_for('login.login') }}" :
+                        "{{ url_for('dashboard.show_dashboard') }}";
+                } catch (error) {
+                    alert(`Error: ${error.message}`);
+                } finally {
+                    hideModal();
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Courses - AIvidya</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <style>
+        :root {
+            --background-dark: #0D0D1A;
+            --background-main: #121224;
+            --sidebar-bg: #1A1A2E;
+            --card-bg: #1A1A2E;
+            --input-bg: #101021;
+            --primary-blue: #00A3FF;
+            --primary-blue-light: #40C4FF;
+            --text-primary: #FFFFFF;
+            --text-secondary: #B0B0C0;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --glow-color: rgba(0, 163, 255, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-dark);
+            color: var(--text-primary);
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* --- Sidebar (Theme Consistent) --- */
+        .sidebar {
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            padding: 25px 15px;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            border-right: 1px solid var(--border-color);
+        }
+
+        .sidebar-header {
+            padding: 0 10px 25px 10px;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .nav-links {
+            flex-grow: 1;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar a i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .sidebar a:hover {
+            color: var(--text-primary);
+            background-color: rgba(255, 255, 255, 0.05);
+            transform: translateX(5px);
+        }
+
+        .sidebar a.active {
+            background-color: var(--primary-blue);
+            color: var(--text-primary);
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(0, 163, 255, 0.2);
+        }
+
+        .sidebar a.active:hover {
+            transform: translateX(0);
+        }
+
+        .sidebar .logout {
+            margin-top: auto;
+        }
+
+        /* --- Main Content --- */
+        main {
+            flex: 1;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .page-title {
+            font-size: 2.8rem;
+            font-weight: 700;
+        }
+
+        .page-title span {
+            color: var(--primary-blue);
+        }
+
+        .btn {
+            background: var(--primary-blue);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0, 163, 255, 0.3);
+        }
+
+        /* Course Grid Layout */
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        /* Individual Course Card */
+        .course-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            padding: 25px;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+
+        .course-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px var(--glow-color);
+            border-color: var(--primary-blue-light);
+        }
+
+        .card-header h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin: 0 0 10px 0;
+            color: var(--text-primary);
+        }
+
+        .card-header .creation-date {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .card-meta {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .meta-tag {
+            background-color: var(--input-bg);
+            color: var(--text-secondary);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .progress-section {
+            margin-bottom: 25px;
+        }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 0.9rem;
+        }
+
+        .progress-labels .label {
+            font-weight: 500;
+        }
+
+        .progress-labels .percentage {
+            color: var(--primary-blue-light);
+            font-weight: 600;
+        }
+
+        .progress-bar-bg {
+            background: var(--input-bg);
+            border-radius: 30px;
+            height: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .progress-bar-fill {
+            background: var(--primary-blue);
+            height: 100%;
+            border-radius: 30px;
+            box-shadow: 0 0 10px var(--primary-blue);
+            transition: width 0.5s ease-in-out;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            /* Pushes footer to the bottom */
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 40px;
+            background-color: var(--card-bg);
+            border: 2px dashed var(--border-color);
+            border-radius: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .empty-state i {
+            font-size: 4rem;
+            color: var(--primary-blue);
+            margin-bottom: 20px;
+        }
+
+        .empty-state h2 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: var(--text-secondary);
+            margin-bottom: 30px;
+            max-width: 400px;
+        }
+
+        .btn-danger-outline {
+            background-color: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-danger-outline:hover {
+            background-color: var(--danger-red, #f44336);
+            color: var(--text-primary);
+            border-color: var(--danger-red, #f44336);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(244, 67, 54, 0.3);
+        }
+
+        /* This will make the two buttons sit side-by-side */
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            /* Pushes buttons to opposite ends */
+            gap: 15px;
+            /* Adds space between buttons */
+        }
+
+        .custom-swal-popup {
+            border: 1px solid var(--border-color) !important;
+            border-radius: 20px !important;
+            box-shadow: 0 8px 30px var(--glow-color) !important;
+        }
+
+        .custom-swal-title {
+            color: var(--text-primary) !important;
+            font-size: 1.5rem !important;
+            font-weight: 600 !important;
+        }
+
+        .custom-swal-text {
+            color: var(--text-secondary) !important;
+            font-size: 1rem !important;
+        }
+
+        .custom-swal-confirm {
+            background: var(--primary-blue) !important;
+            border: none !important;
+            border-radius: 30px !important;
+            padding: 10px 25px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .custom-swal-confirm:hover {
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 20px rgba(0, 163, 255, 0.3) !important;
+        }
+
+        .custom-swal-cancel {
+            background: var(--input-bg) !important;
+            border: none !important;
+            border-radius: 30px !important;
+            padding: 10px 25px !important;
+            color: var(--text-secondary) !important;
+            transition: all 0.3s ease !important;
+        }
+
+        .custom-swal-cancel:hover {
+            background: rgba(255, 255, 255, 0.1) !important;
+            color: var(--text-primary) !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-header">AI-vidya</div>
+        <nav class="nav-links">
+            <a href="{{ url_for('dashboard.show_dashboard') }}"><i
+                    class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
+            <a href="{{ url_for('start_plan.show_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
+                    Plan</span></a>
+            <a href="{{ url_for('my_courses.list_my_courses') }}" class="active"><i
+                    class="fa-solid fa-book-open"></i><span>My Courses</span></a>
+            <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+            <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+        </nav>
+        <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+                class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+    </div>
+
+    <main>
+        <div class="header-section">
+            <h1 class="page-title">My Learning <span>Plans</span></h1>
+            <a href="{{ url_for('start_plan.show_start_plan') }}" class="btn"><i class="fa-solid fa-plus"></i> Create
+                New Plan</a>
+        </div>
+
+        {% if plans %}
+        <div class="courses-grid">
+
+            {% for plan in plans %}
+            <div class="course-card">
+                <div class="card-header">
+                    <h3>{{ plan.plan_title }}</h3>
+                    <div class="creation-date">Created on:
+                        {{ plan.creation_date.strftime('%B %d, %Y') if plan.creation_date else 'N/A' }}</div>
+                </div>
+                <div class="card-meta">
+                    <span class="meta-tag"><i class="fa-solid fa-layer-group"></i> {{ plan.difficulty_level }}</span>
+                    <span class="meta-tag"><i class="fa-solid fa-clock"></i> {{ plan.total_duration_months }}
+                        Months</span>
+                </div>
+                <div class="progress-section">
+                    <div class="progress-labels">
+                        <span class="label">Progress</span>
+                        <span class="percentage">{{ plan.progress | default(0) }}%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" style="width: {{ plan.progress | default(0) }}%;"></div>
+                    </div>
+                </div>
+
+                <div class="card-footer">
+                    <button class="btn btn-danger-outline delete-plan-btn" data-plan-id="{{ plan.id }}">
+                        <i class="fa-solid fa-trash"></i> Delete
+                    </button>
+                    <a href="{{ url_for('my_courses.course_details', plan_id=plan.id) }}" class="btn btn-primary">
+                        Continue Learning <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa-solid fa-book-sparkles"></i>
+            <h2>Your journey awaits!</h2>
+            <p>You haven't created any learning plans yet. Let our AI guide you on your next learning adventure.</p>
+            <a href="{{ url_for('start_plan.show_start_plan') }}" class="btn">Create Your First Plan</a>
+        </div>
+        {% endif %}
+
+    </main>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Add event listeners to all delete buttons
+            document.querySelectorAll('.delete-plan-btn').forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const planId = this.getAttribute('data-plan-id');
+                    const cardElement = this.closest('.course-card'); // Get the parent card
+
+                    // Custom SweetAlert2 theme to match your UI
+                    Swal.fire({
+                        title: 'Delete Learning Plan?',
+                        text: "This will permanently delete the plan and all its associated data.",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        background: 'var(--card-bg)',
+                        color: 'var(--text-primary)',
+                        confirmButtonColor: 'var(--primary-blue)',
+                        cancelButtonColor: 'var(--input-bg)',
+                        confirmButtonText: 'Delete',
+                        cancelButtonText: 'Cancel',
+                        customClass: {
+                            popup: 'custom-swal-popup',
+                            title: 'custom-swal-title',
+                            htmlContainer: 'custom-swal-text',
+                            confirmButton: 'custom-swal-confirm',
+                            cancelButton: 'custom-swal-cancel'
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            deletePlan(planId, cardElement);
+                        }
+                    });
+                });
+            });
+
+            // Function to handle the AJAX request
+            function deletePlan(planId, cardElement) {
+                // Show loading state
+                Swal.fire({
+                    title: 'Deleting...',
+                    html: 'Please wait while we delete your plan',
+                    allowOutsideClick: false,
+                    background: 'var(--card-bg)',
+                    color: 'var(--text-primary)',
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                fetch(`/api/plans/${planId}/delete`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        credentials: 'same-origin'
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.status === 'success') {
+                            // Success notification with theme matching
+                            Swal.fire({
+                                title: 'Deleted!',
+                                text: 'Your learning plan has been removed.',
+                                icon: 'success',
+                                background: 'var(--card-bg)',
+                                color: 'var(--text-primary)',
+                                confirmButtonColor: 'var(--primary-blue)',
+                                showConfirmButton: false,
+                                timer: 1500
+                            }).then(() => {
+                                // Smooth removal animation
+                                if (cardElement) {
+                                    cardElement.style.transition = 'all 0.3s ease';
+                                    cardElement.style.opacity = '0';
+                                    cardElement.style.transform = 'translateY(20px)';
+                                    setTimeout(() => {
+                                        cardElement.remove();
+                                        // If no cards left, show empty state
+                                        if (document.querySelectorAll('.course-card')
+                                            .length === 0) {
+                                            showEmptyState();
+                                        }
+                                    }, 300);
+                                }
+                            });
+                        } else {
+                            throw new Error(data.message || 'Unknown error occurred');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        Swal.fire({
+                            title: 'Error!',
+                            text: error.message || 'Failed to delete plan. Please try again.',
+                            icon: 'error',
+                            background: 'var(--card-bg)',
+                            color: 'var(--text-primary)',
+                            confirmButtonColor: 'var(--primary-blue)'
+                        });
+                    });
+            }
+
+            // Function to show empty state if all cards are deleted
+            function showEmptyState() {
+                const emptyStateHTML = `
+            <div class="empty-state">
+                <i class="fa-solid fa-book-sparkles"></i>
+                <h2>No Learning Plans Found</h2>
+                <p>You don't have any active learning plans. Create a new one to get started!</p>
+                <a href="{{ url_for('start_plan.show_start_plan') }}" class="btn">
+                    <i class="fa-solid fa-plus"></i> Create New Plan
+                </a>
+            </div>
+        `;
+                document.querySelector('.courses-grid').innerHTML = emptyStateHTML;
+            }
+        });
+    </script>
+</body>
+
+</html>
