@@ -95,10 +95,76 @@
         }
 
         /* --- Main Content --- */
-        main {
-            flex: 1;
-            padding: 40px;
-            overflow-y: auto;
+        /* --- Mobile Responsive Sidebar Updates --- */
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 992px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 250px;
+                z-index: 2000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-header {
+                display: block;
+            }
+
+            main {
+                padding: 20px;
+                width: 100%;
+                overflow-x: hidden;
+            }
+
+            .menu-toggle {
+                display: block;
+                margin-bottom: 20px;
+            }
+
+            /* Stats Grid responsive check */
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Main layout grid (Leaderboard vs History) */
+            .main-layout-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .page-header {
@@ -151,7 +217,7 @@
             color: var(--primary-blue-light);
             word-wrap: break-word;
         }
-        
+
         /* --- Quiz Grid & Cards --- */
         .quiz-grid {
             display: grid;
@@ -198,7 +264,7 @@
         .btn:hover {
             background: var(--primary-blue-light);
         }
-        
+
         /* --- Quiz History --- */
         .quiz-history-list {
             background: var(--card-bg);
@@ -234,12 +300,14 @@
             color: var(--primary-blue-light);
             font-size: 1.1rem;
         }
+
         /* --- Add this new CSS inside the <style> tag --- */
 
         /* --- Main Two-Column Layout --- */
         .main-layout-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr; /* 2/3 for history, 1/3 for leaderboard */
+            grid-template-columns: 2fr 1fr;
+            /* 2/3 for history, 1/3 for leaderboard */
             gap: 40px;
         }
 
@@ -272,59 +340,92 @@
             color: var(--text-secondary);
             width: 50px;
         }
-        
+
         .leaderboard-item .name {
             font-weight: 500;
             flex-grow: 1;
         }
-        
+
         .leaderboard-item .score {
             font-weight: 600;
             color: var(--primary-blue-light);
         }
 
         /* Gold, Silver, Bronze styles for top 3 */
-        .leaderboard-item.rank-1 .rank { color: #FFD700; }
-        .leaderboard-item.rank-2 .rank { color: #C0C0C0; }
-        .leaderboard-item.rank-3 .rank { color: #CD7F32; }
+        .leaderboard-item.rank-1 .rank {
+            color: #FFD700;
+        }
+
+        .leaderboard-item.rank-2 .rank {
+            color: #C0C0C0;
+        }
+
+        .leaderboard-item.rank-3 .rank {
+            color: #CD7F32;
+        }
     </style>
 </head>
 
 <body>
-    <div class="sidebar">
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">AI-vidya</div>
         <nav class="nav-links">
-            <a href="{{ url_for('dashboard.show_dashboard') }}"><i class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
-            <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My Courses</span></a>
-            <a href="{{ url_for('start_plan.show_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start Plan</span></a>
-            <a href="{{ url_for('my_courses.show_quizzes_page') }}" class="active"><i class="fa-solid fa-puzzle-piece"></i><span>Quizzes</span></a>
+            <a href="{{ url_for('dashboard.show_dashboard') }}"><i
+                    class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
+            <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
+                    Courses</span></a>
+            <a href="{{ url_for('start_plan.show_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
+                    Plan</span></a>
+            <a href="{{ url_for('my_courses.show_quizzes_page') }}" class="active"><i
+                    class="fa-solid fa-puzzle-piece"></i><span>Quizzes</span></a>
             <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
         </nav>
-        <a href="{{ url_for('logout.logout_user') }}" class="logout"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+        <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+                class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
     </div>
 
     <main>
+        <!-- Mobile Toggle Button -->
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fa-solid fa-bars"></i>
+        </div>
         <header class="page-header">
             <h1>My Quizzes</h1>
         </header>
 
         <section class="content-section">
             <div class="stats-grid">
-                <div class="stat-card"><h3>Total Quizzes Taken</h3><p>{{ stats.total_taken }}</p></div>
-                <div class="stat-card"><h3>Average Score</h3><p>{{ stats.average_score }}</p></div>
-                <div class="stat-card"><h3>Highest Score</h3><p>{{ stats.highest_score }}</p></div>
-                <div class="stat-card"><h3>Last Quiz Topic</h3><p>{{ stats.last_attempt }}</p></div>
+                <div class="stat-card">
+                    <h3>Total Quizzes Taken</h3>
+                    <p>{{ stats.total_taken }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Score</h3>
+                    <p>{{ stats.average_score }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Highest Score</h3>
+                    <p>{{ stats.highest_score }}</p>
+                </div>
+                <div class="stat-card">
+                    <h3>Last Quiz Topic</h3>
+                    <p>{{ stats.last_attempt }}</p>
+                </div>
             </div>
         </section>
 
-<section class="content-section">
+        <section class="content-section">
             <h2>Available Quizzes</h2>
             <div class="quiz-grid">
                 {% for quiz in available_quizzes %}
                 <div class="quiz-card">
                     <h4>{{ quiz.topic }}</h4>
                     <p>A short quiz to test your understanding of the key concepts from this lesson.</p>
-                    <a href="{{ url_for('my_courses.course_details', plan_id=quiz.planId, lesson_id=quiz.lessonId) }}" class="btn">Retake Quiz</a>
+                    <a href="{{ url_for('my_courses.course_details', plan_id=quiz.planId, lesson_id=quiz.lessonId) }}"
+                        class="btn">Retake Quiz</a>
                 </div>
                 {% else %}
                 <p>No quizzes have been generated yet. Complete lessons in 'My Courses' to create them.</p>
@@ -332,7 +433,7 @@
             </div>
         </section>
 
-<div class="main-layout-grid">
+        <div class="main-layout-grid">
             <section class="content-section">
                 <h2>Quiz History</h2>
                 <div class="quiz-history-list">
@@ -345,7 +446,8 @@
                         <span class="score">{{ item.score }}</span>
                     </div>
                     {% else %}
-                    <p style="text-align: center; padding: 20px; color: var(--text-secondary);">No quiz attempts recorded yet.</p>
+                    <p style="text-align: center; padding: 20px; color: var(--text-secondary);">No quiz attempts
+                        recorded yet.</p>
                     {% endfor %}
                 </div>
             </section>
@@ -361,13 +463,36 @@
                             <span class="score">{{ user.score }} Points</span>
                         </li>
                         {% else %}
-                        <p style="text-align: center; padding: 20px; color: var(--text-secondary);">Not enough data to display a leaderboard yet.</p>
+                        <p style="text-align: center; padding: 20px; color: var(--text-secondary);">Not enough data to
+                            display a leaderboard yet.</p>
                         {% endfor %}
                     </ol>
                 </div>
             </section>
         </div>
+        </div>
     </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Mobile Menu Toggle Logic
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (menuToggle && sidebar && overlay) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+        });
+    </script>
 </body>
 
 </html>

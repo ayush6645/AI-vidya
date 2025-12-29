@@ -564,6 +564,28 @@
             opacity: 1;
             transform: translateY(0);
         }
+
+        /* Responsive Navbar for Index Page */
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav-links {
+                display: none;
+                /* Simple hide for now, or could be a column */
+            }
+
+            .hero h1 {
+                font-size: 3rem;
+            }
+
+            .hero p {
+                font-size: 1rem;
+                padding: 0 20px;
+            }
+        }
     </style>
 </head>
 

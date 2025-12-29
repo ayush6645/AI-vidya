@@ -97,8 +97,88 @@
             transform: translateX(0);
         }
 
-        .sidebar .logout {
-            margin-top: auto;
+        /* --- Mobile Responsive Sidebar Updates --- */
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            width: fit-content;
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 992px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 250px;
+                z-index: 2000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-header {
+                display: block;
+            }
+
+            main {
+                padding: 20px;
+                width: 100%;
+                overflow-x: hidden;
+            }
+
+            .menu-toggle {
+                display: block;
+                margin-right: 15px;
+            }
+
+            .header-section {
+                flex-direction: row;
+                align-items: center;
+                justify-content: flex-start;
+                gap: 15px;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .header-section .btn {
+                margin-left: auto;
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+
+            /* Grid responsive adjustment */
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         /* --- Main Content --- */
@@ -340,7 +420,10 @@
 </head>
 
 <body>
-    <div class="sidebar">
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">AI-vidya</div>
         <nav class="nav-links">
             <a href="{{ url_for('dashboard.show_dashboard') }}"><i
@@ -349,7 +432,8 @@
                     Plan</span></a>
             <a href="{{ url_for('my_courses.list_my_courses') }}" class="active"><i
                     class="fa-solid fa-book-open"></i><span>My Courses</span></a>
-            <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+            <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i
+                    class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
             <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
         </nav>
         <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
@@ -358,6 +442,10 @@
 
     <main>
         <div class="header-section">
+            <!-- Mobile Toggle Button -->
+            <div class="menu-toggle" id="menuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </div>
             <h1 class="page-title">My Learning <span>Plans</span></h1>
             <a href="{{ url_for('start_plan.show_start_plan') }}" class="btn"><i class="fa-solid fa-plus"></i> Create
                 New Plan</a>
@@ -412,6 +500,23 @@
     </main>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
+            // Mobile Menu Toggle Logic
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (menuToggle && sidebar && overlay) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
+
             // Add event listeners to all delete buttons
             document.querySelectorAll('.delete-plan-btn').forEach(button => {
                 button.addEventListener('click', function (e) {
@@ -461,12 +566,12 @@
                 });
 
                 fetch(`/api/plans/${planId}/delete`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        credentials: 'same-origin'
-                    })
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'same-origin'
+                })
                     .then(response => {
                         if (!response.ok) {
                             throw new Error('Network response was not ok');

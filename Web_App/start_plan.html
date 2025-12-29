@@ -97,6 +97,89 @@
             transform: translateX(0);
         }
 
+        /* --- Mobile Responsive Sidebar Updates --- */
+        .menu-toggle {
+            display: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            margin-right: 15px;
+            /* Positioning it within the main content/header area */
+        }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
+
+        @media (max-width: 992px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 250px;
+                z-index: 2000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-header {
+                display: block;
+            }
+
+            /* Adjust Main Padding to not be constrained if it was */
+            main {
+                padding: 20px;
+                width: 100%;
+            }
+
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 100;
+                /* Ensure clickable */
+            }
+
+            .page-title {
+                margin-top: 40px;
+                /* Space for the toggle */
+                font-size: 2rem;
+            }
+
+            /* Step 1 Layout Adjustments */
+            .step1-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .preview-panel {
+                position: relative;
+                top: 0;
+            }
+        }
+
         .sidebar .logout {
             margin-top: auto;
         }
@@ -521,8 +604,15 @@
         }
 
         @keyframes scale {
-            0%, 100% { transform: none; }
-            50% { transform: scale3d(1.1, 1.1, 1); }
+
+            0%,
+            100% {
+                transform: none;
+            }
+
+            50% {
+                transform: scale3d(1.1, 1.1, 1);
+            }
         }
 
         @keyframes fill {
@@ -534,19 +624,31 @@
 </head>
 
 <body>
-    <div class="sidebar">
+    <!-- Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <div class="sidebar" id="sidebar">
         <div class="sidebar-header">AI-vidya</div>
         <nav class="nav-links">
-            <a href="{{ url_for('dashboard.show_dashboard') }}"><i class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
-            <a href="{{ url_for('start_plan.show_start_plan') }}" class="active"><i class="fa-solid fa-rocket"></i><span>Start Plan</span></a>
-            <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My Courses</span></a>
-            <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+            <a href="{{ url_for('dashboard.show_dashboard') }}"><i
+                    class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
+            <a href="{{ url_for('start_plan.show_start_plan') }}" class="active"><i
+                    class="fa-solid fa-rocket"></i><span>Start Plan</span></a>
+            <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
+                    Courses</span></a>
+            <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i
+                    class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
             <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
         </nav>
-        <a href="{{ url_for('logout.logout_user') }}" class="logout"><i class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
+        <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+                class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
     </div>
 
     <main>
+        <!-- Mobile Toggle Button -->
+        <div class="menu-toggle" id="menuToggle">
+            <i class="fa-solid fa-bars"></i>
+        </div>
         <div class="main-container">
             <h1 class="page-title">Create Your <span>Learning Plan</span></h1>
 
@@ -555,32 +657,48 @@
                     <div class="form-content">
                         <div class="form-group">
                             <label for="topicInput" class="group-title">1. What do you want to master?</label>
-                            <textarea id="topicInput" placeholder="e.g., Quantum Computing with Python" rows="2"></textarea>
+                            <textarea id="topicInput" placeholder="e.g., Quantum Computing with Python"
+                                rows="2"></textarea>
                         </div>
                         <div class="form-group">
                             <label class="group-title">2. Choose your starting level</label>
                             <div class="card-select-group" id="difficultyLevel">
-                                <input type="radio" id="d-beginner" name="difficulty" value="Beginner"><label for="d-beginner"><i class="fa-solid fa-seedling"></i><span>Beginner</span></label>
-                                <input type="radio" id="d-b2i" name="difficulty" value="Beginner to Intermediate"><label for="d-b2i"><i class="fa-solid fa-arrow-trend-up"></i><span>Beginner to Int.</span></label>
-                                <input type="radio" id="d-b2a" name="difficulty" value="Beginner to Advanced"><label for="d-b2a"><i class="fa-solid fa-rocket"></i><span>Beginner to Adv.</span></label>
-                                <input type="radio" id="d-i2a" name="difficulty" value="Intermediate to Advanced"><label for="d-i2a"><i class="fa-solid fa-brain"></i><span>Int. to Advanced</span></label>
-                                <input type="radio" id="d-a2m" name="difficulty" value="Advanced to Master"><label for="d-a2m"><i class="fa-solid fa-graduation-cap"></i><span>Adv. to Master</span></label>
+                                <input type="radio" id="d-beginner" name="difficulty" value="Beginner"><label
+                                    for="d-beginner"><i class="fa-solid fa-seedling"></i><span>Beginner</span></label>
+                                <input type="radio" id="d-b2i" name="difficulty" value="Beginner to Intermediate"><label
+                                    for="d-b2i"><i class="fa-solid fa-arrow-trend-up"></i><span>Beginner to
+                                        Int.</span></label>
+                                <input type="radio" id="d-b2a" name="difficulty" value="Beginner to Advanced"><label
+                                    for="d-b2a"><i class="fa-solid fa-rocket"></i><span>Beginner to Adv.</span></label>
+                                <input type="radio" id="d-i2a" name="difficulty" value="Intermediate to Advanced"><label
+                                    for="d-i2a"><i class="fa-solid fa-brain"></i><span>Int. to Advanced</span></label>
+                                <input type="radio" id="d-a2m" name="difficulty" value="Advanced to Master"><label
+                                    for="d-a2m"><i class="fa-solid fa-graduation-cap"></i><span>Adv. to
+                                        Master</span></label>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="group-title">3. Select your timeline</label>
                             <div class="card-select-group" id="timelineSelect">
-                                <input type="radio" id="t-1" name="timeline" value="1"><label for="t-1"><i class="fa-solid fa-bolt"></i><span>1 Month</span></label>
-                                <input type="radio" id="t-3" name="timeline" value="3"><label for="t-3"><i class="fa-solid fa-person-running"></i><span>3 Months</span></label>
-                                <input type="radio" id="t-6" name="timeline" value="6"><label for="t-6"><i class="fa-solid fa-calendar-days"></i><span>6 Months</span></label>
-                                <input type="radio" id="t-9" name="timeline" value="9"><label for="t-9"><i class="fa-solid fa-hourglass-half"></i><span>9 Months</span></label>
-                                <input type="radio" id="t-12" name="timeline" value="12"><label for="t-12"><i class="fa-solid fa-mountain-sun"></i><span>12 Months</span></label>
-                                <input type="radio" id="t-custom" name="timeline" value="custom"><label for="t-custom"><i class="fa-solid fa-pen-ruler"></i><span>Custom</span></label>
+                                <input type="radio" id="t-1" name="timeline" value="1"><label for="t-1"><i
+                                        class="fa-solid fa-bolt"></i><span>1 Month</span></label>
+                                <input type="radio" id="t-3" name="timeline" value="3"><label for="t-3"><i
+                                        class="fa-solid fa-person-running"></i><span>3 Months</span></label>
+                                <input type="radio" id="t-6" name="timeline" value="6"><label for="t-6"><i
+                                        class="fa-solid fa-calendar-days"></i><span>6 Months</span></label>
+                                <input type="radio" id="t-9" name="timeline" value="9"><label for="t-9"><i
+                                        class="fa-solid fa-hourglass-half"></i><span>9 Months</span></label>
+                                <input type="radio" id="t-12" name="timeline" value="12"><label for="t-12"><i
+                                        class="fa-solid fa-mountain-sun"></i><span>12 Months</span></label>
+                                <input type="radio" id="t-custom" name="timeline" value="custom"><label
+                                    for="t-custom"><i class="fa-solid fa-pen-ruler"></i><span>Custom</span></label>
                             </div>
-                            <input type="number" id="customTimelineInput" placeholder="Enter number of months" min="1" style="display: none;">
+                            <input type="number" id="customTimelineInput" placeholder="Enter number of months" min="1"
+                                style="display: none;">
                         </div>
                         <div class="button-group">
-                            <button id="generatePlanBtn">Generate Plan with AI <i class="fa-solid fa-arrow-right"></i></button>
+                            <button id="generatePlanBtn">Generate Plan with AI <i
+                                    class="fa-solid fa-arrow-right"></i></button>
                         </div>
                     </div>
                     <aside class="preview-panel">
@@ -609,7 +727,8 @@
                     <h2 style="margin-bottom: 20px;">Review Your AI-Generated Plan</h2>
                     <div id="planReviewContainer"></div>
                     <div class="button-group">
-                        <button id="backToStep1Btn" class="secondary"><i class="fa-solid fa-arrow-left"></i> Back</button>
+                        <button id="backToStep1Btn" class="secondary"><i class="fa-solid fa-arrow-left"></i>
+                            Back</button>
                         <button id="finalizePlanBtn">Finalize & Save Plan <i class="fa-solid fa-check"></i></button>
                     </div>
                 </div>
@@ -624,8 +743,10 @@
                     <h2>Plan Confirmed!</h2>
                     <p>Your personalized learning journey is saved. You can find it under "My Courses".</p>
                     <div class="button-group">
-                        <button onclick="window.location.href='{{ url_for('my_courses.list_my_courses') }}'" class="secondary">View My Courses</button>
-                        <button onclick="window.location.href='{{ url_for('dashboard.show_dashboard') }}'">Go to Dashboard</button>
+                        <button onclick="window.location.href='{{ url_for('my_courses.list_my_courses') }}'"
+                            class="secondary">View My Courses</button>
+                        <button onclick="window.location.href='{{ url_for('dashboard.show_dashboard') }}'">Go to
+                            Dashboard</button>
                     </div>
                 </div>
             </div>
@@ -633,12 +754,10 @@
     </main>
 
     <!-- ✨ FIX: Use a single hidden element to store API configuration -->
-    <input type="hidden" id="apiConfig" 
-        data-user-id="{{ user_id }}"
+    <input type="hidden" id="apiConfig" data-user-id="{{ user_id }}"
         data-recommendations-url="{{ url_for('start_plan.get_recommendations') }}"
         data-generate-plan-url="{{ url_for('start_plan.generate_plan') }}"
-        data-save-plan-url="{{ url_for('start_plan.save_plan') }}"
-    >
+        data-save-plan-url="{{ url_for('start_plan.save_plan') }}">
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -649,8 +768,24 @@
                 2: document.getElementById('step2'),
                 3: document.getElementById('step3')
             };
+
+            // Mobile Menu Toggle Logic
+            const menuToggle = document.getElementById('menuToggle');
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+
+            if (menuToggle && sidebar && overlay) {
+                menuToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('active');
+                    overlay.classList.toggle('active');
+                });
+                overlay.addEventListener('click', () => {
+                    sidebar.classList.remove('active');
+                    overlay.classList.remove('active');
+                });
+            }
             const planReviewContainer = document.getElementById('planReviewContainer');
-            
+
             // ✨ FIX: Get API URLs and user ID from the new config element
             const apiConfigEl = document.getElementById('apiConfig');
             const userId = apiConfigEl.dataset.userId;
@@ -747,7 +882,7 @@
                     });
                 });
             };
-            
+
             const fetchAndDisplayRecommendations = async () => {
                 try {
                     // ✨ FIX: Use the URL from the data attribute
@@ -764,7 +899,7 @@
                                 </div>`;
                         });
                         recommendationsList.innerHTML = recsHtml;
-                        
+
                         document.querySelectorAll('.start-rec-btn').forEach(button => {
                             button.addEventListener('click', (e) => {
                                 const topic = e.target.dataset.topic;

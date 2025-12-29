@@ -470,6 +470,31 @@
     }
 
     /* --- Responsive Design --- */
+    /* Mobile Menu Toggle */
+    .menu-toggle {
+      display: none;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      margin-right: 15px;
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      backdrop-filter: blur(3px);
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+    }
+
     @media (max-width: 1400px) {
       .content-grid {
         grid-template-columns: 1fr;
@@ -493,33 +518,73 @@
     @media (max-width: 992px) {
       body {
         flex-direction: column;
+        /* This is fine, but sidebar needs to be fixed */
       }
 
       .sidebar {
-        width: 100%;
-        height: auto;
-        flex-direction: row;
-        justify-content: center;
-        overflow-x: auto;
-        padding: 10px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 250px;
+        z-index: 2000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        flex-direction: column;
+        justify-content: flex-start;
+        padding-top: 20px;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+        align-items: stretch;
+        /* Ensure items stretch */
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
       }
 
       .sidebar-header {
-        display: none;
+        display: block;
+        /* Show header in mobile sidebar */
+        margin-bottom: 20px;
+        padding-left: 10px;
       }
 
       .nav-links {
-        display: flex;
-        flex-grow: 0;
+        display: block;
+        /* Stack links vertically */
       }
 
       .sidebar a {
-        flex-shrink: 0;
+        width: 100%;
       }
 
       .sidebar .logout {
-        margin-left: 20px;
-        margin-top: 0;
+        margin-top: auto;
+        margin-left: 0;
+      }
+
+      .main-header {
+        justify-content: flex-start;
+      }
+
+      .menu-toggle {
+        display: block;
+      }
+
+      /* Search bar adjustment for mobile header */
+      .search-bar {
+        flex-grow: 1;
+        width: auto;
+        margin-right: 10px;
+      }
+
+      .header-profile {
+        margin-left: auto;
+      }
+
+      .user-info span {
+        display: none;
+        /* Hide name on small screens */
       }
     }
 
@@ -529,20 +594,21 @@
       }
 
       .main-header {
-        flex-direction: column;
-        align-items: stretch;
-        gap: 15px;
+        /* Keep row direction for toggle + search + profile */
+        flex-direction: row;
+        align-items: center;
       }
 
-      .search-bar {
-        width: 100%;
-      }
+      /* .search-bar { } removed empty rule */
     }
   </style>
 </head>
 
 <body>
-  <div class="sidebar">
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-header">AI-vidya</div>
     <nav class="nav-links">
       <a href="{{ url_for('dashboard.show_dashboard') }}" class="active"><i
@@ -561,6 +627,9 @@
 
   <main class="main-content">
     <header class="main-header">
+      <div class="menu-toggle" id="menuToggle">
+        <i class="fa-solid fa-bars"></i>
+      </div>
       <div class="search-bar">
         <i class="fa-solid fa-search"></i>
         <input type="text" placeholder="Search courses, topics...">
@@ -676,6 +745,23 @@
       if (editProfileButton) {
         editProfileButton.addEventListener('click', function () {
           window.location.href = "{{ url_for('settings.show_settings') }}";
+        });
+      }
+
+      // Mobile Menu Toggle Logic
+      const menuToggle = document.getElementById('menuToggle');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      if (menuToggle && sidebar && overlay) {
+        menuToggle.addEventListener('click', () => {
+          sidebar.classList.toggle('active');
+          overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+          sidebar.classList.remove('active');
+          overlay.classList.remove('active');
         });
       }
     });

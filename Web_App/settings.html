@@ -97,6 +97,106 @@
       transform: translateX(0);
     }
 
+    /* --- Mobile Responsive Sidebar Updates --- */
+    .menu-toggle {
+      display: none;
+      font-size: 1.5rem;
+      color: var(--text-primary);
+      cursor: pointer;
+      margin-right: 15px;
+      /* Positioning it within the main content/header area */
+    }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      backdrop-filter: blur(3px);
+    }
+
+    .sidebar-overlay.active {
+      display: block;
+    }
+
+    @media (max-width: 992px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 250px;
+        z-index: 2000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .sidebar-header {
+        display: block;
+      }
+
+      main {
+        padding: 20px;
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      .menu-toggle {
+        display: block;
+        margin-bottom: 20px;
+        align-self: flex-start;
+      }
+
+      /* Adjust settings layout for mobile */
+      .settings-layout {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        padding: 15px;
+      }
+
+      .settings-nav {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding-right: 0;
+        padding-bottom: 15px;
+        display: flex;
+        overflow-x: auto;
+        gap: 10px;
+      }
+
+      .settings-nav .nav-link {
+        flex-shrink: 0;
+        white-space: nowrap;
+      }
+
+      .form-row {
+        flex-direction: column;
+        gap: 0;
+      }
+
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      .profile-pic-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+
     .sidebar .logout {
       margin-top: auto;
     }
@@ -420,7 +520,10 @@
 </head>
 
 <body>
-  <div class="sidebar">
+  <!-- Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+  <div class="sidebar" id="sidebar">
     <div class="sidebar-header">AI-vidya</div>
     <nav class="nav-links">
       <a href="{{ url_for('dashboard.show_dashboard') }}"><i
@@ -429,7 +532,8 @@
           Plan</span></a>
       <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
           Courses</span></a>
-      <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+      <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i
+          class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
       <a href="{{ url_for('settings.show_settings') }}" class="active"><i
           class="fa-solid fa-gear"></i><span>Settings</span></a>
     </nav>
@@ -439,6 +543,10 @@
 
   <main>
     <div class="main-container">
+      <!-- Mobile Toggle Button -->
+      <div class="menu-toggle" id="menuToggle">
+        <i class="fa-solid fa-bars"></i>
+      </div>
       <h1 class="page-title">Account <span>Settings</span></h1>
 
       <div class="settings-layout">
@@ -529,7 +637,8 @@
             <div class="account-action">
               <div>
                 <strong>Export Your Data</strong>
-                <p style="font-size: 0.9rem; color: var(--text-secondary);">Download a copy of all your plans and notes.
+                <p style="font-size: 0.9rem; color: var(--text-secondary);">Download a copy of all your plans and
+                  notes.
                 </p>
               </div>
               <button type="button" class="btn btn-secondary">Export Data</button>
@@ -609,7 +718,23 @@
       if (deleteAccountBtn) {
         deleteAccountBtn.addEventListener('click', () => deleteModal.classList.add('active'));
       }
-      // Add other modal event listeners if you have them
+
+      // Mobile Menu Toggle Logic
+      const menuToggle = document.getElementById('menuToggle');
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
+
+      if (menuToggle && sidebar && overlay) {
+        menuToggle.addEventListener('click', () => {
+          sidebar.classList.toggle('active');
+          overlay.classList.toggle('active');
+        });
+
+        overlay.addEventListener('click', () => {
+          sidebar.classList.remove('active');
+          overlay.classList.remove('active');
+        });
+      }
     });
   </script>
 </body>
