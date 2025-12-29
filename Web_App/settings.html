@@ -517,6 +517,85 @@
       visibility: visible;
     }
   </style>
+
+  <!-- Responsive styles moved to end -->
+  <style>
+    @media (max-width: 992px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        width: 250px;
+        z-index: 2000;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .sidebar.active {
+        transform: translateX(0);
+      }
+
+      .sidebar-header {
+        display: block;
+      }
+
+      main {
+        padding: 20px;
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      .menu-toggle {
+        display: block;
+        margin-right: 15px;
+      }
+
+      .header-section {
+        flex-direction: row;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 15px;
+      }
+
+      .page-title {
+        font-size: 1.8rem;
+      }
+
+      /* Stack Settings Layout */
+      .settings-layout {
+        grid-template-columns: 1fr !important;
+      }
+
+      /* Scrollable Settings Nav */
+      .settings-nav {
+        flex-direction: row !important;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding-bottom: 5px;
+        margin-bottom: 20px;
+        width: 100%;
+      }
+
+      /* Media Query Moved */
+      /* Adjust Nav Items for Horizontal Scroll */
+      .nav-link {
+        display: inline-flex;
+        margin-bottom: 0 !important;
+        margin-right: 10px;
+        width: auto;
+      }
+
+      .main-container {
+        padding: 0;
+      }
+    }
+  </style>
 </head>
 
 <body>

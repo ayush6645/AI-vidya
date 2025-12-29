@@ -123,62 +123,7 @@
             display: block;
         }
 
-        @media (max-width: 992px) {
-            body {
-                flex-direction: column;
-            }
-
-            .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                height: 100vh;
-                width: 250px;
-                z-index: 2000;
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
-                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
-            }
-
-            .sidebar.active {
-                transform: translateX(0);
-            }
-
-            .sidebar-header {
-                display: block;
-            }
-
-            /* Adjust Main Padding to not be constrained if it was */
-            main {
-                padding: 20px;
-                width: 100%;
-            }
-
-            .menu-toggle {
-                display: block;
-                position: absolute;
-                top: 20px;
-                left: 20px;
-                z-index: 100;
-                /* Ensure clickable */
-            }
-
-            .page-title {
-                margin-top: 40px;
-                /* Space for the toggle */
-                font-size: 2rem;
-            }
-
-            /* Step 1 Layout Adjustments */
-            .step1-layout {
-                grid-template-columns: 1fr;
-            }
-
-            .preview-panel {
-                position: relative;
-                top: 0;
-            }
-        }
+        /* Media query moved to bottom of style block */
 
         .sidebar .logout {
             margin-top: auto;
@@ -618,6 +563,89 @@
         @keyframes fill {
             100% {
                 box-shadow: inset 0px 0px 0px 40px var(--success-green);
+            }
+        }
+    </style>
+
+    <!-- Move responsive styles to end to ensure precedence -->
+    <style>
+        @media (max-width: 992px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 250px;
+                z-index: 2000;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 4px 0 15px rgba(0, 0, 0, 0.5);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-header {
+                display: block;
+            }
+
+            main {
+                padding: 20px;
+                width: 100%;
+            }
+
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                top: 20px;
+                left: 20px;
+                z-index: 100;
+            }
+
+            .page-title {
+                margin-top: 40px;
+                font-size: 2rem;
+            }
+
+            /* Step 1 Layout Adjustments - Force 1 column on mobile */
+            .step1-layout {
+                grid-template-columns: 1fr !important;
+                gap: 20px;
+            }
+
+            .preview-panel {
+                position: relative;
+                top: 0;
+                margin-top: 20px;
+            }
+
+            /* Professional Alignments for Mobile */
+            .card-select-group {
+                grid-template-columns: repeat(2, 1fr) !important;
+                /* Force 2 columns for better ratio */
+            }
+
+            #generatePlanBtn {
+                width: 100%;
+                /* Full width button */
+            }
+
+            .step1-layout .form-content,
+            .step1-layout .preview-panel {
+                padding: 20px;
+                /* Reduced padding for mobile */
+            }
+        }
+
+        @media (max-width: 480px) {
+            .card-select-group {
+                grid-template-columns: 1fr !important;
+                /* Stack vertically on very small screens if needed, or keep 2 */
             }
         }
     </style>
