@@ -514,7 +514,9 @@ def generate_llm_summary(video_title: str, video_description: str) -> str:
     try:
         response = client.models.generate_content(
             model=model_id,
-            contents=prompt
+            contents=[
+                {"role": "user", "parts": [{"text": prompt}]}
+            ]
         )
         return response.text
     except Exception as e:
@@ -557,7 +559,9 @@ def generate_summary_and_quiz_from_lesson(title: str, description: str) -> dict:
     try:
         response = client.models.generate_content(
             model=model_id,
-            contents=prompt
+            contents=[
+                {"role": "user", "parts": [{"text": prompt}]}
+            ]
         )
         
         # Use regex to find and parse the JSON object

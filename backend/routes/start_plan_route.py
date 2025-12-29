@@ -67,10 +67,12 @@ def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_m
     Now, generate the detailed, day-by-day JSON plan for the user's request.
     """
     try:
-        # New API Call
+        # New API Call with explicit structure to avoid 400 Bad Request
         response = client.models.generate_content(
             model=model_id,
-            contents=prompt
+            contents=[
+                {"role": "user", "parts": [{"text": prompt}]}
+            ]
         )
         # Result text access might differ slightly, usually response.text works
         json_match = re.search(r'\{.*\}', response.text, re.DOTALL)
