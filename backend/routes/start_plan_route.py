@@ -25,16 +25,6 @@ except (ValueError, TypeError) as e:
     client = None
     YOUTUBE_API_KEY = None
 
-# --- List Available Models (Debug) ---
-if client:
-    try:
-        print("--- AVAILABLE GEMINI MODELS ---")
-        for m in client.models.list():
-            print(f"Model: {m.name}")
-        print("-------------------------------")
-    except Exception as e:
-        print(f"Failed to list models: {e}")
-
 # ----------------------------- HELPER FUNCTIONS -----------------------------
 
 def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_months: int) -> dict | None:
@@ -42,12 +32,7 @@ def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_m
         print("CRITICAL: Gemini Client is not initialized.")
         return None
 
-    # Using the new model name format (often just 'gemini-1.5-flash' or similar)
-    # Adjust 'gemini-2.0-flash-exp' if you need a specific version, 
-    # but 'gemini-1.5-flash' is the current stable standard.
-    # Let's try to stick to a known working string or what you had 'gemini-2.5-flash' 
-    # (Note: 2.5 isn't standard, likely 1.5 or 2.0-flash-exp. I will use 2.0-flash-exp for bleeding edge or 1.5-flash for stable)
-    model_id = 'gemini-2.5-flash-lite' 
+    model_id = 'gemini-2.5-flash' 
     
     prompt = f"""
     You are a hyper-detailed, logical curriculum architect for an AI learning platform. Your task is to generate a comprehensive, day-by-day study plan based on user requirements.

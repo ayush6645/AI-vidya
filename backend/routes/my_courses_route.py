@@ -500,7 +500,7 @@ def generate_llm_summary(video_title: str, video_description: str) -> str:
 
     # New Client Initialization
     client = genai.Client(api_key=GOOGLE_API_KEY)
-    model_id = 'gemini-2.5-flash-lite'
+    model_id = 'gemini-2.5-flash'
     
     prompt = f"""
     You are an expert content analyst. Based on the following video title and description, generate a concise, single-paragraph summary of about 100-150 words.
@@ -535,7 +535,7 @@ def generate_summary_and_quiz_from_lesson(title: str, description: str) -> dict:
 
     genai.configure(api_key=GOOGLE_API_KEY)
     client = genai.Client(api_key=GOOGLE_API_KEY)
-    model_id = 'gemini-2.5-flash-lite'
+    model_id = 'gemini-2.5-flash'
 
     # A more sophisticated prompt for a combined task
     prompt = f"""
