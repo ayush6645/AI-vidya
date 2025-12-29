@@ -37,7 +37,7 @@ def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_m
     # but 'gemini-1.5-flash' is the current stable standard.
     # Let's try to stick to a known working string or what you had 'gemini-2.5-flash' 
     # (Note: 2.5 isn't standard, likely 1.5 or 2.0-flash-exp. I will use 2.0-flash-exp for bleeding edge or 1.5-flash for stable)
-    model_id = 'gemini-2.0-flash-exp' 
+    model_id = 'gemini-2.5-flash-lite' 
     
     prompt = f"""
     You are a hyper-detailed, logical curriculum architect for an AI learning platform. Your task is to generate a comprehensive, day-by-day study plan based on user requirements.
