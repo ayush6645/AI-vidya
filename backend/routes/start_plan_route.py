@@ -35,36 +35,32 @@ def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_m
     model_id = 'gemini-2.5-flash' 
     
     prompt = f"""
-    You are a hyper-detailed, logical curriculum architect for an AI learning platform. Your task is to generate a comprehensive, day-by-day study plan based on user requirements.
+    Generate a day-by-day learning plan for:
+    Topic: "{topic}" | Level: "{difficulty}" | Duration: {timeline_months} months
 
-    **User Request:**
-    - Topic: "{topic}"
-    - Skill Level: "{difficulty}"
-    - Completion Timeline: "{timeline_months} months"
+    Constraints:
+    1. Total lessons = {int(timeline_months) * 20} (20 days/month).
+    2. Pace: Basic -> Advanced. No filler days.
+    3. Output JSON ONLY. No markdown.
 
-    **CRITICAL INSTRUCTIONS (MUST be followed exactly):**
-
-    1.  **Strict Duration Calculation:**
-        - A "study month" consists of exactly **20 study days** (5 days/week for 4 weeks).
-        - The total number of lessons in the plan MUST equal **{timeline_months} months * 20 days/month**.
-        - For a **{timeline_months}-month timeline**, you must generate a plan with exactly **{int(timeline_months) * 20} lessons**.
-
-    2.  **Syllabus Pacing and Depth:**
-        - You **MUST** adjust the content's depth and breadth to perfectly fit the requested timeline.
-        - For a **long timeline** (4+ months), the syllabus must progress from fundamental concepts to advanced topics, and must include dedicated "Project Days" or "Review Weeks".
-        - For a **short timeline** (1-2 months), focus only on the core, most essential topics.
-        - **Do not** include generic filler days like "Catch-up day". Every day must have a specific, actionable topic.
-
-    3.  **JSON Output Requirements:**
-        - Your entire response **MUST** be a single, valid JSON object and nothing else.
-        - Do not include any text, explanations, or markdown formatting like ```json before or after the JSON object.
-        - The JSON must have keys: "plan_title", and "modules".
-        - The "modules" array should be structured logically (e.g., one module per month).
-        - Each lesson object must have keys: "day_of_plan", "topic", "description", and "Youtube_keywords".
-
-    **Example Logic:** An 8-month plan for "Data Science" must cover basics like Python and stats in the first months, then progress to Machine Learning algorithms, and dedicate the final months to advanced topics like Deep Learning and a capstone project.
-
-    Now, generate the detailed, day-by-day JSON plan for the user's request.
+    Expected JSON Structure:
+    {{
+      "plan_title": "string",
+      "modules": [
+        {{
+          "module_title": "string",
+          "module_number": 1,
+          "lessons": [
+            {{
+              "day_of_plan": 1,
+              "topic": "string",
+              "description": "string",
+              "Youtube_keywords": "string"
+            }}
+          ]
+        }}
+      ]
+    }}
     """
     try:
         # New API Call with explicit structure to avoid 400 Bad Request
