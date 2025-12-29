@@ -25,6 +25,16 @@ except (ValueError, TypeError) as e:
     client = None
     YOUTUBE_API_KEY = None
 
+# --- List Available Models (Debug) ---
+if client:
+    try:
+        print("--- AVAILABLE GEMINI MODELS ---")
+        for m in client.models.list():
+            print(f"Model: {m.name}")
+        print("-------------------------------")
+    except Exception as e:
+        print(f"Failed to list models: {e}")
+
 # ----------------------------- HELPER FUNCTIONS -----------------------------
 
 def generate_structured_plan_from_gemini(topic: str, difficulty: str, timeline_months: int) -> dict | None:
