@@ -60,6 +60,12 @@ Whether you have 1 month or 6 months, AI-Vidya architects the perfect path for y
 
 ---
 
+## 📄 **License**
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
 ## ⚡ **Getting Started**
 
 ### **Prerequisites**
