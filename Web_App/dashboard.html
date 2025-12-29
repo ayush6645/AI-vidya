@@ -5,6 +5,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AIvidya - Dashboard</title>
+  <!-- Favicon: Brain Emoji -->
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
@@ -537,6 +540,7 @@
     }
   </style>
 </head>
+
 <body>
   <div class="sidebar">
     <div class="sidebar-header">AI-vidya</div>
@@ -547,7 +551,8 @@
           Plan</span></a>
       <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
           Courses</span></a>
-      <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+      <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i
+          class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
       <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
     </nav>
     <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
@@ -581,9 +586,10 @@
         <p>Track your progress, explore new courses, and achieve your learning goals with AI-powered insights.</p>
         <div class="hero-buttons">
           {% if last_plan %}
-            <a href="{{ url_for('my_courses.course_details', plan_id=last_plan.id) }}" class="btn btn-primary">Continue Learning</a>
+          <a href="{{ url_for('my_courses.course_details', plan_id=last_plan.id) }}" class="btn btn-primary">Continue
+            Learning</a>
           {% else %}
-            <a href="{{ url_for('start_plan.show_start_plan') }}" class="btn btn-primary">Start a Plan</a>
+          <a href="{{ url_for('start_plan.show_start_plan') }}" class="btn btn-primary">Start a Plan</a>
           {% endif %}
           <a href="#" class="btn btn-secondary">View Progress</a>
         </div>
@@ -629,7 +635,7 @@
         <div class="info">
           <div class="title">Completed Topics</div>
           <div class="value">{{ completed_topics_count | default('0') }}</div>
-           <div class="change">Feature Comming soon</div>
+          <div class="change">Feature Comming soon</div>
         </div>
       </div>
       <div class="stat-card card">
