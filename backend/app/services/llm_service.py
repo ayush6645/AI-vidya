@@ -180,8 +180,23 @@ class LLMService:
 
         return await asyncio.to_thread(_call_gemini_rank)
 
+    async def get_embeddings(self, texts: list[str]) -> list[list[float]]:
+        if not self.client: return []
+        
+        def _embed():
+            try:
+                # Use gemini-embedding-1.0 as per user availability
+                response = self.client.models.embed_content(
+                    model='gemini-embedding-1.0',
+                    contents=texts
+                )
+                # response.embeddings might be list of ContentEmbedding objects
+                # Need to extract 'values'
+                return [e.values for e in response.embeddings]
+            except Exception as e:
+                print(f"Gemini Embedding Error: {e}")
+                return []
 
-
-llm_service = LLMService()
+        return await asyncio.to_thread(_embed)
 
 llm_service = LLMService()

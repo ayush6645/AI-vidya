@@ -19,12 +19,13 @@ google-cloud-secret-manager
 google-genai
 numpy<2.0
 chromadb
-sentence-transformers
+# sentence-transformers (Removed: Heavy and unused 2026-01-18)
 pypdf
 
 # --- YouTube & APIs ---
 youtube-transcript-api
 requests
+yt-dlp
 
 # --- Utilities ---
 python-dotenv

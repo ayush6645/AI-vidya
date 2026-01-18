@@ -124,8 +124,6 @@
             display: block;
         }
 
-        /* Media Query Moved */
-
         .sidebar .logout {
             margin-top: auto;
         }
@@ -235,7 +233,6 @@
 
         .module-item.open .lesson-list {
             max-height: 4000px;
-            /* Large value */
         }
 
         /* Lesson Item */
@@ -278,7 +275,8 @@
 
         /* Custom Checkbox */
         .lesson-checkbox {
-            display: none;
+            position: absolute;
+            opacity: 0;
         }
 
         .custom-checkbox {
@@ -293,6 +291,7 @@
             justify-content: center;
             flex-shrink: 0;
             transition: all 0.3s ease;
+            margin-right: 10px;
         }
 
         .custom-checkbox i {
@@ -309,6 +308,10 @@
 
         .lesson-checkbox:checked+.custom-checkbox i {
             transform: scale(1);
+        }
+
+        .lesson-checkbox:focus+.custom-checkbox {
+            box-shadow: 0 0 0 2px var(--primary-blue-light);
         }
 
         /* Dynamic Content Area */
@@ -413,7 +416,7 @@
             text-align: center;
         }
 
-        /* ✨ FIX: Enhanced Notes Section */
+        /* Notes Section */
         .notes-layout {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -433,7 +436,6 @@
             pointer-events: none;
         }
 
-        /* Disabled state */
         .note-editor h3 {
             font-size: 1.3rem;
             margin-bottom: 20px;
@@ -470,6 +472,16 @@
             padding: 12px;
             border-radius: 10px;
             font-size: 1rem;
+            background: var(--primary-blue);
+            border: none;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 20px rgba(0, 163, 255, 0.3);
         }
 
         .notes-list-container {
@@ -478,7 +490,6 @@
             border-radius: 15px;
             padding: 30px;
             min-height: 385px;
-            /* Match editor height */
             display: flex;
             flex-direction: column;
         }
@@ -559,7 +570,6 @@
             color: var(--text-secondary);
         }
 
-        /* Add to your existing styles */
         .curated-content {
             display: flex;
             flex-direction: column;
@@ -596,7 +606,6 @@
             background: rgba(0, 163, 255, 0.2);
         }
 
-        /* Add to your existing styles */
         .loader-spinner {
             border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
@@ -647,71 +656,126 @@
             font-weight: 500;
         }
 
-        .highlight {
-            background-color: yellow;
-            color: black;
-            padding: 0 2px;
+        /* --- Chat & Tabs CSS --- */
+        .right-pane-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 15px;
         }
 
-        .btn-icon {
-            background: none;
+        .tab-btn {
+            flex: 1;
+            background: transparent;
             border: none;
             color: var(--text-secondary);
+            padding: 10px;
             cursor: pointer;
-            font-size: 1rem;
-            margin-left: 10px;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
         }
 
-        .btn-icon:hover {
+        .tab-btn.active {
             color: var(--primary-blue);
+            border-bottom-color: var(--primary-blue);
         }
 
-        .hide-timestamps [class*="timestamp"] {
+        .tab-content {
             display: none;
+            height: 100%;
+            flex-direction: column;
         }
 
-        .lesson-checkbox {
-            position: absolute;
-            opacity: 0;
+        .tab-content.active {
+            display: flex;
         }
 
-        .custom-checkbox {
-            width: 20px;
-            height: 20px;
-            background-color: var(--input-bg);
+        /* Chat UI */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 350px;
+            /* Fixed height for chat area */
+        }
+
+        .chat-messages {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .chat-message {
+            max-width: 80%;
+            padding: 10px;
+            border-radius: 10px;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .chat-message.user {
+            align-self: flex-end;
+            background: var(--primary-blue);
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+
+        .chat-message.ai {
+            align-self: flex-start;
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 5px;
+            color: var(--text-primary);
+            border-bottom-left-radius: 0;
+        }
+
+        .chat-input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chat-input {
+            flex-grow: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 20px;
+            outline: none;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-blue);
+        }
+
+        .chat-send-btn {
+            background: var(--primary-blue);
+            border: none;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            flex-shrink: 0;
-            transition: all 0.3s ease;
-            margin-right: 10px;
+            transition: transform 0.2s;
         }
 
-        .custom-checkbox i {
-            color: white;
-            font-size: 0.8rem;
-            transform: scale(0);
-            transition: transform 0.3s ease;
+        .chat-send-btn:hover {
+            transform: scale(1.1);
         }
 
-        .lesson-checkbox:checked+.custom-checkbox {
-            background-color: var(--primary-blue);
-            border-color: var(--primary-blue);
-        }
-
-        .lesson-checkbox:checked+.custom-checkbox i {
-            transform: scale(1);
-        }
-
-        .lesson-checkbox:focus+.custom-checkbox {
-            box-shadow: 0 0 0 2px var(--primary-blue-light);
+        .chat-send-btn:disabled {
+            background: var(--text-secondary);
+            cursor: not-allowed;
         }
     </style>
 
-    <!-- Responsive styles moved to end -->
     <style>
         @media (max-width: 992px) {
             body {
@@ -749,13 +813,11 @@
                 margin-bottom: 20px;
             }
 
-            /* Responsive Notes Layout */
             .notes-layout {
                 grid-template-columns: 1fr !important;
                 gap: 20px;
             }
 
-            /* Lesson Dynamic Content Stack */
             .lesson-dynamic-content {
                 flex-direction: column !important;
             }
@@ -778,8 +840,7 @@
         <nav class="nav-links">
             <a href="{{ url_for('view_dashboard') }}"><i
                     class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
-            <a href="{{ url_for('view_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
-                    Plan</span></a>
+            <a href="{{ url_for('view_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start Plan</span></a>
             <a href="{{ url_for('view_my_courses') }}" class="active"><i class="fa-solid fa-book-open"></i><span>My
                     Courses</span></a>
             <a href="{{ url_for('view_quizzes') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
@@ -873,6 +934,7 @@
             </div>
         </section>
     </main>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Mobile Menu Toggle Logic
@@ -897,25 +959,20 @@
             const lessonIdToOpen = urlParams.get('lesson_id');
 
             if (lessonIdToOpen) {
-                // Find the lesson link on the page
                 const topicLink = document.querySelector(`.lesson-topic[data-lesson-id="${lessonIdToOpen}"]`);
                 if (topicLink) {
-                    // Find the parent module and open it
                     const moduleItem = topicLink.closest('.module-item');
                     if (moduleItem) {
                         moduleItem.classList.add('open');
                     }
-
-                    // Programmatically click the link to load its content
                     topicLink.click();
-
-                    // Scroll the lesson into view for a better user experience
                     setTimeout(() => {
                         topicLink.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }, 500); // A small delay ensures the accordion is open before scrolling
+                    }, 500);
                 }
             }
             let activeLessonId = null;
+            let currentVideoId = null;
 
             // --- Element References ---
             const noteEditor = document.querySelector('.note-editor');
@@ -931,7 +988,7 @@
                 header.addEventListener('click', () => header.parentElement.classList.toggle('open'));
             });
 
-            // --- Lesson Interaction Logic ---
+            // --- Lesson Interaction Logic (UPDATED) ---
             document.querySelectorAll('.lesson-topic').forEach(topicLink => {
                 topicLink.addEventListener('click', async (e) => {
                     e.preventDefault();
@@ -941,13 +998,12 @@
 
                     activeLessonId = lessonId;
 
-                    // Enable and update the notes section
+                    // Note Editor Setup
                     noteEditor.classList.remove('disabled');
                     noteTextarea.disabled = false;
                     saveNoteBtn.disabled = false;
                     noteEditorTitle.innerHTML = `Add a Note for "<strong>${lessonTitleText}</strong>"`;
 
-                    // Toggle the active state for the split-view display
                     document.querySelectorAll('.lesson-item.active').forEach(item => {
                         if (item !== currentLessonItem) item.classList.remove('active');
                     });
@@ -956,45 +1012,55 @@
                     const videoPane = currentLessonItem.querySelector('.video-pane');
                     const rightPane = currentLessonItem.querySelector('.right-pane');
 
-                    // Load notes for the selected lesson
                     loadNotes(activeLessonId);
 
-                    // Load content only if the lesson is now active and content is empty
-                    if (currentLessonItem.classList.contains('active') && videoPane.innerHTML === '') {
-                        videoPane.innerHTML = `<div class="loader">Finding video...</div>`;
-                        rightPane.innerHTML = `<div class="loader">Waiting for video...</div>`;
-
-                        try {
-                            // 1. First fetch and display the video
-                            const videoResult = await fetchVideo(lessonId, videoPane);
-
-                            // 2. Fetch the summary if video was successful
-                            if (videoResult.success) {
-                                // --- THIS IS THE ONLY LINE THAT CHANGED ---
-                                // We now call fetchSummary directly instead of fetchTranscript
-                                await fetchSummary(lessonId, rightPane);
-                            } else {
-                                rightPane.innerHTML = `
-                                <div class="transcript-error">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                    <p>Cannot load summary without video</p>
-                                </div>
-                            `;
-                            }
-                        } catch (error) {
-                            console.error('Content loading failed:', error);
-                            videoPane.innerHTML = `
-                            <div class="video-error">
-                                <i class="fas fa-video-slash"></i>
-                                <p>Failed to load content</p>
-                            </div>
-                        `;
+                    if (currentLessonItem.classList.contains('active')) {
+                        if (videoPane.innerHTML === '') {
+                            videoPane.innerHTML = `<div class="loader">Finding video...</div>`;
+                            // Setup Tabs for Right Pane
                             rightPane.innerHTML = `
-                            <div class="transcript-error">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <p>Failed to load content</p>
-                            </div>
-                        `;
+                                <div class="right-pane-tabs">
+                                    <button class="tab-btn active" onclick="switchTab(this, 'summary')">Summary & Quiz</button>
+                                    <button class="tab-btn" onclick="switchTab(this, 'chat')">Ask AI</button>
+                                </div>
+                                <div id="tab-summary" class="tab-content active">
+                                    <div class="loader">Loading summary...</div>
+                                </div>
+                                <div id="tab-chat" class="tab-content">
+                                    <div class="chat-container">
+                                        <div class="chat-messages" id="chat-messages-${lessonId}">
+                                            <div class="chat-message ai">Hello! Ask me anything about this video.</div>
+                                        </div>
+                                        <div class="chat-input-area">
+                                            <input type="text" class="chat-input" placeholder="Ask a question..." id="chat-input-${lessonId}">
+                                            <button class="chat-send-btn" onclick="sendChatMessage('${lessonId}')"><i class="fa-solid fa-paper-plane"></i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                             `;
+
+                            setTimeout(() => {
+                                const input = document.getElementById(`chat-input-${lessonId}`);
+                                if (input) {
+                                    input.addEventListener('keydown', (ev) => {
+                                        if (ev.key === 'Enter') sendChatMessage(lessonId);
+                                    });
+                                }
+                            }, 100);
+
+                            try {
+                                const videoResult = await fetchVideo(lessonId, videoPane);
+
+                                if (videoResult.success) {
+                                    currentVideoId = extractVideoId(videoResult.video_url);
+                                    const summaryTab = rightPane.querySelector('#tab-summary');
+                                    await fetchSummary(lessonId, summaryTab);
+                                } else {
+                                    rightPane.querySelector('#tab-summary').innerHTML = `<p>Error loading video.</p>`;
+                                }
+                            } catch (e) {
+                                console.error(e);
+                            }
                         }
                     }
                 });
@@ -1006,72 +1072,44 @@
                     const lessonItem = this.closest('.lesson-item');
                     const lessonId = this.dataset.lessonId;
                     const isCompleted = this.checked;
-                    const rightPane = lessonItem.querySelector('.right-pane');
+                    const rightPane = lessonItem.querySelector('#tab-summary') || lessonItem.querySelector('.right-pane');
                     const planId = "{{ plan_id }}";
 
-                    // Ensure we're working with the actual checkbox element
                     const actualCheckbox = this;
 
                     try {
-                        // Visual feedback
                         actualCheckbox.disabled = true;
                         lessonItem.classList.add('updating');
 
-                        // Update database
                         const response = await fetch(`/api/lessons/${lessonId}/completion`, {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                is_completed: isCompleted,
-                                plan_id: planId
-                            })
+                            body: JSON.stringify({ is_completed: isCompleted, plan_id: planId })
                         });
 
                         const data = await response.json();
+                        if (!response.ok) throw new Error(data.message || 'Update failed');
 
-                        if (!response.ok) {
-                            throw new Error(data.message || 'Update failed');
-                        }
+                        updateOverallProgress();
 
-                        // Update progress display
-                        const progressBar = document.getElementById('overall-progress-bar');
-                        const progressText = document.getElementById('overall-progress-text');
-                        if (progressBar && progressText) {
-                            progressBar.style.width = `${data.progress}%`;
-                            progressText.textContent = `${data.progress}%`;
-                        }
-
-                        // Handle quiz generation if completed
                         if (isCompleted) {
                             rightPane.innerHTML = `<div class="loader">Generating quiz...</div>`;
                             lessonItem.classList.add('active');
 
                             try {
-                                const quizResponse = await fetch(`/api/lesson/${lessonId}/generate-quiz`, {
-                                    method: 'POST'
-                                });
+                                const quizResponse = await fetch(`/api/lesson/${lessonId}/generate-quiz`, { method: 'POST' });
                                 const quizData = await quizResponse.json();
                                 if (!quizResponse.ok) throw new Error(quizData.message);
                                 renderQuiz(quizData.quiz, rightPane);
                             } catch (error) {
-                                rightPane.innerHTML = `
-                        <div class="quiz-error">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <p>Error: ${error.message}</p>
-                        </div>
-                    `;
+                                rightPane.innerHTML = `<div class="quiz-error"><p>Error: ${error.message}</p></div>`;
                             }
-                        } else {
-                            rightPane.innerHTML = '';
                         }
 
                     } catch (error) {
                         console.error('Error:', error);
-                        // Revert the checkbox state on error
                         actualCheckbox.checked = !isCompleted;
                         lessonItem.classList.toggle('completed', !isCompleted);
-
-                        // Show error to user
                         alert(`Operation failed: ${error.message}`);
                     } finally {
                         actualCheckbox.disabled = false;
@@ -1080,57 +1118,75 @@
                 });
             });
 
-            // Add this helper function to your script
-            function retryQuizGeneration(lessonId, buttonElement) {
-                const lessonItem = buttonElement.closest('.lesson-item');
-                const rightPane = lessonItem.querySelector('.right-pane');
-
-                rightPane.innerHTML = `
-        <div class="loader">
-            <div class="loader-spinner"></div>
-            <p>Generating quiz...</p>
-        </div>
-    `;
-
-                fetch(`/api/lesson/${lessonId}/generate-quiz`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Requested-With': 'XMLHttpRequest'
-                    }
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.quiz) {
-                            renderQuiz(data.quiz, rightPane);
-                        } else {
-                            throw new Error(data.message || 'Failed to generate quiz');
-                        }
-                    })
-                    .catch(error => {
-                        rightPane.innerHTML = `
-            <div class="quiz-error">
-                <i class="fas fa-exclamation-triangle"></i>
-                <p>${error.message || 'Failed to generate quiz'}</p>
-                <button class="btn retry-btn" onclick="retryQuizGeneration('${lessonId}', this)">
-                    Try Again
-                </button>
-            </div>
-        `;
-                    });
-            }
-
             function updateOverallProgress() {
                 const allCheckboxes = document.querySelectorAll('.lesson-checkbox');
                 const checkedCheckboxes = document.querySelectorAll('.lesson-checkbox:checked');
                 const progress = allCheckboxes.length > 0 ? (checkedCheckboxes.length / allCheckboxes.length) * 100 : 0;
-
                 const progressBar = document.getElementById('overall-progress-bar');
                 const progressText = document.getElementById('overall-progress-text');
                 if (progressBar && progressText) {
                     progressBar.style.width = `${progress.toFixed(0)}%`;
                     progressText.textContent = `${progress.toFixed(0)}%`;
                 }
+            }
+
+            // --- Chat & Tab Functions ---
+            window.switchTab = function (btn, tabName) {
+                const parent = btn.closest('.right-pane');
+                parent.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                parent.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                parent.querySelector(`#tab-${tabName}`).classList.add('active');
+            };
+
+            window.sendChatMessage = async function (lessonId) {
+                if (!currentVideoId) { alert("Video not fully loaded yet."); return; }
+                const input = document.getElementById(`chat-input-${lessonId}`);
+                const msgContainer = document.getElementById(`chat-messages-${lessonId}`);
+                const question = input.value.trim();
+                if (!question) return;
+
+                appendMessage(msgContainer, question, 'user');
+                input.value = '';
+                const loadingId = appendMessage(msgContainer, "Thinking...", 'ai', true);
+
+                try {
+                    const response = await fetch('/api/video-chat', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ video_id: currentVideoId, question: question })
+                    });
+                    const data = await response.json();
+                    document.getElementById(loadingId).remove();
+
+                    if (data.answer) appendMessage(msgContainer, data.answer, 'ai');
+                    else appendMessage(msgContainer, "Sorry, I couldn't get an answer.", 'ai');
+
+                } catch (e) {
+                    document.getElementById(loadingId).remove();
+                    appendMessage(msgContainer, "Error connecting to AI.", 'ai');
+                }
+            };
+
+            function appendMessage(container, text, type, isLoading = false) {
+                const div = document.createElement('div');
+                div.className = `chat-message ${type}`;
+                div.textContent = text;
+                if (isLoading) {
+                    div.id = `msg-loading-${Date.now()}`;
+                    div.style.opacity = '0.7';
+                    div.style.fontStyle = 'italic';
+                }
+                container.appendChild(div);
+                container.scrollTop = container.scrollHeight;
+                return div.id;
+            }
+
+            function extractVideoId(url) {
+                if (!url) return null;
+                const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                const match = url.match(regExp);
+                return (match && match[2].length === 11) ? match[2] : null;
             }
 
             // --- Notes Functionality ---
@@ -1157,251 +1213,109 @@
                             <div class="note-header">
                                 <span class="note-date">${new Date(note.created_at?.seconds * 1000).toLocaleString()}</span>
                                 <div class="note-actions">
-                                    <button class="delete-note" data-note-id="${note.id}">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <button class="delete-note" data-note-id="${note.id}"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
                             <div class="note-content">${note.body.replace(/\n/g, '<br>')}</div>
                         </div>
                     `).join('');
                         notesListDiv.innerHTML = notesHtml;
-
-                        // Add delete handlers
                         document.querySelectorAll('.delete-note').forEach(btn => {
                             btn.addEventListener('click', async (e) => {
                                 e.stopPropagation();
-                                const noteId = e.currentTarget.dataset.noteId;
-                                if (confirm('Are you sure you want to delete this note?')) {
-                                    await deleteNote(noteId);
+                                if (confirm('Delete note?')) {
+                                    await deleteNote(e.currentTarget.dataset.noteId);
                                     loadNotes(activeLessonId);
                                 }
                             });
                         });
                     }
                 } catch (error) {
-                    notesListDiv.innerHTML = `
-                    <div class="notes-error">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <p>${error.message}</p>
-                    </div>
-                `;
+                    notesListDiv.innerHTML = `<div class="notes-error"><p>${error.message}</p></div>`;
                 }
             }
 
             async function deleteNote(noteId) {
                 try {
-                    const response = await fetch(`/api/notes/${noteId}`, {
-                        method: 'DELETE'
-                    });
-                    if (!response.ok) throw new Error('Failed to delete note');
-                } catch (error) {
-                    console.error('Delete note error:', error);
-                    alert(error.message);
-                }
+                    await fetch(`/api/notes/${noteId}`, { method: 'DELETE' });
+                } catch (error) { alert(error.message); }
             }
 
             saveNoteBtn.addEventListener('click', async () => {
                 const body = noteTextarea.value.trim();
                 if (!body || !activeLessonId) return;
-
                 try {
                     const response = await fetch(`/api/my-courses/${planId}/add-note`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            title: `Note for lesson ${activeLessonId}`,
-                            body: body,
-                            lessonId: activeLessonId
-                        })
+                        body: JSON.stringify({ title: `Note`, body: body, lessonId: activeLessonId })
                     });
-
-                    if (!response.ok) throw new Error('Failed to save note');
-
+                    if (!response.ok) throw new Error('Failed');
                     noteTextarea.value = '';
                     loadNotes(activeLessonId);
-                } catch (error) {
-                    alert(`Error saving note: ${error.message}`);
-                }
+                } catch (error) { alert(`Error: ${error.message}`); }
             });
 
-            // --- Video, Transcript, and Quiz Functions ---
+            // --- Video / Summary ---
             async function fetchVideo(lessonId, container) {
                 try {
-                    const response = await fetch(`/api/get-video-for-lesson/${lessonId}`, {
-                        method: 'POST'
-                    });
+                    const response = await fetch(`/api/get-video-for-lesson/${lessonId}`, { method: 'POST' });
                     const data = await response.json();
-
                     if (data.is_curated) {
-                        // Render curated content with additional resources
                         container.innerHTML = `
                         <div class="curated-content">
                             <iframe src="${data.video_url}" frameborder="0" allowfullscreen></iframe>
                             <div class="video-resources">
-                                <h4>Additional Resources</h4>
-                                <ul>
-                                    ${data.additional_resources.map(res => `
-                                        <li>
-                                            <a href="${res.url}" target="_blank">
-                                                ${res.title || 'Resource'} 
-                                                ${res.type === 'reading' ? '📄' : '🎥'}
-                                            </a>
-                                        </li>
-                                    `).join('')}
-                                </ul>
+                                <h4>Resources</h4>
+                                <ul>${data.additional_resources.map(res => `<li><a href="${res.url}" target="_blank">${res.title || 'Res'}</a></li>`).join('')}</ul>
                             </div>
-                        </div>
-                    `;
+                        </div>`;
                     } else {
-                        // Regular YouTube embed
                         container.innerHTML = `<iframe src="${data.video_url}" frameborder="0" allowfullscreen></iframe>`;
                     }
-
-                    return { success: true };
+                    return { success: true, video_url: data.video_url };
                 } catch (error) {
-                    container.innerHTML = `
-                    <div class="video-error">
-                        <i class="fas fa-video-slash"></i>
-                        <p>Could not load video.</p>
-                        <button class="btn" onclick="fetchVideo('${lessonId}', this.closest('.video-pane'))">
-                            Try Again
-                        </button>
-                    </div>
-                `;
-                    console.error('Video load error:', error);
+                    container.innerHTML = `<div class="video-error"><p>Could not load video.</p></div>`;
                     return { success: false, error: error.message };
                 }
             }
 
-            async function fetchTranscript(lessonId, container) {
-                container.innerHTML = `<div class="loader">Loading transcript...</div>`;
+            async function fetchSummary(lessonId, container) {
+                container.innerHTML = `<div class="loader">Generating content...</div>`;
                 try {
-                    const response = await fetch(`/api/lesson/${lessonId}/transcript`, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' }
-                    });
+                    const response = await fetch(`/api/lesson/${lessonId}/generate-summary`, { method: 'POST' });
                     const result = await response.json();
-                    if (result.status !== 'success') {
-                        throw new Error(result.message || 'Failed to load transcript');
-                    }
-                    renderTranscript(container, result.transcript);
+                    if (result.status !== 'success') throw new Error(result.message);
+                    renderSummaryAndQuiz(container, result.summary, result.quiz);
                 } catch (error) {
-                    console.error('Transcript load error:', error);
                     renderTranscriptError(container, lessonId, error.message);
                 }
             }
 
-            // --- MODIFIED --- to handle both summary and quiz
-            async function fetchSummary(lessonId, container) {
-                container.innerHTML = `<div class="loader">Generating summary and quiz... This may take a moment.</div>`;
-                try {
-                    const response = await fetch(`/api/lesson/${lessonId}/generate-summary`, {
-                        method: 'POST'
-                    });
-                    const result = await response.json();
-                    if (result.status !== 'success') {
-                        throw new Error(result.message || 'Failed to generate content.');
-                    }
-                    // Call the new rendering function for both summary and quiz
-                    renderSummaryAndQuiz(container, result.summary, result.quiz);
-                } catch (error) {
-                    renderTranscriptError(container, lessonId, `Could not generate content: ${error.message}`);
-                }
-            }
-
-            /* ========== HELPER FUNCTIONS ========== */
-
-            // --- NEW --- Renders both the summary and the quiz below it
             function renderSummaryAndQuiz(container, summaryText, quizData) {
-                // Step 1: Create the structure
-                container.innerHTML = `
-                <div id="summary-container"></div>
-                <hr style="border-color: var(--border-color); margin: 20px 0;">
-                <div id="quiz-container"></div>
-            `;
-
-                const summaryContainer = container.querySelector('#summary-container');
-                const quizContainer = container.querySelector('#quiz-container');
-
-                // Step 2: Render the summary
-                summaryContainer.innerHTML = `
+                container.innerHTML = `<div id="summary-container"></div><hr style="border-color:var(--border-color);margin:20px 0;"><div id="quiz-container"></div>`;
+                container.querySelector('#summary-container').innerHTML = `
                 <div class="transcript-container">
-                    <div class="transcript-header">
-                        <h4>Predicted Summary</h4>
-                    </div>
-                    <div class="transcript-content">
-                        <p style="white-space: pre-wrap; line-height: 1.6;">${summaryText}</p>
-                    </div>
-                </div>
-            `;
-
-                // Step 3: Render the quiz using your existing function
+                    <div class="transcript-header"><h4>Predicted Summary</h4></div>
+                    <div class="transcript-content"><p style="white-space: pre-wrap; line-height: 1.6;">${summaryText}</p></div>
+                </div>`;
                 if (quizData && quizData.length > 0) {
-                    quizContainer.innerHTML = `<h4>Quiz based on the summary:</h4>`;
-                    renderQuiz(quizData, quizContainer); // Re-using your existing function
+                    container.querySelector('#quiz-container').innerHTML = `<h4>Quiz:</h4>`;
+                    renderQuiz(quizData, container.querySelector('#quiz-container'));
                 } else {
-                    quizContainer.innerHTML = `<p>Could not generate a quiz for this summary.</p>`;
+                    container.querySelector('#quiz-container').innerHTML = `<p>No quiz available.</p>`;
                 }
-            }
-
-            // --- DELETE the old renderSummary function as it's replaced by the one above ---
-            // function renderSummary(container, summaryText) { ... }
-
-
-            function renderTranscript(container, transcript) {
-                const formattedTranscript = formatTranscript(transcript);
-                container.innerHTML = `
-                <div class="transcript-container">
-                    <div class="transcript-header">
-                        <h4>Video Transcript</h4>
-                    </div>
-                    <div class="transcript-content">
-                        ${formattedTranscript}
-                    </div>
-                </div>
-            `;
             }
 
             function renderTranscriptError(container, lessonId, errorMsg) {
-                const isTranscriptMissing = errorMsg.toLowerCase().includes('no transcript') || errorMsg.toLowerCase().includes('captions');
-
-                container.innerHTML = `
-                <div class="transcript-error" style="text-align:center; padding: 20px;">
-                    <i class="fas fa-exclamation-triangle fa-2x" style="margin-bottom: 15px;"></i>
-                    <h4>Error</h4>
-                    <p>${errorMsg}</p>
-                    <div class="error-actions" style="margin-top: 20px; display: flex; flex-direction: column; gap: 10px;">
-                        <button class="btn" onclick="fetchSummary('${lessonId}', this.closest('.right-pane'))">
-                            <i class="fas fa-sync-alt"></i> Try Again
-                        </button>
-                    </div>
-                </div>
-            `;
-            }
-
-            function formatTranscript(text) {
-                return text.split('\n')
-                    .filter(line => line.trim())
-                    .map(line => `<p class="transcript-line">${line}</p>`)
-                    .join('');
+                container.innerHTML = `<div class="transcript-error" style="text-align:center; padding: 20px;"><h4>Error</h4><p>${errorMsg}</p><button class="btn" onclick="fetchSummary('${lessonId}', this.closest('.right-pane') || this.closest('#tab-summary'))">Try Again</button></div>`;
             }
 
             function renderQuiz(quizData, container) {
                 let quizHtml = '<form class="quiz-form">';
                 quizData.forEach((q, index) => {
-                    const optionsHtml = q.options.map(opt => `
-                    <label>
-                        <input type="radio" name="question-${index}" value="${opt}" required>
-                        <span>${opt}</span>
-                    </label>
-                `).join('');
-                    quizHtml += `
-                    <div class="quiz-question">
-                        <p><strong>${index + 1}.</strong> ${q.question}</p>
-                        <div class="quiz-options">${optionsHtml}</div>
-                    </div>
-                `;
+                    const optionsHtml = q.options.map(opt => `<label><input type="radio" name="question-${index}" value="${opt}" required><span>${opt}</span></label>`).join('');
+                    quizHtml += `<div class="quiz-question"><p><strong>${index + 1}.</strong> ${q.question}</p><div class="quiz-options">${optionsHtml}</div></div>`;
                 });
                 quizHtml += '<button type="submit" class="quiz-submit-btn">Submit Quiz</button></form>';
                 container.innerHTML = quizHtml;
@@ -1411,59 +1325,28 @@
                     let score = 0;
                     const results = [];
                     const form = e.target;
-
                     quizData.forEach((q, index) => {
                         const selectedOption = form.querySelector(`input[name="question-${index}"]:checked`);
                         const isCorrect = selectedOption && selectedOption.value === q.answer;
                         if (isCorrect) score++;
-                        results.push({
-                            question: q.question,
-                            selected: selectedOption ? selectedOption.value : 'None',
-                            correct: q.answer,
-                            isCorrect: isCorrect
-                        });
+                        results.push({ question: q.question, selected: selectedOption ? selectedOption.value : 'None', correct: q.answer, isCorrect: isCorrect });
                     });
 
-                    // --- THIS IS THE NEW PART THAT SAVES THE SCORE ---
                     const lessonId = activeLessonId;
                     const planId = "{{ plan_id }}";
                     fetch(`/api/lesson/${lessonId}/submit-quiz`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            score: score,
-                            total: quizData.length,
-                            planId: planId
-                        })
-                    })
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.status === 'success') {
-                                console.log('Quiz score saved successfully!');
-                            } else {
-                                console.error('Failed to save score:', data.message);
-                            }
-                        })
-                        .catch(err => console.error('Error sending score to backend:', err));
-                    // --- END OF NEW PART ---
+                        body: JSON.stringify({ score: score, total: quizData.length, planId: planId })
+                    }); // Fire and forget for UX speed
 
                     const resultsHtml = results.map((result, i) => `
                     <div class="quiz-result-item ${result.isCorrect ? 'correct' : 'incorrect'}" style="margin-bottom: 15px; padding: 10px; border-radius: 5px; border-left: 3px solid ${result.isCorrect ? 'var(--success-green)' : 'var(--danger-red)'}; background: var(--input-bg);">
                         <p><strong>Q${i + 1}:</strong> ${result.question}</p>
                         <p style="color: var(--text-secondary);">Your answer: ${result.selected}</p>
                         ${!result.isCorrect ? `<p style="color: var(--primary-blue-light);">Correct answer: ${result.correct}</p>` : ''}
-                    </div>
-                `).join('');
-
-                    container.innerHTML = `
-                    <div class="quiz-results">
-                        <h3>Quiz Results: You scored ${score}/${quizData.length}</h3>
-                        <div class="quiz-results-detail">
-                            ${resultsHtml}
-                        </div>
-                         <a href="{{ url_for('view_quizzes') }}" style="display: block; text-align: center; margin-top: 20px; text-decoration: none;" class="btn">View All Quiz Stats</a>
-                    </div>
-                `;
+                    </div>`).join('');
+                    container.innerHTML = `<div class="quiz-results"><h3>You scored ${score}/${quizData.length}</h3><div class="quiz-results-detail">${resultsHtml}</div><a href="{{ url_for('view_quizzes') }}" style="display: block; text-align: center; margin-top: 20px; text-decoration: none;" class="btn">View All Stats</a></div>`;
                 });
             }
         });
