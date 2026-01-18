@@ -1,0 +1,13 @@
+E:\AI_Edu_Bot_Project\backend\app\main.py:31: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Will watch for changes in these directories: ['E:\\AI_Edu_Bot_Project']
+INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+INFO:     Started reloader process [2884] using WatchFiles
+INFO:     Started server process [9708]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.

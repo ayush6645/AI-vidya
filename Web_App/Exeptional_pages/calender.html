@@ -342,7 +342,7 @@
         }
 
         .loader-spinner {
-            border: 3px solid rgba(255,255,255,0.3);
+            border: 3px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top: 3px solid var(--primary-blue);
             width: 24px;
@@ -352,8 +352,13 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         /* ========== QUIZ STYLES ========== */
@@ -571,11 +576,11 @@
         }
 
         .transcript-content p:hover {
-            background: rgba(0,163,255,0.1);
+            background: rgba(0, 163, 255, 0.1);
         }
 
         .transcript-content p.active {
-            background: rgba(0,163,255,0.2);
+            background: rgba(0, 163, 255, 0.2);
             font-weight: 500;
         }
 
@@ -632,15 +637,15 @@
     <div class="sidebar">
         <div class="sidebar-header">AI-vidya</div>
         <nav class="nav-links">
-            <a href="{{ url_for('dashboard.show_dashboard') }}"><i
+            <a href="{{ url_for('view_dashboard') }}"><i
                     class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
-            <a href="{{ url_for('my_courses.list_my_courses') }}" class="active"><i
-                    class="fa-solid fa-book-open"></i><span>My Courses</span></a>
-            <a href="{{ url_for('start_plan.show_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
+            <a href="{{ url_for('view_my_courses') }}" class="active"><i class="fa-solid fa-book-open"></i><span>My
+                    Courses</span></a>
+            <a href="{{ url_for('view_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
                     Plan</span></a>
-            <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+            <a href="{{ url_for('view_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
         </nav>
-        <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+        <a href="{{ url_for('logout') }}" class="logout"><i
                 class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
     </div>
 
@@ -765,7 +770,7 @@
                     activeLessonId = lessonId;
                     updateNotesSection(lessonTitleText);
                     toggleLessonActiveState(currentLessonItem);
-                    
+
                     // Load content if lesson is active and content is empty
                     if (currentLessonItem.classList.contains('active')) {
                         await loadLessonContent(currentLessonItem, lessonId);
@@ -808,7 +813,7 @@
                 // Only load if content is empty
                 if (videoPane.innerHTML === '') {
                     showLoadingState(videoPane, rightPane);
-                    
+
                     try {
                         // Load video and then transcript
                         const videoResult = await fetchVideo(lessonId, videoPane);
@@ -887,8 +892,8 @@
                     await fetch(`/api/lessons/${lessonId}/status`, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ 
-                            status: isCompleted ? 'Completed' : 'In Progress' 
+                        body: JSON.stringify({
+                            status: isCompleted ? 'Completed' : 'In Progress'
                         })
                     });
                 } catch (error) {
@@ -904,8 +909,8 @@
             async function generateQuiz(lessonId, rightPane) {
                 rightPane.innerHTML = `<div class="loader">Generating quiz...</div>`;
                 try {
-                    const response = await fetch(`/api/lesson/${lessonId}/generate-quiz`, { 
-                        method: 'POST' 
+                    const response = await fetch(`/api/lesson/${lessonId}/generate-quiz`, {
+                        method: 'POST'
                     });
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.message);
@@ -926,12 +931,12 @@
             function updateOverallProgress() {
                 const allCheckboxes = document.querySelectorAll('.lesson-checkbox');
                 const checkedCheckboxes = document.querySelectorAll('.lesson-checkbox:checked');
-                const progress = allCheckboxes.length > 0 ? 
+                const progress = allCheckboxes.length > 0 ?
                     (checkedCheckboxes.length / allCheckboxes.length) * 100 : 0;
-                
+
                 const progressBar = document.getElementById('overall-progress-bar');
                 const progressText = document.getElementById('overall-progress-text');
-                
+
                 if (progressBar && progressText) {
                     progressBar.style.width = `${progress.toFixed(0)}%`;
                     progressText.textContent = `${progress.toFixed(0)}%`;
@@ -939,7 +944,7 @@
             }
 
             // --- Notes Functionality ---
-            
+
             /**
              * Loads notes for a specific lesson
              * @param {string} lessonId - The lesson ID
@@ -949,16 +954,16 @@
                     showEmptyNotesState();
                     return;
                 }
-                
+
                 showNotesLoadingState();
-                
+
                 try {
                     const response = await fetch(`/api/lessons/${lessonId}/notes`);
                     if (!response.ok) throw new Error('Failed to load notes.');
-                    
+
                     const result = await response.json();
                     const notes = result.notes;
-                    
+
                     if (notes.length === 0) {
                         showEmptyNotesState();
                     } else {
@@ -1016,7 +1021,7 @@
                         <div class="note-content">${note.body.replace(/\n/g, '<br>')}</div>
                     </div>
                 `).join('');
-                
+
                 notesListDiv.innerHTML = notesHtml;
                 setupNoteDeletionHandlers();
             }
@@ -1027,8 +1032,8 @@
              * @returns {string} Formatted date string
              */
             function formatNoteDate(timestamp) {
-                return timestamp ? 
-                    new Date(timestamp * 1000).toLocaleString() : 
+                return timestamp ?
+                    new Date(timestamp * 1000).toLocaleString() :
                     'No date available';
             }
 
@@ -1079,9 +1084,9 @@
                             lessonId: activeLessonId
                         })
                     });
-                    
+
                     if (!response.ok) throw new Error('Failed to save note');
-                    
+
                     noteTextarea.value = '';
                     loadNotes(activeLessonId);
                 } catch (error) {
@@ -1090,7 +1095,7 @@
             });
 
             // --- Video, Transcript, and Quiz Functions ---
-            
+
             /**
              * Fetches and displays video content for a lesson
              * @param {string} lessonId - The lesson ID
@@ -1103,13 +1108,13 @@
                         method: 'POST'
                     });
                     const data = await response.json();
-                    
+
                     if (data.is_curated) {
                         renderCuratedContent(container, data);
                     } else {
                         renderStandardVideo(container, data.video_url);
                     }
-                    
+
                     return { success: true };
                 } catch (error) {
                     renderVideoError(container, lessonId, error);
@@ -1184,7 +1189,7 @@
             async function fetchTranscript(lessonId, container) {
                 try {
                     container.innerHTML = `<div class="loader">Verifying video link...</div>`;
-                    
+
                     // First ensure we have a video
                     const videoUrl = await ensureVideoLink(lessonId);
                     if (!videoUrl) {
@@ -1199,10 +1204,10 @@
                             'Video-Url': videoUrl
                         }
                     });
-                    
+
                     const data = await response.json();
                     if (!response.ok) throw new Error(data.message || 'Failed to load transcript');
-                    
+
                     if (data.transcript) {
                         renderTranscript(container, data.transcript, videoUrl);
                     } else {
@@ -1238,7 +1243,7 @@
              */
             function renderTranscript(container, transcript, videoUrl) {
                 const formattedTranscript = formatTranscript(transcript);
-                
+
                 container.innerHTML = `
                     <div class="transcript-container">
                         <div class="transcript-header">
@@ -1291,7 +1296,7 @@
              */
             function renderTranscriptError(container, lessonId, errorMsg) {
                 const isLessonNotFound = errorMsg.includes('Lesson not found');
-                
+
                 container.innerHTML = `
                     <div class="transcript-error">
                         <i class="fas fa-exclamation-triangle"></i>
@@ -1342,12 +1347,12 @@
             function addTranscriptEventListeners(container, videoUrl) {
                 const videoId = new URL(videoUrl).pathname.split('/').pop();
                 const videoIframe = container.closest('.lesson-item').querySelector('iframe');
-                
+
                 container.querySelectorAll('.transcript-line').forEach(line => {
-                    line.addEventListener('click', function() {
+                    line.addEventListener('click', function () {
                         const timestamp = this.dataset.timestamp;
                         if (timestamp && videoIframe) {
-                            const [mins, secs] = timestamp.slice(1,-1).split(':').map(Number);
+                            const [mins, secs] = timestamp.slice(1, -1).split(':').map(Number);
                             seekVideo(videoIframe, mins * 60 + secs);
                             highlightTranscriptLine(this);
                         }
@@ -1387,7 +1392,7 @@
              */
             function renderQuiz(quizData, container) {
                 let quizHtml = '<form class="quiz-form">';
-                
+
                 quizData.forEach((q, index) => {
                     const optionsHtml = q.options.map(opt => `
                         <label>
@@ -1395,7 +1400,7 @@
                             <span>${opt}</span>
                         </label>
                     `).join('');
-                    
+
                     quizHtml += `
                         <div class="quiz-question">
                             <p><strong>${index + 1}.</strong> ${q.question}</p>
@@ -1403,7 +1408,7 @@
                         </div>
                     `;
                 });
-                
+
                 quizHtml += '<button type="submit" class="quiz-submit-btn">Submit Quiz</button></form>';
                 container.innerHTML = quizHtml;
 
@@ -1425,7 +1430,7 @@
                 return quizData.map((q, index) => {
                     const selectedOption = form.querySelector(`input[name="question-${index}"]:checked`);
                     const isCorrect = selectedOption && selectedOption.value === q.answer;
-                    
+
                     return {
                         question: q.question,
                         selected: selectedOption ? selectedOption.value : 'None',
@@ -1445,7 +1450,7 @@
                 const score = results.filter(r => r.isCorrect).length;
                 const resultsHtml = results.map((result, i) => `
                     <div class="quiz-result-item ${result.isCorrect ? 'correct' : 'incorrect'}">
-                        <p><strong>Q${i+1}:</strong> ${result.question}</p>
+                        <p><strong>Q${i + 1}:</strong> ${result.question}</p>
                         <p>Your answer: ${result.selected}</p>
                         <p>Correct answer: ${result.correct}</p>
                     </div>
@@ -1463,7 +1468,7 @@
         });
 
         // ========== GLOBAL FUNCTIONS (for inline event handlers) ==========
-        
+
         /**
          * Shows fallback content when video/transcript fails
          * @param {string} lessonId - The lesson ID
@@ -1473,9 +1478,9 @@
             try {
                 const response = await fetch(`/api/lessons/${lessonId}`);
                 if (!response.ok) throw new Error('Lesson not found');
-                
+
                 const { lesson } = await response.json();
-                
+
                 container.innerHTML = `
                     <div class="lesson-fallback-content">
                         <h4>${lesson.topic}</h4>
@@ -1511,18 +1516,18 @@
         function searchTranscript(button) {
             const container = button.closest('.transcript-container');
             const searchTerm = prompt('Search transcript:');
-            
+
             if (searchTerm) {
                 const content = container.querySelector('.transcript-content');
                 const originalHtml = content.dataset.originalHtml || content.innerHTML;
                 content.dataset.originalHtml = originalHtml;
-                
+
                 const highlighted = originalHtml.replace(
-                    new RegExp(searchTerm, 'gi'), 
+                    new RegExp(searchTerm, 'gi'),
                     match => `<span class="highlight">${match}</span>`
                 );
                 content.innerHTML = highlighted;
-                
+
                 // Scroll to first match
                 const firstMatch = content.querySelector('.highlight');
                 if (firstMatch) {
@@ -1542,4 +1547,5 @@
         }
     </script>
 </body>
+
 </html>

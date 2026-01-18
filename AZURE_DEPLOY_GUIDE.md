@@ -57,7 +57,7 @@ To ensure the app starts correctly with Gunicorn:
 2.  Go to the **General settings** tab.
 3.  In the **Startup Command** field, enter:
     ```bash
-    gunicorn --bind=0.0.0.0:8000 --timeout 600 app:app
+    gunicorn -w 2 -k uvicorn.workers.UvicornWorker backend.app.main:app --bind 0.0.0.0:8000 --timeout 600
     ```
     *(Or simply `sh startup.sh` since we created that file for you)*.
 4.  Click **Save**.

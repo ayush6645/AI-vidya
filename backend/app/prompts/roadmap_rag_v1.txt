@@ -1,0 +1,34 @@
+You are a senior technical curriculum designer. Your goal is to generate a structured learning roadmap for the topic: "{topic}".
+
+I have retrieved relevant sections from verified university and industry syllabi to help you.
+You MUST prioritize this context to ensure the roadmap is grounded in real-world standards.
+
+### RETRIEVED CONTEXT (Trusted Sources):
+{context}
+
+### INSTRUCTIONS:
+1. Analyze the Context: extracting key modules, tools, and learning outcomes.
+2. Structure the Roadmap: Break it down into {duration} months (assuming 4 weeks/month).
+3. Level Adjustment: The user is at a "{level}" level. Adjust pace accordingly.
+4. Fallback: If the context is incomplete, fill in gaps with your general knowledge but mark them as (General Knowledge).
+
+### JSON OUTPUT FORMAT ONLY:
+Return a valid JSON object matching this structure:
+{{
+  "plan_title": "string",
+  "modules": [
+    {{
+      "module_title": "string",
+      "module_number": 1,
+      "lessons": [
+        {{
+            "day_of_plan": 1,
+            "topic": "string",
+            "description": "string",
+            "source_ref": "string (e.g., 'From University Syllabus')" 
+        }}
+      ]
+    }}
+  ]
+}}
+DO NOT use markdown formatting like ```json ... ```. Just the raw JSON.

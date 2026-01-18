@@ -159,19 +159,19 @@
 <body>
     <div class="dashboard-container">
         <div class="sidebar">
-            <a href="{{ url_for('dashboard.show_dashboard') }}">🏠 Dashboard</a>
-            <a href="{{ url_for('start_plan.show_start_plan') }}">📥 Start Plan</a>
-            <a href="{{ url_for('my_courses.list_my_courses') }}">📚 My Courses</a>
-            <a href="{{ url_for('my_courses.show_quizzes_page') }}">✏️ Quizzes</a>
-            <a href="{{ url_for('profile.edit_profile') }}" class="active">⚙️ Settings</a>
-            <a href="/logout">🚪 Logout</a>
+            <a href="{{ url_for('view_dashboard') }}">🏠 Dashboard</a>
+            <a href="{{ url_for('view_start_plan') }}">📥 Start Plan</a>
+            <a href="{{ url_for('view_my_courses') }}">📚 My Courses</a>
+            <a href="{{ url_for('view_quizzes') }}">✏️ Quizzes</a>
+            <a href="{{ url_for('view_settings') }}" class="active">⚙️ Settings</a>
+            <a href="{{ url_for('logout') }}">🚪 Logout</a>
         </div>
         <main>
             <h1>Settings</h1>
 
             <section class="profile-section">
                 <h2>Profile Information</h2>
-                <form id="profile-form" method="POST" action="{{ url_for('profile.update_profile') }}">
+                <form id="profile-form" method="POST" action="{{ url_for('update_profile') }}">
                     <label for="first_name">First Name</label>
                     <input type="text" id="first_name" name="first_name" value="{{ user.first_name }}">
                     <br><br>
@@ -229,12 +229,12 @@
             document.getElementById('deleteAllPlansBtn').addEventListener('click', () => {
                 showModal('delete_plans', 'Delete All Plans?',
                     "This will permanently delete all your study plans. To confirm, type 'yes' below."
-                    );
+                );
             });
             document.getElementById('deleteAccountBtn').addEventListener('click', () => {
                 showModal('delete_account', 'Delete Your Account?',
                     "This will permanently delete your account and all associated data. To confirm, type 'yes' below."
-                    );
+                );
             });
 
             modalCancelBtn.addEventListener('click', hideModal);
@@ -244,9 +244,9 @@
 
                 let endpoint = '';
                 if (currentAction === 'delete_plans') endpoint =
-                    "{{ url_for('profile.delete_all_plans') }}";
+                    "{{ url_for('delete_all_plans') }}";
                 if (currentAction === 'delete_account') endpoint =
-                    "{{ url_for('profile.delete_account') }}";
+                    "{{ url_for('delete_account') }}";
 
                 try {
                     const response = await fetch(endpoint, {
@@ -260,8 +260,8 @@
 
                     alert(data.message); // Show success message from backend
                     window.location.href = (currentAction === 'delete_account') ?
-                        "{{ url_for('login.login') }}" :
-                        "{{ url_for('dashboard.show_dashboard') }}";
+                        "{{ url_for('login_page') }}" :
+                        "{{ url_for('view_dashboard') }}";
                 } catch (error) {
                     alert(`Error: ${error.message}`);
                 } finally {

@@ -95,6 +95,15 @@
         }
 
         /* --- Main Content --- */
+        main {
+            flex-grow: 1;
+            padding: 30px 40px;
+            /* Generous padding for desktop */
+            background-color: var(--background-main);
+            overflow-y: auto;
+            height: 100vh;
+        }
+
         /* --- Mobile Responsive Sidebar Updates --- */
         .menu-toggle {
             display: none;
@@ -360,13 +369,70 @@
 
             /* Stats Grid responsive check */
             .stats-grid {
-                grid-template-columns: 1fr !important;
+                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+                /* More flexible */
             }
 
             /* Main layout grid (Leaderboard vs History) */
             .main-layout-grid {
                 grid-template-columns: 1fr !important;
             }
+        }
+
+        /* New Styles for Text Overflow in Stat Cards */
+        .stat-card.text-card p {
+            font-size: 1.1rem;
+            /* Smaller font for text */
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            /* Show max 3 lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-primary);
+            /* Use primary text color for readability */
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary-blue);
+            transition: all 0.3s ease;
+        }
+
+        /* Leaderboard Badges */
+        .rank-badge {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            font-weight: bold;
+            color: #121224;
+        }
+
+        .rank-1 .rank-badge {
+            background: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
+
+        .rank-2 .rank-badge {
+            background: #C0C0C0;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
+        }
+
+        .rank-3 .rank-badge {
+            background: #CD7F32;
+            box-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
+        }
+
+        .rank-other .rank-badge {
+            background: #2C2C40;
+            color: #fff;
         }
     </style>
 </head>
@@ -378,17 +444,17 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">AI-vidya</div>
         <nav class="nav-links">
-            <a href="{{ url_for('dashboard.show_dashboard') }}"><i
+            <a href="{{ url_for('view_dashboard') }}"><i
                     class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
-            <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
+            <a href="{{ url_for('view_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
                     Courses</span></a>
-            <a href="{{ url_for('start_plan.show_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
+            <a href="{{ url_for('view_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
                     Plan</span></a>
-            <a href="{{ url_for('my_courses.show_quizzes_page') }}" class="active"><i
+            <a href="{{ url_for('view_quizzes') }}" class="active"><i
                     class="fa-solid fa-puzzle-piece"></i><span>Quizzes</span></a>
-            <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+            <a href="{{ url_for('view_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
         </nav>
-        <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+        <a href="{{ url_for('logout') }}" class="logout"><i
                 class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
     </div>
 
@@ -415,9 +481,10 @@
                     <h3>Highest Score</h3>
                     <p>{{ stats.highest_score }}</p>
                 </div>
-                <div class="stat-card">
+                <!-- Added 'text-card' class to handle long text gracefully -->
+                <div class="stat-card text-card">
                     <h3>Last Quiz Topic</h3>
-                    <p>{{ stats.last_attempt }}</p>
+                    <p title="{{ stats.last_attempt }}">{{ stats.last_attempt }}</p>
                 </div>
             </div>
         </section>
@@ -429,11 +496,17 @@
                 <div class="quiz-card">
                     <h4>{{ quiz.topic }}</h4>
                     <p>A short quiz to test your understanding of the key concepts from this lesson.</p>
-                    <a href="{{ url_for('my_courses.course_details', plan_id=quiz.planId, lesson_id=quiz.lessonId) }}"
+                    <a href="{{ url_for('view_course_detail', plan_id=quiz.planId) }}?lesson_id={{ quiz.lessonId }}"
                         class="btn">Retake Quiz</a>
                 </div>
                 {% else %}
-                <p>No quizzes have been generated yet. Complete lessons in 'My Courses' to create them.</p>
+                <div
+                    style="grid-column: 1 / -1; text-align: center; padding: 40px; background: rgba(255,255,255,0.02); border-radius: 10px; border: 1px dashed var(--text-secondary);">
+                    <i class="fa-solid fa-clipboard-list"
+                        style="font-size: 2rem; color: var(--text-secondary); margin-bottom: 15px;"></i>
+                    <p style="color: var(--text-secondary);">No quizzes have been generated yet.<br>Complete lessons in
+                        'My Courses' to unlock new quizzes.</p>
+                </div>
                 {% endfor %}
             </div>
         </section>
@@ -446,9 +519,10 @@
                     <div class="history-item">
                         <div>
                             <span class="topic">{{ item.topic }}</span><br>
-                            <span class="date">{{ item.date }}</span>
+                            <span class="date">{{ item.date.strftime('%Y-%m-%d') if item.date and item.date.strftime
+                                else item.date }}</span>
                         </div>
-                        <span class="score">{{ item.score }}</span>
+                        <span class="score">{{ item.score }}/{{ item.total }}</span>
                     </div>
                     {% else %}
                     <p style="text-align: center; padding: 20px; color: var(--text-secondary);">No quiz attempts
@@ -462,10 +536,11 @@
                 <div class="leaderboard">
                     <ol class="leaderboard-list">
                         {% for user in leaderboard %}
-                        <li class="leaderboard-item rank-{{ user.rank }}">
-                            <span class="rank">#{{ user.rank }}</span>
+                        <li class="leaderboard-item rank-{{ 'other' if user.rank > 3 else user.rank }}">
+                            <!-- New Badge system -->
+                            <span class="rank-badge">{{ user.rank }}</span>
                             <span class="name">{{ user.name }}</span>
-                            <span class="score">{{ user.score }} Points</span>
+                            <span class="score">{{ user.score }} pts</span>
                         </li>
                         {% else %}
                         <p style="text-align: center; padding: 20px; color: var(--text-secondary);">Not enough data to

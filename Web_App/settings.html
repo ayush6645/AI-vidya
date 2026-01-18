@@ -605,18 +605,15 @@
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">AI-vidya</div>
     <nav class="nav-links">
-      <a href="{{ url_for('dashboard.show_dashboard') }}"><i
-          class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
-      <a href="{{ url_for('start_plan.show_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
+      <a href="{{ url_for('view_dashboard') }}"><i class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
+      <a href="{{ url_for('view_start_plan') }}"><i class="fa-solid fa-rocket"></i><span>Start
           Plan</span></a>
-      <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
+      <a href="{{ url_for('view_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
           Courses</span></a>
-      <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i
-          class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
-      <a href="{{ url_for('settings.show_settings') }}" class="active"><i
-          class="fa-solid fa-gear"></i><span>Settings</span></a>
+      <a href="{{ url_for('view_quizzes') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+      <a href="{{ url_for('view_settings') }}" class="active"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
     </nav>
-    <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+    <a href="{{ url_for('logout') }}" class="logout"><i
         class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
   </div>
 

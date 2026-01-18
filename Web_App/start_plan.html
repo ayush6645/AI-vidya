@@ -658,17 +658,16 @@
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">AI-vidya</div>
         <nav class="nav-links">
-            <a href="{{ url_for('dashboard.show_dashboard') }}"><i
+            <a href="{{ url_for('view_dashboard') }}"><i
                     class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
-            <a href="{{ url_for('start_plan.show_start_plan') }}" class="active"><i
-                    class="fa-solid fa-rocket"></i><span>Start Plan</span></a>
-            <a href="{{ url_for('my_courses.list_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
+            <a href="{{ url_for('view_start_plan') }}" class="active"><i class="fa-solid fa-rocket"></i><span>Start
+                    Plan</span></a>
+            <a href="{{ url_for('view_my_courses') }}"><i class="fa-solid fa-book-open"></i><span>My
                     Courses</span></a>
-            <a href="{{ url_for('my_courses.show_quizzes_page') }}"><i
-                    class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
-            <a href="{{ url_for('settings.show_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
+            <a href="{{ url_for('view_quizzes') }}"><i class="fa-solid fa-pen-to-square"></i><span>Quizzes</span></a>
+            <a href="{{ url_for('view_settings') }}"><i class="fa-solid fa-gear"></i><span>Settings</span></a>
         </nav>
-        <a href="{{ url_for('logout.logout_user') }}" class="logout"><i
+        <a href="{{ url_for('logout') }}" class="logout"><i
                 class="fa-solid fa-right-from-bracket"></i><span>Logout</span></a>
     </div>
 
@@ -771,9 +770,9 @@
                     <h2>Plan Confirmed!</h2>
                     <p>Your personalized learning journey is saved. You can find it under "My Courses".</p>
                     <div class="button-group">
-                        <button onclick="window.location.href='{{ url_for('my_courses.list_my_courses') }}'"
-                            class="secondary">View My Courses</button>
-                        <button onclick="window.location.href='{{ url_for('dashboard.show_dashboard') }}'">Go to
+                        <button onclick="window.location.href='{{ url_for('view_my_courses') }}'" class="secondary">View
+                            My Courses</button>
+                        <button onclick="window.location.href='{{ url_for('view_dashboard') }}'">Go to
                             Dashboard</button>
                     </div>
                 </div>
@@ -782,10 +781,8 @@
     </main>
 
     <!-- ✨ FIX: Use a single hidden element to store API configuration -->
-    <input type="hidden" id="apiConfig" data-user-id="{{ user_id }}"
-        data-recommendations-url="{{ url_for('start_plan.get_recommendations') }}"
-        data-generate-plan-url="{{ url_for('start_plan.generate_plan') }}"
-        data-save-plan-url="{{ url_for('start_plan.save_plan') }}">
+    <input type="hidden" id="apiConfig" data-user-id="{{ user_id }}" data-recommendations-url="#"
+        data-generate-plan-url="{{ url_for('generate_plan') }}" data-save-plan-url="{{ url_for('save_plan') }}">
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {

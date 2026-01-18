@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register - AIvidya</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <style>
@@ -20,8 +22,15 @@
             --danger-red: rgba(220, 53, 69, 0.8);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        html { height: 100%; }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            height: 100%;
+        }
 
         body {
             font-family: 'Poppins', sans-serif;
@@ -36,20 +45,62 @@
             /* ✨ FIX: Hides the default system cursor */
             cursor: none;
         }
-        
+
         /* ✨ FIX: Ensure custom cursor is always visible over interactive elements */
-        a, button, label, input[type="checkbox"], input[type="radio"], select {
-             cursor: none;
+        a,
+        button,
+        label,
+        input[type="checkbox"],
+        input[type="radio"],
+        select {
+            cursor: none;
         }
-        
+
         /* Custom Cursor */
-        .cursor-dot, .cursor-outline { display: none; }
-        @media (pointer: fine) {
-            .cursor-dot { display: block; width: 8px; height: 8px; background-color: var(--primary-blue); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transform: translate(-50%, -50%); }
-            .cursor-outline { display: block; width: 40px; height: 40px; border: 2px solid var(--primary-blue); border-radius: 50%; position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999; transition: transform 0.2s ease-out, opacity 0.2s; transform: translate(-50%, -50%); }
+        .cursor-dot,
+        .cursor-outline {
+            display: none;
         }
-        
-        #particle-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; }
+
+        @media (pointer: fine) {
+            .cursor-dot {
+                display: block;
+                width: 8px;
+                height: 8px;
+                background-color: var(--primary-blue);
+                border-radius: 50%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+            }
+
+            .cursor-outline {
+                display: block;
+                width: 40px;
+                height: 40px;
+                border: 2px solid var(--primary-blue);
+                border-radius: 50%;
+                position: fixed;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                z-index: 9999;
+                transition: transform 0.2s ease-out, opacity 0.2s;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
 
         .register-card {
             width: 100%;
@@ -60,14 +111,34 @@
             border-radius: 20px;
             padding: 40px;
             z-index: 2;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.5);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.5);
             animation: fadeIn 1s ease-out;
         }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        
-        .card-header { text-align: center; margin-bottom: 30px; }
-        .card-header h2 { font-size: 2rem; }
-        .card-header p { color: var(--text-secondary); }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .card-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .card-header h2 {
+            font-size: 2rem;
+        }
+
+        .card-header p {
+            color: var(--text-secondary);
+        }
 
         /* ✨ FIX: Multi-step Progress Bar Alignment */
         .progress-bar {
@@ -76,19 +147,23 @@
             position: relative;
             margin-bottom: 30px;
         }
+
         .progress-bar::before {
             content: '';
             position: absolute;
-            top: 14px; /* Vertically center on the 30px dot */
+            top: 14px;
+            /* Vertically center on the 30px dot */
             left: 0;
             height: 2px;
             width: 100%;
             background-color: var(--border-color);
             z-index: 0;
         }
+
         .progress-bar .progress {
             position: absolute;
-            top: 14px; /* Vertically center on the 30px dot */
+            top: 14px;
+            /* Vertically center on the 30px dot */
             left: 0;
             height: 2px;
             background-color: var(--primary-blue);
@@ -96,55 +171,209 @@
             transition: width 0.4s ease;
             z-index: 1;
         }
+
         .step {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 8px;
             z-index: 2;
-            background-color: var(--card-bg); /* Match card background to create clean break in the line */
+            background-color: var(--card-bg);
+            /* Match card background to create clean break in the line */
             padding: 0 5px;
         }
-        .step .dot { width: 30px; height: 30px; background-color: var(--input-bg); border: 2px solid var(--border-color); border-radius: 50%; transition: all 0.4s ease; }
-        .step .label { font-size: 0.8rem; color: var(--text-secondary); transition: color 0.4s ease; }
-        .step.active .dot { background-color: var(--primary-blue); border-color: var(--primary-blue); transform: scale(1.1); }
-        .step.active .label { color: var(--primary-blue); font-weight: 600; }
+
+        .step .dot {
+            width: 30px;
+            height: 30px;
+            background-color: var(--input-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 50%;
+            transition: all 0.4s ease;
+        }
+
+        .step .label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: color 0.4s ease;
+        }
+
+        .step.active .dot {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+            transform: scale(1.1);
+        }
+
+        .step.active .label {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
 
         /* Form Styling */
-        .form-step { display: none; animation: stepFadeIn 0.5s; }
-        .form-step.active { display: block; }
-        @keyframes stepFadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .form-step {
+            display: none;
+            animation: stepFadeIn 0.5s;
+        }
 
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        
-        .input-group { position: relative; margin-bottom: 20px; }
-        .input-group input, .input-group select { width: 100%; padding: 20px 15px 10px 45px; border-radius: 10px; border: 1px solid var(--border-color); background: var(--input-bg); color: white; font-size: 1rem; font-family: 'Poppins', sans-serif; }
-        .input-group select { padding-right: 15px; appearance: none; }
-        .input-group label { position: absolute; left: 45px; top: 15px; color: var(--text-secondary); pointer-events: none; transition: all 0.3s ease; }
-        .input-group input:focus + label, .input-group input:not(:placeholder-shown) + label,
-        .input-group select:focus + label, .input-group select:valid + label { top: 5px; font-size: 0.75rem; color: var(--primary-blue); }
-        .input-group input:focus, .input-group select:focus { outline: none; border-color: var(--primary-blue); }
-        .input-group i.input-icon { position: absolute; left: 15px; top: 16px; color: var(--text-secondary); transition: color 0.3s ease; }
-        .input-group input:focus ~ i.input-icon, .input-group select:focus ~ i.input-icon { color: var(--primary-blue); }
+        .form-step.active {
+            display: block;
+        }
 
-        .button-group { display: flex; justify-content: space-between; margin-top: 20px; }
-        .btn { background: var(--primary-blue); border: none; padding: 12px 25px; border-radius: 10px; color: white; font-size: 1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; }
-        .btn:hover { transform: translateY(-3px); }
-        .btn-secondary { background: var(--border-color); }
-        
-        .password-strength { display: flex; height: 5px; border-radius: 5px; overflow: hidden; margin-top: 10px; }
-        .strength-bar { flex: 1; background-color: var(--input-bg); margin: 0 2px; transition: background-color 0.3s; }
-        .strength-bar.weak { background-color: #dc3545; }
-        .strength-bar.medium { background-color: #ffc107; }
-        .strength-bar.strong { background-color: #28a745; }
-        
-        .password-toggle { position: absolute; right: 15px; top: 16px; cursor: pointer; color: var(--text-secondary); z-index: 3; }
-        .login-link { text-align: center; margin-top: 25px; color: var(--text-secondary); }
-        .login-link a { color: var(--primary-blue-light); text-decoration: none; font-weight: 500; }
-        
-        .flash { /* Styles from login page */ }
+        @keyframes stepFadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 20px 15px 10px 45px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: var(--input-bg);
+            color: white;
+            font-size: 1rem;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .input-group select {
+            padding-right: 15px;
+            appearance: none;
+        }
+
+        .input-group label {
+            position: absolute;
+            left: 45px;
+            top: 15px;
+            color: var(--text-secondary);
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        .input-group input:focus+label,
+        .input-group input:not(:placeholder-shown)+label,
+        .input-group select:focus+label,
+        .input-group select:valid+label {
+            top: 5px;
+            font-size: 0.75rem;
+            color: var(--primary-blue);
+        }
+
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+        }
+
+        .input-group i.input-icon {
+            position: absolute;
+            left: 15px;
+            top: 16px;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+        }
+
+        .input-group input:focus~i.input-icon,
+        .input-group select:focus~i.input-icon {
+            color: var(--primary-blue);
+        }
+
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        .btn {
+            background: var(--primary-blue);
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+        }
+
+        .btn-secondary {
+            background: var(--border-color);
+        }
+
+        .password-strength {
+            display: flex;
+            height: 5px;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .strength-bar {
+            flex: 1;
+            background-color: var(--input-bg);
+            margin: 0 2px;
+            transition: background-color 0.3s;
+        }
+
+        .strength-bar.weak {
+            background-color: #dc3545;
+        }
+
+        .strength-bar.medium {
+            background-color: #ffc107;
+        }
+
+        .strength-bar.strong {
+            background-color: #28a745;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 15px;
+            top: 16px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            z-index: 3;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 25px;
+            color: var(--text-secondary);
+        }
+
+        .login-link a {
+            color: var(--primary-blue-light);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .flash {
+            /* Styles from login page */
+        }
     </style>
 </head>
+
 <body>
     <canvas id="particle-canvas"></canvas>
     <div class="cursor-dot"></div>
@@ -155,28 +384,60 @@
             <h2>Create Your Account</h2>
             <p>Join AIvidya and start your personalized learning journey today.</p>
         </div>
-        
+
         <div class="progress-bar">
             <div class="progress" id="progress"></div>
-            <div class="step active" data-step="1"><div class="dot"></div><div class="label">Personal</div></div>
-            <div class="step" data-step="2"><div class="dot"></div><div class="label">Account</div></div>
-            <div class="step" data-step="3"><div class="dot"></div><div class="label">Education</div></div>
+            <div class="step active" data-step="1">
+                <div class="dot"></div>
+                <div class="label">Personal</div>
+            </div>
+            <div class="step" data-step="2">
+                <div class="dot"></div>
+                <div class="label">Account</div>
+            </div>
+            <div class="step" data-step="3">
+                <div class="dot"></div>
+                <div class="label">Education</div>
+            </div>
         </div>
 
         <style>
             /* ... Existing CSS ... */
-            
+
             /* Responsive Design */
             @media (max-width: 768px) {
-                body { padding: 20px 15px; height: auto; min-height: 100vh; }
-                .register-card { padding: 25px; margin-top: 20px; }
-                .card-header h2 { font-size: 1.5rem; }
-                .form-row { grid-template-columns: 1fr; gap: 15px; }
-                .progress-bar {  }
-                .step .dot { width: 25px; height: 25px; }
-                .step .label { font-size: 0.7rem; }
+                body {
+                    padding: 20px 15px;
+                    height: auto;
+                    min-height: 100vh;
+                }
+
+                .register-card {
+                    padding: 25px;
+                    margin-top: 20px;
+                }
+
+                .card-header h2 {
+                    font-size: 1.5rem;
+                }
+
+                .form-row {
+                    grid-template-columns: 1fr;
+                    gap: 15px;
+                }
+
+                .progress-bar {}
+
+                .step .dot {
+                    width: 25px;
+                    height: 25px;
+                }
+
+                .step .label {
+                    font-size: 0.7rem;
+                }
             }
-            
+
             .alert {
                 padding: 12px;
                 border-radius: 8px;
@@ -184,25 +445,27 @@
                 font-size: 0.9rem;
                 text-align: center;
             }
-            .alert-error { background: rgba(220, 53, 69, 0.2); border: 1px solid var(--danger-red); color: #ff6b6b; }
-            .alert-success { background: rgba(40, 167, 69, 0.2); border: 1px solid #28a745; color: #5ddc79; }
+
+            .alert-error {
+                background: rgba(220, 53, 69, 0.2);
+                border: 1px solid var(--danger-red);
+                color: #ff6b6b;
+            }
+
+            .alert-success {
+                background: rgba(40, 167, 69, 0.2);
+                border: 1px solid #28a745;
+                color: #5ddc79;
+            }
         </style>
-        
+
         <!-- ... inside body ... -->
 
         <div class="messages">
-             {% with messages = get_flashed_messages(with_categories=true) %}
-                 {% if messages %}
-                     {% for category, message in messages %}
-                        <div class="alert alert-{{ category }}">
-                            {{ message }}
-                        </div>
-                     {% endfor %}
-                 {% endif %}
-             {% endwith %}
+            <!-- Flashed messages block removed -->
         </div>
-        
-        <form method="POST" action="{{ url_for('register.register') }}" id="register-form">
+
+        <form method="POST" action="{{ url_for('register') }}" id="register-form">
             <div class="form-step active" id="step-1">
                 <div class="form-row">
                     <div class="input-group">
@@ -222,7 +485,8 @@
                     <i class="input-icon fa-solid fa-calendar-days"></i>
                 </div>
                 <div class="button-group">
-                    <span></span> <button type="button" class="btn" id="next-1">Next <i class="fa-solid fa-arrow-right"></i></button>
+                    <span></span> <button type="button" class="btn" id="next-1">Next <i
+                            class="fa-solid fa-arrow-right"></i></button>
                 </div>
             </div>
 
@@ -239,7 +503,7 @@
                         <i class="input-icon fa-solid fa-phone"></i>
                     </div>
                 </div>
-                 <div class="input-group">
+                <div class="input-group">
                     <input type="text" id="username" name="username" placeholder=" " required>
                     <label for="username">Username</label>
                     <i class="input-icon fa-solid fa-at"></i>
@@ -255,7 +519,7 @@
                     <div class="strength-bar"></div>
                     <div class="strength-bar"></div>
                 </div>
-                 <div class="input-group" style="margin-top:20px;">
+                <div class="input-group" style="margin-top:20px;">
                     <input type="password" id="confirm_password" name="confirm_password" placeholder=" " required>
                     <label for="confirm_password">Confirm Password</label>
                     <i class="input-icon fa-solid fa-lock"></i>
@@ -268,8 +532,9 @@
             </div>
 
             <div class="form-step" id="step-3">
-                 <div class="input-group">
-                    <select id="education" name="education" required onchange="this.setAttribute('valid', !!this.value)">
+                <div class="input-group">
+                    <select id="education" name="education" required
+                        onchange="this.setAttribute('valid', !!this.value)">
                         <option value="" disabled selected></option>
                         <option value="SSC">SSC</option>
                         <option value="HSC">HSC</option>
@@ -293,7 +558,7 @@
         </form>
 
         <div class="login-link">
-            Already have an account? <a href="{{ url_for('login.login') }}">Login</a>
+            Already have an account? <a href="{{ url_for('login_page') }}">Login</a>
         </div>
     </div>
 
@@ -331,7 +596,7 @@
             document.getElementById('next-2').addEventListener('click', () => showStep(3));
             document.getElementById('back-1').addEventListener('click', () => showStep(1));
             document.getElementById('back-2').addEventListener('click', () => showStep(2));
-            
+
             const passwordInput = document.getElementById('password');
             const strengthBars = document.querySelectorAll('#password-strength .strength-bar');
             passwordInput.addEventListener('input', () => {
@@ -341,7 +606,7 @@
                 if (/[A-Z]/.test(value)) score++;
                 if (/[0-9]/.test(value)) score++;
                 if (/[^A-Za-z0-9]/.test(value)) score++;
-                
+
                 strengthBars.forEach((bar, index) => {
                     if (index < score) {
                         if (score === 1) bar.className = 'strength-bar weak';
@@ -370,4 +635,45 @@
         });
     </script>
 </body>
+<script>
+    // --- Frontend API Integration Script (JWT Support) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        const registerForm = document.getElementById('register-form');
+        if (registerForm) {
+            registerForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const formData = new FormData(registerForm);
+                const jsonData = Object.fromEntries(formData.entries());
+                const btn = registerForm.querySelector('button[type="submit"]');
+                const originalText = btn.innerText;
+                btn.innerText = 'Creating Account...';
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(jsonData)
+                    });
+
+                    if (response.ok) {
+                        const result = await response.json();
+                        // Redirect to login on success
+                        window.location.href = '/login';
+                    } else {
+                        const err = await response.json();
+                        alert('Registration Failed: ' + (err.detail || 'Unknown error'));
+                    }
+                } catch (error) {
+                    alert('Network Error: ' + error.message);
+                } finally {
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            });
+        }
+    });
+</script>
+</body>
+
 </html>
