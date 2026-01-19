@@ -47,36 +47,60 @@ class LLMService:
         return await asyncio.to_thread(_call_gemini)
 
     async def generate_plan(self, topic: str, difficulty: str, timeline_months: int) -> Optional[Dict[str, Any]]:
-        """Legacy method for Plan Generation (Phase 1)"""
-        # Re-using the prompt logic but could route via generate_json
+        """
+        Generates a detailed, day-by-day learning plan using a high-quality prompt.
+        Designed to create structured, academic-quality curriculum without RAG dependency.
+        """
+        days_per_month = 20
+        total_days = int(timeline_months) * days_per_month
+        
         prompt = f"""
-        Generate a day-by-day learning plan for:
-        Topic: "{topic}" | Level: "{difficulty}" | Duration: {timeline_months} months
+        Role: Expert Curriculum Designer.
+        Task: Create a comprehensive, detailed, and structured learning roadmap for:
+        
+        Target Topic: "{topic}"
+        Current Level: "{difficulty}"
+        Timeline: {timeline_months} Month(s) ({total_days} total learning days)
 
-        Constraints:
-        1. Total lessons = {int(timeline_months) * 20} (20 days/month).
-        2. Pace: Basic -> Advanced. No filler days.
-        3. Output JSON ONLY. No markdown.
+        Requirements:
+        1. **Curriculum Structure**: Break the timeline into logical 'Modules' (e.g., Fundamentals, Intermediate Concepts, Applied Skills, Advanced Projects).
+        2. **Day-wise Progression**: Plan exactly {total_days} days of content.
+           - Ensure a smooth learning curve (Basic -> Advanced).
+           - Every day must have a specific, actionable topic.
+           - NO "Review days" or "Filler days" unless strictly necessary for complex topics.
+        3. **Content Quality**:
+           - 'topic': Concise title of the concept (e.g., "Python List Comprehensions").
+           - 'description': A brief, clear explanation of what will be learned and why it's important.
+           - 'Youtube_keywords': High-intent search terms to find the specific video tutorial for this day (e.g., "python list comprehension tutorial").
 
-        Expected JSON Structure:
+        Format Rules:
+        - Output strictly valid JSON.
+        - Do not include markdown formatting (like ```json).
+        - Follow this exact schema:
+
         {{
-          "plan_title": "string",
+          "plan_title": "Mastering {topic}: Zero to Hero",
+          "difficulty_level": "{difficulty}",
+          "total_duration_months": {timeline_months},
           "modules": [
             {{
-              "module_title": "string",
+              "module_title": "Module 1: [Module Name]",
               "module_number": 1,
               "lessons": [
                 {{
                   "day_of_plan": 1,
-                  "topic": "string",
-                  "description": "string",
-                  "Youtube_keywords": "string"
-                }}
+                  "topic": "[Specific Topic]",
+                  "description": "[Educational Description]",
+                  "Youtube_keywords": "[Optimized Search Terms]"
+                }},
+                ... (continue for all days in this module)
               ]
-            }}
+            }},
+            ... (continue for required number of modules)
           ]
         }}
         """
+        # Increase token limit implicitly by using the robust prompt
         return await self.generate_json(prompt)
 
     async def generate_summary_and_quiz(self, title: str, description: str) -> Dict[str, Any]:

@@ -26,14 +26,19 @@ async def create_roadmap(data: RoadmapRequest, user_id: str = Depends(get_curren
 
 @router.post("/generate_plan")
 async def generate_plan(data: GeneratePlanRequest, user_id: str = Depends(get_current_user_required)):
-    # Upgraded to use RAG for Complete Potential, fulfilling user request
-    result = await rag_service.generate_roadmap_rag(data.topic, data.difficulty, data.timeline)
+    # Upgraded to use direct LLM generation with high-quality prompt (User Request: Remove unnecessary RAG)
+    # The new prompt in llm_service.generate_plan() wraps all the logic needed.
+    result = await llm_service.generate_plan(data.topic, data.difficulty, data.timeline)
     
-    if result.get("status") == "error":
-        raise HTTPException(status_code=500, detail=result.get("message"))
+    if not result:
+        raise HTTPException(status_code=500, detail="Failed to generate plan. Please try again.")
     
-    # RAG service returns 'roadmap' key which matches plan_data structure
-    return {"status": "success", "plan_data": result.get("roadmap")}
+    # Check if result matches expected structure roughly
+    if "modules" not in result:
+         raise HTTPException(status_code=500, detail="Generated plan format invalid.")
+
+    # Return structure matching frontend expectation
+    return {"status": "success", "plan_data": result}
 
 @router.post("/save_plan")
 async def save_plan(data: SavePlanRequest, user_id: str = Depends(get_current_user_required)):
