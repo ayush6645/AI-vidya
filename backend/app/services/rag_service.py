@@ -8,7 +8,6 @@ except ImportError:
 
 import os
 import chromadb
-from chromadb.utils import embedding_functions
 from typing import Dict, Any, List, Optional
 from backend.app.core.config import settings
 from backend.app.services.llm_service import llm_service
@@ -25,12 +24,10 @@ class RAGService:
         if self.collection: return
         logging.info("Initializing RAG Service (Lazy Loading)...")
         self.chroma_client = chromadb.PersistentClient(path=settings.CHROMA_DB_DIR)
-        self.embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="all-MiniLM-L6-v2"
-        )
+        # Use default embedding function instead of sentence-transformers
+        # This avoids the heavy dependency and works out of the box
         self.collection = self.chroma_client.get_or_create_collection(
             name="roadmap_rag_context",
-            embedding_function=self.embedding_fn,
             metadata={"hnsw:space": "cosine"}
         )
         logging.info("RAG Service Initialized.")
