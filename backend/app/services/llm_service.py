@@ -104,28 +104,46 @@ class LLMService:
         return await self.generate_json(prompt)
 
     async def generate_summary_and_quiz(self, title: str, description: str) -> Dict[str, Any]:
-        """Legacy method for Summary/Quiz (Phase 1)"""
+        """
+        Generates a concise summary and a 3-question quiz for a given lesson.
+        Uses a robust prompt to ensure valid JSON output.
+        """
         if not self.client: 
             return {"summary": "Service unavailable", "quiz": []}
 
         prompt = f"""
+        Role: Educational Content Creator
+        Task: Create a learning summary and a short quiz for the following lesson.
+
         Lesson Topic: {title}
-        Lesson Description: {description}
+        Context: {description}
 
-        Task 1: Summary (4-5 paragraphs, educational).
-        Task 2: Quiz (3 questions, multiple choice).
+        Requirements:
+        1. **Summary**: Write a clear, engaging, and educational summary (3-4 paragraphs). Explain the key concepts simply.
+        2. **Quiz**: Create exactly 3 multiple-choice questions based on the summary.
+           - 'options': Provide 4 choices.
+           - 'answer': Must be one of the options (exact Text match).
 
-        JSON Output Format:
+        Output Format:
+        - STRICTLY valid JSON.
+        - NO markdown code blocks (e.g. ```json).
+        - Use this schema:
+
         {{
-            "summary": "string", 
+            "summary": "Full summary text here...", 
             "quiz": [
-                {{"question": "string", "options": ["string"], "answer": "string"}}
+                {{
+                    "question": "Question text?", 
+                    "options": ["Option A", "Option B", "Option C", "Option D"], 
+                    "answer": "Option A"
+                }},
+                ... (2 more questions)
             ]
         }}
         """
         result = await self.generate_json(prompt)
         if not result:
-             return {"summary": "Generation failed", "quiz": []}
+             return {"summary": "Content generation failed. Please try again.", "quiz": []}
         return result
 
     async def generate_youtube_search_query(self, topic: str, description: str) -> str:
