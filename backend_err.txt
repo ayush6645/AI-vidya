@@ -7,7 +7,19 @@ E:\AI_Edu_Bot_Project\backend\app\main.py:31: DeprecationWarning:
   @app.on_event("startup")
 INFO:     Will watch for changes in these directories: ['E:\\AI_Edu_Bot_Project']
 INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
-INFO:     Started reloader process [2884] using WatchFiles
-INFO:     Started server process [9708]
+INFO:     Started reloader process [5800] using WatchFiles
+INFO:     Started server process [3488]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
+WARNING:backend.app.services.video_rag_service:list_transcripts failed: type object 'YouTubeTranscriptApi' has no attribute 'list_transcripts'. Trying get_transcript.
+WARNING:backend.app.services.video_rag_service:Transcript API failed for 3iLALsW5qAQ: type object 'YouTubeTranscriptApi' has no attribute 'get_transcript'. Trying audio fallback.
+WARNING: [youtube] No supported JavaScript runtime could be found. Only deno is enabled by default; to use another runtime add  --js-runtimes RUNTIME[:PATH]  to your command/config. YouTube extraction without a JS runtime has been deprecated, and some formats may be missing. See  https://github.com/yt-dlp/yt-dlp/wiki/EJS  for details on installing one
+WARNING: [youtube] 3iLALsW5qAQ: Some web_safari client https formats have been skipped as they are missing a url. YouTube is forcing SABR streaming for this client. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
+WARNING: [youtube] 3iLALsW5qAQ: Some web client https formats have been skipped as they are missing a url. YouTube is forcing SABR streaming for this client. See  https://github.com/yt-dlp/yt-dlp/issues/12482  for more details
+ERROR:backend.app.services.video_rag_service:Fallback transcription failed: 500 INTERNAL. {'error': {'code': 500, 'message': 'Failed to convert server response to JSON', 'status': 'INTERNAL'}}
+ERROR:backend.app.services.video_rag_service:Failed to fetch transcript for 3iLALsW5qAQ
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [3488]
+INFO:     Stopping reloader process [5800]

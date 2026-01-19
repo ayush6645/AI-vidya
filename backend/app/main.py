@@ -15,6 +15,17 @@ app = FastAPI(
 )
 
 # Middleware
+from starlette.middleware.trustedhost import TrustedHostMiddleware
+
+# Fix for Azure: Trust proxy headers (X-Forwarded-Proto, X-Forwarded-For)
+@app.middleware("http")
+async def add_proxy_headers(request: Request, call_next):
+    # Azure sets X-Forwarded-Proto to tell us if the original request was HTTPS
+    if "x-forwarded-proto" in request.headers:
+        request.scope["scheme"] = request.headers["x-forwarded-proto"]
+    response = await call_next(request)
+    return response
+
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
 # Static Files

@@ -1,5 +1,15 @@
 Starting Application...
 Starting Application...
-INFO:     127.0.0.1:56312 - "GET /dashboard HTTP/1.1" 200 OK
-INFO:     127.0.0.1:50323 - "GET /dashboard HTTP/1.1" 200 OK
-INFO:     127.0.0.1:61569 - "GET /my-courses?search=data%20science HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64493 - "GET /my-courses/kvk6Cantz1XZDipAlv5n HTTP/1.1" 200 OK
+DEBUG: Optimized YouTube Query: 'None'
+INFO:     127.0.0.1:65048 - "GET /api/lessons/80I75TslLm4F1wMWNwxF/notes HTTP/1.1" 200 OK
+INFO:     127.0.0.1:50464 - "POST /api/get-video-for-lesson/80I75TslLm4F1wMWNwxF HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65048 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:50464 - "POST /api/lesson/80I75TslLm4F1wMWNwxF/generate-summary HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65012 - "GET /api/lessons/VlGBXw875b0xuTqKuQJw/notes HTTP/1.1" 200 OK
+DEBUG: Optimized YouTube Query: 'None'
+INFO:     127.0.0.1:54679 - "POST /api/get-video-for-lesson/VlGBXw875b0xuTqKuQJw HTTP/1.1" 200 OK
+Gemini JSON Error: 429 RESOURCE_EXHAUSTED. {'error': {'code': 429, 'message': 'You exceeded your current quota, please check your plan and billing details. For more information on this error, head to: https://ai.google.dev/gemini-api/docs/rate-limits. To monitor your current usage, head to: https://ai.dev/rate-limit. \n* Quota exceeded for metric: generativelanguage.googleapis.com/generate_content_free_tier_requests, limit: 20, model: gemini-2.5-flash\nPlease retry in 1.504537529s.', 'status': 'RESOURCE_EXHAUSTED', 'details': [{'@type': 'type.googleapis.com/google.rpc.Help', 'links': [{'description': 'Learn more about Gemini API quotas', 'url': 'https://ai.google.dev/gemini-api/docs/rate-limits'}]}, {'@type': 'type.googleapis.com/google.rpc.QuotaFailure', 'violations': [{'quotaMetric': 'generativelanguage.googleapis.com/generate_content_free_tier_requests', 'quotaId': 'GenerateRequestsPerDayPerProjectPerModel-FreeTier', 'quotaDimensions': {'location': 'global', 'model': 'gemini-2.5-flash'}, 'quotaValue': '20'}]}, {'@type': 'type.googleapis.com/google.rpc.RetryInfo', 'retryDelay': '1s'}]}}
+INFO:     127.0.0.1:54679 - "POST /api/lesson/VlGBXw875b0xuTqKuQJw/generate-summary HTTP/1.1" 200 OK
+[download]   0.0% of    7.98MiB at  245.35KiB/s ETA 00:33[download]   0.0% of    7.98MiB at  449.61KiB/s ETA 00:18[download]   0.1% of    7.98MiB at  846.28KiB/s ETA 00:09[download]   0.2% of    7.98MiB at    1.33MiB/s ETA 00:06[download]   0.4% of    7.98MiB at    2.17MiB/s ETA 00:03[download]   0.8% of    7.98MiB at    2.52MiB/s ETA 00:03[download]   1.6% of    7.98MiB at    2.91MiB/s ETA 00:02[download]   3.1% of    7.98MiB at    2.97MiB/s ETA 00:02[download]   6.2% of    7.98MiB at    2.87MiB/s ETA 00:02[download]  12.5% of    7.98MiB at    3.13MiB/s ETA 00:02[download]  25.0% of    7.98MiB at    3.25MiB/s ETA 00:01[download]  50.1% of    7.98MiB at    3.25MiB/s ETA 00:01[download]  90.8% of    7.98MiB at    3.39MiB/s ETA 00:00[download] 100.0% of    7.98MiB at    3.39MiB/s ETA 00:00[download] 100% of    7.98MiB in 00:00:02 at 3.25MiB/s                                                         INFO:     127.0.0.1:62901 - "POST /api/video-chat HTTP/1.1" 200 OK
+Starting Application...
