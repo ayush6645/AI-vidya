@@ -8,11 +8,24 @@ from backend.app.api.v1.api import api_router
 from backend.app.core.templates import templates
 
 # Initialize App
+import logging
+import sys
+
+# Configure logging to show up in Azure Log Stream
+logging.basicConfig(
+    stream=sys.stdout, 
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     openapi_url="/api/v1/openapi.json",
     docs_url="/docs"
 )
+
+logger.info("Application starting up...")
 
 # Middleware
 from starlette.middleware.trustedhost import TrustedHostMiddleware
