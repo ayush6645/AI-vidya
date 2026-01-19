@@ -14,7 +14,8 @@ class LLMService:
             self.client = None
         else:
             self.client = genai.Client(api_key=self.api_key)
-        self.model_id = 'gemini-2.5-flash'
+        # Using gemini-2.0-flash for better limits (Unlimited RPD) and stability
+        self.model_id = 'gemini-2.0-flash'
 
     async def generate_json(self, prompt: str) -> Optional[Dict[str, Any]]:
         """Generic method to generate JSON from a prompt."""

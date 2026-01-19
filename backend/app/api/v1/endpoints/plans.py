@@ -28,13 +28,22 @@ async def create_roadmap(data: RoadmapRequest, user_id: str = Depends(get_curren
 async def generate_plan(data: GeneratePlanRequest, user_id: str = Depends(get_current_user_required)):
     # Upgraded to use direct LLM generation with high-quality prompt (User Request: Remove unnecessary RAG)
     # The new prompt in llm_service.generate_plan() wraps all the logic needed.
-    result = await llm_service.generate_plan(data.topic, data.difficulty, data.timeline)
+    import logging
+    logger = logging.getLogger(__name__)
+    
+    try:
+        result = await llm_service.generate_plan(data.topic, data.difficulty, data.timeline)
+    except Exception as e:
+        logger.error(f"Plan Generation Exception: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Plan generation failed: {str(e)}")
     
     if not result:
+        logger.error("Plan Generation returned None (likely API Key or Model issue)")
         raise HTTPException(status_code=500, detail="Failed to generate plan. Please try again.")
     
     # Check if result matches expected structure roughly
     if "modules" not in result:
+         logger.error(f"Invalid Plan Structure: {result}")
          raise HTTPException(status_code=500, detail="Generated plan format invalid.")
 
     # Return structure matching frontend expectation
