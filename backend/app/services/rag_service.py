@@ -26,8 +26,9 @@ class RAGService:
         self.chroma_client = chromadb.PersistentClient(path=settings.CHROMA_DB_DIR)
         # Use default embedding function instead of sentence-transformers
         # This avoids the heavy dependency and works out of the box
+        # Changed collection name to create new collection without old sentence-transformer embeddings
         self.collection = self.chroma_client.get_or_create_collection(
-            name="roadmap_rag_context",
+            name="roadmap_rag_context_v2",  # New name to avoid old config
             metadata={"hnsw:space": "cosine"}
         )
         logging.info("RAG Service Initialized.")
