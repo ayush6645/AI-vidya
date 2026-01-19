@@ -67,4 +67,5 @@ def init_firebase():
 
 # Initialize immediately for module-level access, 
 # though usage should be via dependency or service.
-init_firebase()
+# REMOVED global call to prevent import-time crashes on Cloud Run
+# init_firebase()
