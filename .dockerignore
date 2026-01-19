@@ -1,0 +1,56 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+*.md
+docs/
+
+# Tests
+tests/
+*.pytest_cache/
+
+# Local development
+.env
+*.log
+*.sqlite
+debug_*.py
+
+# Azure/GitHub
+.github/
+.azure/
+.agent/
+
+# Secrets
+serviceAccountKey.json
+*.pem
+*.key
+
+# Data
+data/
+chroma_db/
+uploaded_files/
+*.db
+
+# Misc
+*.bak
+*.tmp
