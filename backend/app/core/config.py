@@ -26,8 +26,15 @@ class Settings:
     STATIC_DIR = os.path.join(ROOT_DIR, 'Web_App')
     
     # RAG Settings
+    # RAG Settings
     DATA_RAG_DIR: str = r"E:\AI_Edu_Bot_Project\data_rag"
     CHROMA_DB_DIR: str = os.path.join(ROOT_DIR, "backend", "data", "chroma_db")
+    
+    # Cloud Run specific overwrite: Use /tmp because system is read-only
+    if os.environ.get("K_SERVICE") or os.environ.get("PORT"):
+         CHROMA_DB_DIR = "/tmp/chroma_db"
+         DATA_RAG_DIR = "/tmp/data_rag"
+
     PROMPTS_DIR: str = os.path.join(ROOT_DIR, "backend", "app", "prompts")
 
 settings = Settings()
