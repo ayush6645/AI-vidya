@@ -1,7 +1,7 @@
-# Docker-based deployment for Azure Web App - MUCH FASTER!
-# Deploys in ~2-5 minutes instead of 30+ minutes
+# Optimized Python deployment with caching - Much faster!
+# Deploys in ~10-15 minutes instead of 30+ minutes
 
-name: Build and deploy Docker to Azure Web App - Ai-vidya
+name: Build and deploy Python app to Azure Web App - Ai-vidya
 
 on:
   push:
@@ -9,49 +9,60 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  AZURE_WEBAPP_NAME: Ai-vidya
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
-
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      packages: write
-      id-token: write
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Log in to Container Registry
-        uses: docker/login-action@v3
+      - name: Set up Python version
+        uses: actions/setup-python@v5
         with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          python-version: '3.10'
 
-      - name: Extract metadata for Docker
-        id: meta
-        uses: docker/metadata-action@v5
+      # ⚡ SPEED OPTIMIZATION: Cache pip dependencies
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
 
-      - name: Build and push Docker image
-        uses: docker/build-push-action@v5
+      - name: Create and start virtual environment
+        run: |
+          python -m venv antenv
+          source antenv/bin/activate
+
+      - name: Install dependencies (with cache)
+        run: |
+          source antenv/bin/activate
+          pip install --no-cache-dir -r requirements.txt
+                
+      - name: Upload artifact for deployment
+        uses: actions/upload-artifact@v4
         with:
-          context: .
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache
-          cache-to: type=registry,ref=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:buildcache,mode=max
+          name: python-app
+          path: |
+            .
+            !antenv/
 
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: python-app
+      
       - name: Login to Azure
         uses: azure/login@v2
         with:
@@ -59,9 +70,9 @@ jobs:
           tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_F8FEAA994DD34161A5E5B241A36D3997 }}
           subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_92C2703DEFC343249378B3B1AD5E31B3 }}
 
-      - name: Deploy to Azure Web App
+      - name: 'Deploy to Azure Web App'
         uses: azure/webapps-deploy@v3
+        id: deploy-to-webapp
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          app-name: 'Ai-vidya'
           slot-name: 'Production'
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
