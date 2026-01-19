@@ -357,83 +357,229 @@
             }
 
             main {
-                padding: 20px;
+                padding: 70px 16px 24px 16px;
                 width: 100%;
                 overflow-x: hidden;
+                height: auto;
             }
 
             .menu-toggle {
                 display: block;
-                margin-bottom: 20px;
+                position: fixed;
+                top: 16px;
+                left: 16px;
+                z-index: 100;
+                background: var(--card-bg);
+                padding: 10px 12px;
+                border-radius: 10px;
+                border: 1px solid var(--border-color);
+                margin-bottom: 0;
             }
 
-            /* Stats Grid responsive check */
+            .page-header h1 {
+                font-size: 2rem;
+                margin-top: 8px;
+            }
+
+            .content-section {
+                margin-bottom: 32px;
+            }
+
+            .content-section>h2 {
+                font-size: 1.4rem;
+                margin-bottom: 16px;
+                padding-bottom: 12px;
+            }
+
+            /* Stats Grid responsive */
             .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                /* More flexible */
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+
+            .stat-card {
+                padding: 20px 16px;
+                border-radius: 12px;
+            }
+
+            .stat-card h3 {
+                font-size: 0.95rem;
+                margin-bottom: 8px;
+            }
+
+            .stat-card p {
+                font-size: 1.8rem;
+            }
+
+            .stat-card.text-card p {
+                font-size: 0.95rem;
+            }
+
+            /* Quiz grid responsive */
+            .quiz-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .quiz-card {
+                padding: 20px 16px;
+                border-radius: 12px;
+            }
+
+            .quiz-card h4 {
+                font-size: 1.1rem;
+            }
+
+            .quiz-card p {
+                font-size: 0.85rem;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                border-radius: 10px;
+                font-size: 0.95rem;
             }
 
             /* Main layout grid (Leaderboard vs History) */
             .main-layout-grid {
                 grid-template-columns: 1fr !important;
+                gap: 24px;
+            }
+
+            /* Quiz history responsive */
+            .quiz-history-list {
+                padding: 12px 16px;
+                border-radius: 12px;
+            }
+
+            .history-item {
+                padding: 12px 0;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .history-item .score {
+                font-size: 1rem;
+            }
+
+            /* Leaderboard responsive */
+            .leaderboard {
+                padding: 12px 16px;
+                border-radius: 12px;
+            }
+
+            .leaderboard-item {
+                padding: 12px 5px;
+            }
+
+            .leaderboard-item .rank {
+                width: 40px;
+                font-size: 1rem;
+            }
+
+            .leaderboard-item .name {
+                font-size: 0.95rem;
+            }
+
+            .leaderboard-item .score {
+                font-size: 0.95rem;
+            }
+
+            .rank-badge {
+                width: 20px;
+                height: 20px;
+                line-height: 20px;
+                font-size: 0.7rem;
+                margin-right: 6px;
             }
         }
 
-        /* New Styles for Text Overflow in Stat Cards */
-        .stat-card.text-card p {
-            font-size: 1.1rem;
-            /* Smaller font for text */
-            line-height: 1.4;
-            display: -webkit-box;
-            -webkit-line-clamp: 3;
-            /* Show max 3 lines */
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            color: var(--text-primary);
-            /* Use primary text color for readability */
-        }
+        @media (max-width: 480px) {
+            main {
+                padding: 60px 12px 20px 12px;
+            }
 
-        .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-            border-color: var(--primary-blue);
-            transition: all 0.3s ease;
-        }
+            .page-header h1 {
+                font-size: 1.75rem;
+            }
 
-        /* Leaderboard Badges */
-        .rank-badge {
-            display: inline-block;
-            width: 24px;
-            height: 24px;
-            text-align: center;
-            line-height: 24px;
-            border-radius: 50%;
-            font-size: 0.8rem;
-            margin-right: 8px;
-            font-weight: bold;
-            color: #121224;
-        }
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
 
-        .rank-1 .rank-badge {
-            background: #FFD700;
-            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-        }
+            .stat-card {
+                padding: 18px 14px;
+            }
 
-        .rank-2 .rank-badge {
-            background: #C0C0C0;
-            box-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
-        }
+            .content-section>h2 {
+                font-size: 1.25rem;
+            }
 
-        .rank-3 .rank-badge {
-            background: #CD7F32;
-            box-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
+            .quiz-card,
+            .quiz-history-list,
+            .leaderboard {
+                padding: 16px 14px;
+            }
         }
+    </style>
 
-        .rank-other .rank-badge {
-            background: #2C2C40;
-            color: #fff;
-        }
+    /* New Styles for Text Overflow in Stat Cards */
+    .stat-card.text-card p {
+    font-size: 1.1rem;
+    /* Smaller font for text */
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    /* Show max 3 lines */
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-primary);
+    /* Use primary text color for readability */
+    }
+
+    .stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary-blue);
+    transition: all 0.3s ease;
+    }
+
+    /* Leaderboard Badges */
+    .rank-badge {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    text-align: center;
+    line-height: 24px;
+    border-radius: 50%;
+    font-size: 0.8rem;
+    margin-right: 8px;
+    font-weight: bold;
+    color: #121224;
+    }
+
+    .rank-1 .rank-badge {
+    background: #FFD700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+    }
+
+    .rank-2 .rank-badge {
+    background: #C0C0C0;
+    box-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
+    }
+
+    .rank-3 .rank-badge {
+    background: #CD7F32;
+    box-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
+    }
+
+    .rank-other .rank-badge {
+    background: #2C2C40;
+    color: #fff;
+    }
     </style>
 </head>
 

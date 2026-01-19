@@ -153,6 +153,137 @@
         .modal-content input {
             text-align: center;
         }
+
+        /* Mobile Responsive Styles */
+        @media (max-width: 992px) {
+            .dashboard-container {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: -250px;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            main {
+                padding: 70px 16px 24px 16px;
+                width: 100%;
+            }
+
+            h1 {
+                font-size: 2rem;
+                margin-bottom: 20px;
+                margin-top: 8px;
+            }
+
+            .profile-section {
+                padding: 24px 20px;
+                border-radius: 16px;
+                margin-bottom: 20px;
+            }
+
+            h2 {
+                font-size: 1.4rem;
+                margin-bottom: 16px;
+            }
+
+            label {
+                font-size: 0.95rem;
+            }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="tel"] {
+                padding: 12px 14px;
+                font-size: 1rem;
+                border-radius: 10px;
+                margin-bottom: 16px;
+            }
+
+            br {
+                display: none;
+            }
+
+            .btn {
+                width: 100%;
+                padding: 14px 20px;
+                font-size: 1rem;
+                margin-bottom: 10px;
+            }
+
+            .modal-content {
+                width: 90%;
+                padding: 24px;
+                border-radius: 16px;
+            }
+
+            .modal-content h2 {
+                font-size: 1.25rem;
+            }
+
+            .modal-content p {
+                font-size: 0.95rem;
+            }
+
+            .modal-content input {
+                width: 100%;
+                padding: 12px;
+                margin-bottom: 16px;
+                border-radius: 10px;
+            }
+
+            .modal-content .btn {
+                width: 48%;
+                display: inline-block;
+                margin: 0 1%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            main {
+                padding: 60px 12px 20px 12px;
+            }
+
+            h1 {
+                font-size: 1.75rem;
+            }
+
+            .profile-section {
+                padding: 20px 16px;
+            }
+
+            h2 {
+                font-size: 1.25rem;
+            }
+
+            input[type="text"],
+            input[type="email"],
+            input[type="tel"] {
+                padding: 12px;
+            }
+
+            .btn {
+                padding: 12px 18px;
+            }
+
+            .modal-content {
+                width: 95%;
+                padding: 20px;
+            }
+
+            .modal-content .btn {
+                width: 100%;
+                margin: 5px 0;
+            }
+        }
     </style>
 </head>
 
