@@ -1,17 +1,11 @@
-# Fix for Azure: Replace system sqlite3 with pysqlite3-binary
+# Fix for Azure/GCP: Replace system sqlite3 with pysqlite3-binary
+# Moved to lazy import to prevent startup crashes if sqlite is incompatible
 import sys
-try:
-    __import__('pysqlite3')
-    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-except ImportError:
-    pass  # pysqlite3 not available, use system sqlite3
-
 import os
-import chromadb
+import logging
 from typing import Dict, Any, List, Optional
 from backend.app.core.config import settings
 from backend.app.services.llm_service import llm_service
-import logging
 
 class RAGService:
     def __init__(self):
@@ -22,17 +16,30 @@ class RAGService:
 
     def _ensure_initialized(self):
         if self.collection: return
+        
         logging.info("Initializing RAG Service (Lazy Loading)...")
-        self.chroma_client = chromadb.PersistentClient(path=settings.CHROMA_DB_DIR)
-        # Use default embedding function instead of sentence-transformers
-        # This avoids the heavy dependency and works out of the box
-        # Changed collection name to create new collection without old sentence-transformer embeddings
-        self.collection = self.chroma_client.get_or_create_collection(
-            name="roadmap_rag_context_v2",  # New name to avoid old config
-            metadata={"hnsw:space": "cosine"}
-        )
-        logging.info("RAG Service Initialized.")
-
+        
+        # 1. Setup SQLite Hack only when needed
+        try:
+            __import__('pysqlite3')
+            sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+        except ImportError:
+            logging.info("pysqlite3-binary not found, using system sqlite3.")
+        
+        # 2. Local Import ChromaDB
+        try:
+            import chromadb
+            self.chroma_client = chromadb.PersistentClient(path=settings.CHROMA_DB_DIR)
+            
+            self.collection = self.chroma_client.get_or_create_collection(
+                name="roadmap_rag_context_v2",
+                metadata={"hnsw:space": "cosine"}
+            )
+            logging.info(f"RAG Service Initialized at {settings.CHROMA_DB_DIR}")
+        except Exception as e:
+            logging.error(f"RAG Initialization Failed: {e}")
+            self.collection = None # Mark as failed
+            
     def _load_prompt(self, filename: str) -> str:
         try:
             with open(os.path.join(settings.PROMPTS_DIR, filename), 'r', encoding='utf-8') as f:
