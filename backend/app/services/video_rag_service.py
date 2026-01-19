@@ -46,18 +46,36 @@ class GeminiEmbeddingFunction(chromadb.EmbeddingFunction):
 
 class VideoRAGService:
     def __init__(self):
-        # ChromaDB Persist Path
-        self.chroma_dir = settings.CHROMA_DB_DIR
-        os.makedirs(self.chroma_dir, exist_ok=True)
-        
-        self.chroma_client = chromadb.PersistentClient(path=self.chroma_dir)
+        # ChromaDB Lazy Init
+        self.chroma_client = None
+        self.collection = None
         self.collection_name = "video_transcripts"
+        self.chroma_dir = settings.CHROMA_DB_DIR
+
+    def _ensure_initialized(self):
+        if self.collection: return
         
-        # Get or Create Collection
-        # We won't set an embedding_function here because we will provide embeddings manually
-        self.collection = self.chroma_client.get_or_create_collection(name=self.collection_name)
+        logging.info("Initializing Video RAG Service (Lazy Loading)...")
+        try:
+             # Ensure SQLite hack (if rag_service didn't run yet)
+            try:
+                __import__('pysqlite3')
+                sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+            except ImportError:
+                pass
+
+            os.makedirs(self.chroma_dir, exist_ok=True)
+            self.chroma_client = chromadb.PersistentClient(path=self.chroma_dir)
+            self.collection = self.chroma_client.get_or_create_collection(name=self.collection_name)
+            logging.info("Video RAG Service Initialized.")
+        except Exception as e:
+            logging.error(f"Video RAG Init Failed: {e}")
 
     async def get_or_create_interaction_session(self, video_id: str):
+        self._ensure_initialized()
+        """
+        Ensures the video is indexed and ready for chat.
+        """
         """
         Ensures the video is indexed and ready for chat.
         """
@@ -217,12 +235,12 @@ class VideoRAGService:
                     logger.info("Waiting for audio file to process...")
                     await asyncio.sleep(2)
                 
-                logger.info(f"File ready for processing: {upload_file.name}. Starting generation with gemini-2.5-flash...")
+                logger.info(f"File ready for processing: {upload_file.name}. Starting generation with gemini-2.0-flash...")
                 
                 try:
                     response = await asyncio.to_thread(
                         llm_service.client.models.generate_content,
-                        model='gemini-2.5-flash',
+                        model='gemini-2.0-flash',
                         contents=[
                             upload_file,
                             "Generate a full verbatim transcript of this audio."
@@ -230,7 +248,7 @@ class VideoRAGService:
                     )
                     return response.text
                 except Exception as e_gen:
-                    logger.error(f"Gemini 2.5 generation failed: {e_gen}. Retrying with 1.5-flash...")
+                    logger.error(f"Gemini 2.0 generation failed: {e_gen}. Retrying with 1.5-flash...")
                     try:
                         response = await asyncio.to_thread(
                             llm_service.client.models.generate_content,
@@ -310,7 +328,7 @@ class VideoRAGService:
         try:
             resp = await asyncio.to_thread(
                 llm_service.client.models.generate_content,
-                model='gemini-2.5-flash',
+                model='gemini-2.0-flash',
                 contents=prompt
             )
             return {"answer": resp.text, "source": "video_rag", "context_chunks": len(context_list)}
