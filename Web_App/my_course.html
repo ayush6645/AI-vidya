@@ -1020,11 +1020,15 @@
                             // Setup Tabs for Right Pane
                             rightPane.innerHTML = `
                                 <div class="right-pane-tabs">
-                                    <button class="tab-btn active" onclick="switchTab(this, 'summary')">Summary & Quiz</button>
+                                    <button class="tab-btn active" onclick="switchTab(this, 'summary')">Summary</button>
+                                    <button class="tab-btn" onclick="switchTab(this, 'quiz')">Quiz</button>
                                     <button class="tab-btn" onclick="switchTab(this, 'chat')">Ask AI</button>
                                 </div>
                                 <div id="tab-summary" class="tab-content active">
                                     <div class="loader">Loading summary...</div>
+                                </div>
+                                <div id="tab-quiz" class="tab-content">
+                                    <div class="loader">Loading quiz...</div>
                                 </div>
                                 <div id="tab-chat" class="tab-content">
                                     <div class="chat-container">
@@ -1054,7 +1058,8 @@
                                 if (videoResult.success) {
                                     currentVideoId = extractVideoId(videoResult.video_url);
                                     const summaryTab = rightPane.querySelector('#tab-summary');
-                                    await fetchSummary(lessonId, summaryTab);
+                                    const quizTab = rightPane.querySelector('#tab-quiz');
+                                    await fetchSummary(lessonId, summaryTab, quizTab);
                                 } else {
                                     rightPane.querySelector('#tab-summary').innerHTML = `<p>Error loading video.</p>`;
                                 }
@@ -1072,7 +1077,7 @@
                     const lessonItem = this.closest('.lesson-item');
                     const lessonId = this.dataset.lessonId;
                     const isCompleted = this.checked;
-                    const rightPane = lessonItem.querySelector('#tab-summary') || lessonItem.querySelector('.right-pane');
+                    const quizTab = lessonItem.querySelector('#tab-quiz');
                     const planId = "{{ plan_id }}";
 
                     const actualCheckbox = this;
@@ -1092,18 +1097,13 @@
 
                         updateOverallProgress();
 
-                        if (isCompleted) {
-                            rightPane.innerHTML = `<div class="loader">Generating quiz...</div>`;
-                            lessonItem.classList.add('active');
+                        if (isCompleted && quizTab) {
+                            // Switch to Quiz Tab
+                            const quizBtn = lessonItem.querySelector('.tab-btn[onclick*="quiz"]');
+                            if (quizBtn) switchTab(quizBtn, 'quiz');
 
-                            try {
-                                const quizResponse = await fetch(`/api/lesson/${lessonId}/generate-quiz`, { method: 'POST' });
-                                const quizData = await quizResponse.json();
-                                if (!quizResponse.ok) throw new Error(quizData.message);
-                                renderQuiz(quizData.quiz, rightPane);
-                            } catch (error) {
-                                rightPane.innerHTML = `<div class="quiz-error"><p>Error: ${error.message}</p></div>`;
-                            }
+                            // If quiz is not loaded yet (or empty from initial load), maybe reload it?
+                            // But fetchSummary usually handles this.
                         }
 
                     } catch (error) {
@@ -1280,35 +1280,32 @@
                 }
             }
 
-            async function fetchSummary(lessonId, container) {
-                container.innerHTML = `<div class="loader">Generating content...</div>`;
+            async function fetchSummary(lessonId, summaryContainer, quizContainer) {
+                summaryContainer.innerHTML = `<div class="loader">Generating content...</div>`;
+                quizContainer.innerHTML = `<div class="loader">Loading quiz...</div>`;
+
                 try {
                     const response = await fetch(`/api/lesson/${lessonId}/generate-summary`, { method: 'POST' });
                     const result = await response.json();
                     if (result.status !== 'success') throw new Error(result.message);
-                    renderSummaryAndQuiz(container, result.summary, result.quiz);
+                    renderSummary(summaryContainer, result.summary);
+                    renderQuiz(result.quiz, quizContainer);
                 } catch (error) {
-                    renderTranscriptError(container, lessonId, error.message);
+                    renderTranscriptError(summaryContainer, lessonId, error.message);
+                    quizContainer.innerHTML = `<p>Quiz unavailable due to error.</p>`;
                 }
             }
 
-            function renderSummaryAndQuiz(container, summaryText, quizData) {
-                container.innerHTML = `<div id="summary-container"></div><hr style="border-color:var(--border-color);margin:20px 0;"><div id="quiz-container"></div>`;
-                container.querySelector('#summary-container').innerHTML = `
+            function renderSummary(container, summaryText) {
+                container.innerHTML = `
                 <div class="transcript-container">
                     <div class="transcript-header"><h4>Predicted Summary</h4></div>
                     <div class="transcript-content"><p style="white-space: pre-wrap; line-height: 1.6;">${summaryText}</p></div>
                 </div>`;
-                if (quizData && quizData.length > 0) {
-                    container.querySelector('#quiz-container').innerHTML = `<h4>Quiz:</h4>`;
-                    renderQuiz(quizData, container.querySelector('#quiz-container'));
-                } else {
-                    container.querySelector('#quiz-container').innerHTML = `<p>No quiz available.</p>`;
-                }
             }
 
             function renderTranscriptError(container, lessonId, errorMsg) {
-                container.innerHTML = `<div class="transcript-error" style="text-align:center; padding: 20px;"><h4>Error</h4><p>${errorMsg}</p><button class="btn" onclick="fetchSummary('${lessonId}', this.closest('.right-pane') || this.closest('#tab-summary'))">Try Again</button></div>`;
+                container.innerHTML = `<div class="transcript-error" style="text-align:center; padding: 20px;"><h4>Error</h4><p>${errorMsg}</p><button class="btn" onclick="fetchSummary('${lessonId}', this.closest('.right-pane').querySelector('#tab-summary'), this.closest('.right-pane').querySelector('#tab-quiz'))">Try Again</button></div>`;
             }
 
             function renderQuiz(quizData, container) {
