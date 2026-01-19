@@ -1,3 +1,11 @@
+# Fix for Azure: Replace system sqlite3 with pysqlite3-binary
+import sys
+try:
+    __import__('pysqlite3')
+    sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+except ImportError:
+    pass  # pysqlite3 not available, use system sqlite3
+
 import os
 import asyncio
 import json
