@@ -588,25 +588,130 @@
             transform: translateY(0);
         }
 
-        /* Responsive Navbar for Index Page */
-        @media (max-width: 768px) {
+        /* Responsive Navbar & Layout for Mobile */
+        @media (max-width: 900px) {
             .navbar {
                 flex-direction: column;
-                gap: 15px;
+                gap: 20px;
+                padding-bottom: 10px;
             }
 
             .nav-links {
-                display: none;
-                /* Simple hide for now, or could be a column */
+                display: flex;
+                /* Show links again but stacked or small */
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 10px;
+            }
+
+            .nav-links a {
+                margin: 0 8px;
+                font-size: 0.9rem;
             }
 
             .hero h1 {
-                font-size: 3rem;
+                font-size: 2.5rem;
+                /* Smaller hero text */
             }
 
             .hero p {
                 font-size: 1rem;
+                padding: 0 15px;
+            }
+
+            /* Disable Horizontal Scroll on Mobile */
+            .horizontal-scroll-section {
+                height: auto;
+                /* Allow natural height */
+                display: block;
+                padding: 60px 0;
+            }
+
+            .horizontal-scroll-wrapper {
+                position: static;
+                /* Remove sticky */
+                height: auto;
+                width: 100%;
+                overflow: visible;
+            }
+
+            .features-track {
+                display: flex;
+                flex-direction: column;
+                /* Stack cards vertically */
+                height: auto;
                 padding: 0 20px;
+                gap: 40px;
+                transform: none !important;
+                /* Force disable JS transform */
+            }
+
+            .feature-card {
+                width: 100%;
+                /* Full width cards */
+                margin-right: 0;
+                transform: none !important;
+                /* Disable hover tilt effects on mobile */
+            }
+
+            .feature-card:hover {
+                transform: none !important;
+            }
+
+            /* Fix Timeline for Mobile */
+            .timeline {
+                max-width: 100%;
+                padding-left: 20px;
+                /* Space for line */
+            }
+
+            .timeline::after {
+                left: 31px;
+                /* Move line to left */
+            }
+
+            .timeline-item {
+                width: 100%;
+                padding-left: 50px;
+                /* Space from line */
+                padding-right: 10px;
+                margin-bottom: 30px;
+            }
+
+            /* Reset left/right distinction */
+            .timeline-item.left,
+            .timeline-item.right {
+                left: 0;
+            }
+
+            /* Move dots to left line */
+            .timeline-item::after {
+                left: 17px;
+                right: auto;
+            }
+
+            /* Arrows pointing to left */
+            .timeline-item.left::before,
+            .timeline-item.right::before {
+                left: 40px;
+                right: auto;
+                border-width: 10px 10px 10px 0;
+                border-color: transparent var(--border-color) transparent transparent;
+            }
+
+            /* Promise Grid Stack */
+            .promise-grid {
+                grid-template-columns: 1fr;
+            }
+
+            /* Footer Stack */
+            .footer-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
             }
         }
     </style>
