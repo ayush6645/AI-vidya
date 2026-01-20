@@ -145,7 +145,7 @@ class VideoRAGService:
         
         # 2. Create LLM
         llm = ChatGoogleGenerativeAI(
-            model="gemini-1.5-flash",
+            model="gemini-2.5-flash",
             google_api_key=settings.GOOGLE_API_KEY,
             temperature=0.3
         )
@@ -181,23 +181,45 @@ class VideoRAGService:
             return {"answer": "I encountered an error processing your request.", "source": "system_error"}
 
     async def _fetch_transcript(self, video_id: str) -> Optional[str]:
-        # Try youtube-transcript-api first
+        # STEP 1: Get Transcript Directly (YouTube)
         try:
-            transcript_list = await asyncio.to_thread(YouTubeTranscriptApi.list_transcripts, video_id)
-            try:
-                transcript = transcript_list.find_transcript(['en'])
-            except:
+            from youtube_transcript_api.formatters import TextFormatter
+            
+            # Helper to get transcript object handling version diffs
+            def _get_transcript_obj():
+                # Check for static method (Standard)
+                if hasattr(YouTubeTranscriptApi, 'get_transcript'):
+                     return YouTubeTranscriptApi.get_transcript(video_id)
+                
+                # Check for list_transcripts static (Standard)
+                if hasattr(YouTubeTranscriptApi, 'list_transcripts'):
+                     transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
+                else:
+                     # Instance-based (Non-standard/Newer?)
+                     api = YouTubeTranscriptApi()
+                     transcript_list = api.list(video_id)
+
+                # Prioritize English, then auto-generated
                 try:
-                    transcript = transcript_list.find_generated_transcript(['en'])
+                    transcript = transcript_list.find_transcript(['en'])
                 except:
-                    transcript = transcript_list[0]
+                    try:
+                        transcript = transcript_list.find_generated_transcript(['en'])
+                    except:
+                        # Fallback to any
+                        transcript = transcript_list[0]
+                
+                return transcript.fetch()
+
+            transcript_data = await asyncio.to_thread(_get_transcript_obj)
             
-            fetched_transcript = await asyncio.to_thread(transcript.fetch)
-            full_text = " ".join([t['text'] for t in fetched_transcript])
-            return full_text
-            
+            # Format
+            formatter = TextFormatter()
+            text = formatter.format_transcript(transcript_data)
+            return text
+
         except Exception as e:
-            logger.warning(f"Transcript API failed: {e}. Trying audio fallback.")
+            logger.warning(f"Step 1 (YouTube Caption) failed: {e}. Trying Step 2 (Audio Fallback).")
             return await self._fallback_audio_transcription(video_id)
 
     async def _fallback_audio_transcription(self, video_id: str) -> Optional[str]:
