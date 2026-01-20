@@ -588,48 +588,71 @@
             transform: translateY(0);
         }
 
-        /* Responsive Navbar & Layout for Mobile */
+        /* --- AUTOMATIC RESPONSIVE SYSTEM --- */
+
+        /* 1. Fluid Typography (Scales automatically with screen width) */
+        /* Format: clamp(min-size, preferred-size, max-size) */
+
+        html {
+            font-size: 16px;
+            /* Base size */
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw + 1rem, 4.5rem);
+        }
+
+        .section-header h2 {
+            font-size: clamp(2rem, 4vw + 1rem, 3rem);
+        }
+
+        .cta-section h2 {
+            font-size: clamp(1.8rem, 3vw + 1rem, 2.5rem);
+        }
+
+        /* 2. Global Safety for Small Screens */
+        body,
+        html {
+            overflow-x: hidden;
+            /* Prevent horizontal scrollbars globally */
+            width: 100%;
+        }
+
+        .container {
+            width: 90%;
+            /* Use percentage instead of fixed px for better fluidity */
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 3. Automatic Grid Collapse (Tablet/Mobile) */
+        /* Triggered when screen is narrower than 900px */
         @media (max-width: 900px) {
+
+            /* Navbar Stacking */
             .navbar {
                 flex-direction: column;
-                gap: 20px;
+                gap: 15px;
                 padding-bottom: 10px;
+                text-align: center;
             }
 
             .nav-links {
                 display: flex;
-                /* Show links again but stacked or small */
                 flex-wrap: wrap;
                 justify-content: center;
-                gap: 10px;
+                gap: 15px;
             }
 
-            .nav-links a {
-                margin: 0 8px;
-                font-size: 0.9rem;
-            }
-
-            .hero h1 {
-                font-size: 2.5rem;
-                /* Smaller hero text */
-            }
-
-            .hero p {
-                font-size: 1rem;
-                padding: 0 15px;
-            }
-
-            /* Disable Horizontal Scroll on Mobile */
+            /* Disable Complex Horizontal Scroll Effect and Stack Cards */
             .horizontal-scroll-section {
                 height: auto;
-                /* Allow natural height */
                 display: block;
-                padding: 60px 0;
+                padding: 40px 0;
             }
 
             .horizontal-scroll-wrapper {
                 position: static;
-                /* Remove sticky */
                 height: auto;
                 width: 100%;
                 overflow: visible;
@@ -638,59 +661,52 @@
             .features-track {
                 display: flex;
                 flex-direction: column;
-                /* Stack cards vertically */
                 height: auto;
-                padding: 0 20px;
-                gap: 40px;
+                padding: 0;
+                gap: 20px;
                 transform: none !important;
-                /* Force disable JS transform */
             }
 
             .feature-card {
                 width: 100%;
-                /* Full width cards */
-                margin-right: 0;
+                /* Automatically fill container */
+                margin: 0;
                 transform: none !important;
-                /* Disable hover tilt effects on mobile */
             }
 
             .feature-card:hover {
                 transform: none !important;
             }
 
-            /* Fix Timeline for Mobile */
+            /* Timeline: Single Column Mode */
             .timeline {
                 max-width: 100%;
                 padding-left: 20px;
-                /* Space for line */
             }
 
             .timeline::after {
-                left: 31px;
-                /* Move line to left */
+                left: 20px;
+                /* Line follows padding */
             }
 
             .timeline-item {
                 width: 100%;
                 padding-left: 50px;
-                /* Space from line */
-                padding-right: 10px;
+                padding-right: 0;
                 margin-bottom: 30px;
             }
 
-            /* Reset left/right distinction */
+            /* Force all items to left side styles */
             .timeline-item.left,
             .timeline-item.right {
                 left: 0;
             }
 
-            /* Move dots to left line */
             .timeline-item::after {
-                left: 17px;
+                left: 6px;
                 right: auto;
             }
 
-            /* Arrows pointing to left */
             .timeline-item.left::before,
             .timeline-item.right::before {
                 left: 40px;
@@ -699,19 +715,18 @@
                 border-color: transparent var(--border-color) transparent transparent;
             }
 
-            /* Promise Grid Stack */
-            .promise-grid {
-                grid-template-columns: 1fr;
-            }
-
-            /* Footer Stack */
+            /* Grids become Stacks */
+            .promise-grid,
             .footer-grid {
                 grid-template-columns: 1fr;
                 gap: 30px;
             }
 
-            .section-header h2 {
-                font-size: 2rem;
+            /* Adjust Hero Padding */
+            .hero {
+                padding-top: 120px;
+                /* Accounts for stacked navbar height */
+                padding-bottom: 60px;
             }
         }
     </style>
