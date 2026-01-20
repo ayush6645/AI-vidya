@@ -29,4 +29,7 @@ EXPOSE 8080
 
 # Command to run the application
 # We use shell form to allow environment variable expansion ($PORT)
-CMD exec gunicorn --bind :$PORT --workers 2 --worker-class uvicorn.workers.UvicornWorker --timeout 0 backend.app.main:app
+RUN chmod +x /app/startup.sh
+
+# Command to run the application
+CMD ["/app/startup.sh"]
