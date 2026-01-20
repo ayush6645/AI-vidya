@@ -20,7 +20,7 @@ google-cloud-secret-manager
 # --- AI & Data Science ---
 google-genai
 numpy<2.0
-chromadb
+# chromadb
 # pysqlite3-binary (Linux/Cloud Run only)
 # sentence-transformers (Removed: Heavy and unused 2026-01-18)
 pypdf
