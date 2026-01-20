@@ -524,62 +524,62 @@
             }
         }
     </style>
+    <style>
+        /* New Styles for Text Overflow in Stat Cards */
+        .stat-card.text-card p {
+            font-size: 1.1rem;
+            /* Smaller font for text */
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            /* Show max 3 lines */
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text-primary);
+            /* Use primary text color for readability */
+        }
 
-    /* New Styles for Text Overflow in Stat Cards */
-    .stat-card.text-card p {
-    font-size: 1.1rem;
-    /* Smaller font for text */
-    line-height: 1.4;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    /* Show max 3 lines */
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: var(--text-primary);
-    /* Use primary text color for readability */
-    }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border-color: var(--primary-blue);
+            transition: all 0.3s ease;
+        }
 
-    .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    border-color: var(--primary-blue);
-    transition: all 0.3s ease;
-    }
+        /* Leaderboard Badges */
+        .rank-badge {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            text-align: center;
+            line-height: 24px;
+            border-radius: 50%;
+            font-size: 0.8rem;
+            margin-right: 8px;
+            font-weight: bold;
+            color: #121224;
+        }
 
-    /* Leaderboard Badges */
-    .rank-badge {
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    text-align: center;
-    line-height: 24px;
-    border-radius: 50%;
-    font-size: 0.8rem;
-    margin-right: 8px;
-    font-weight: bold;
-    color: #121224;
-    }
+        .rank-1 .rank-badge {
+            background: #FFD700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
+        }
 
-    .rank-1 .rank-badge {
-    background: #FFD700;
-    box-shadow: 0 0 10px rgba(255, 215, 0, 0.4);
-    }
+        .rank-2 .rank-badge {
+            background: #C0C0C0;
+            box-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
+        }
 
-    .rank-2 .rank-badge {
-    background: #C0C0C0;
-    box-shadow: 0 0 10px rgba(192, 192, 192, 0.4);
-    }
+        .rank-3 .rank-badge {
+            background: #CD7F32;
+            box-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
+        }
 
-    .rank-3 .rank-badge {
-    background: #CD7F32;
-    box-shadow: 0 0 10px rgba(205, 127, 50, 0.4);
-    }
-
-    .rank-other .rank-badge {
-    background: #2C2C40;
-    color: #fff;
-    }
+        .rank-other .rank-badge {
+            background: #2C2C40;
+            color: #fff;
+        }
     </style>
 </head>
 
