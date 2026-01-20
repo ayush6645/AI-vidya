@@ -6,6 +6,7 @@ python-multipart
 jinja2
 itsdangerous
 email-validator
+werkzeug
 
 # --- Google & Firebase ---
 firebase-admin
