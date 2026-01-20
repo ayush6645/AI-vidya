@@ -10,6 +10,7 @@ ENV PYTHONUNBUFFERED=1
 ENV PORT=8080
 # Critical for Cloud Run: Allow libraries to write cache to /tmp
 ENV HOME=/tmp
+ENV PYTHONPATH=/app
 
 # Install system dependencies (gcc required for some python packages)
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -27,4 +28,5 @@ COPY . .
 EXPOSE 8080
 
 # Command to run the application
-CMD ["uvicorn", "backend.app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+# We use shell form to allow environment variable expansion ($PORT)
+CMD exec gunicorn --bind :$PORT --workers 2 --worker-class uvicorn.workers.UvicornWorker --timeout 0 backend.app.main:app

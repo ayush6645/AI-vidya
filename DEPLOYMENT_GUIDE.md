@@ -36,7 +36,31 @@ Since you already have `app.yaml`, this is the most native path.
 
     *Since you use a `serviceAccountKey.json` file, on specific platforms like Render, you often need to paste the CONTENT of that file into a variable, or use a "Secret File" upload if they support it.*
 
+## Option 3: Deploy to Google Cloud Run (Modern/Scalable)
+
+1. **Build and Submit to Container Registry**:
+   ```bash
+   gcloud builds submit --tag gcr.io/YOUR_PROJECT_ID/ai-vidya
+   ```
+2. **Deploy to Cloud Run**:
+   ```bash
+   gcloud run deploy ai-vidya \
+     --image gcr.io/YOUR_PROJECT_ID/ai-vidya \
+     --platform managed \
+     --region YOUR_REGION \
+     --allow-unauthenticated \
+     --set-env-vars "GOOGLE_API_KEY=your_key,YOUTUBE_API_KEY=your_key,FIREBASE_CREDENTIALS='{...content of json...}'"
+   ```
+
+*Important: For `FIREBASE_CREDENTIALS`, copy the ENTIRE content of your `serviceAccountKey.json` and paste it as a single-quoted string.*
+
+## Troubleshooting "Container Doesn't Start"
+If you see "Container doesn't start or listen on port":
+- Ensure you have set the `FIREBASE_CREDENTIALS` environment variable.
+- In Cloud Run, the port is handled automatically via the `$PORT` variable (now correctly configured in the `Dockerfile`).
+- Check Cloud Logging for "FATAL" or "ERROR" messages during startup.
+
 ## What was updated?
 - **Security**: Removed `serviceAccountKey.json`, `.env`, and `app.yaml` from GitHub history.
-- **Model**: Updated code to use `gemini-2.5-flash`.
-- **Config**: Added `.env.example` and `app.yaml.example` for reference.
+- **Model**: Updated code to use `gemini-2.0-flash`.
+- **Infrastructure**: Added `Dockerfile` and `gunicorn` for production-grade deployment on Cloud Run.

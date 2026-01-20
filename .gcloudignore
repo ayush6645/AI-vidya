@@ -1,0 +1,15 @@
+.git
+.github
+.gitignore
+.dockerignore
+venv/
+antenv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.DS_Store
+serviceAccountKey.json
+.env
+tmp/
+list_dir_output.txt

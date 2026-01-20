@@ -1,6 +1,6 @@
 import asyncio
 from typing import Any, Dict, List, Optional
-from backend.app.core.config import db
+from backend.app.core import config
 from google.cloud.firestore_v1.base_query import FieldFilter
 from google.cloud import firestore
 
@@ -11,9 +11,9 @@ class DBService:
     """
 
     async def get_user(self, user_id: str) -> Optional[Dict[str, Any]]:
-        if not db: return None
+        if not config.db: return None
         def _get():
-            doc = db.collection('users').document(user_id).get()
+            doc = config.db.collection('users').document(user_id).get()
             if doc.exists:
                 data = doc.to_dict()
                 data['id'] = doc.id
@@ -22,9 +22,9 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
-        if not db: return None
+        if not config.db: return None
         def _get():
-            query = db.collection('users').where(filter=FieldFilter('email', '==', email)).limit(1).stream()
+            query = config.db.collection('users').where(filter=FieldFilter('email', '==', email)).limit(1).stream()
             docs = list(query)
             if docs:
                 data = docs[0].to_dict()
@@ -34,9 +34,9 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
-        if not db: return None
+        if not config.db: return None
         def _get():
-            query = db.collection('users').where(filter=FieldFilter('username', '==', username)).limit(1).stream()
+            query = config.db.collection('users').where(filter=FieldFilter('username', '==', username)).limit(1).stream()
             docs = list(query)
             if docs:
                 data = docs[0].to_dict()
@@ -88,46 +88,46 @@ class DBService:
         # Then `security.create_access_token(user['id'])` throws KeyError.
         # This causes the 500 error.
         
-        if not db: raise Exception("Status: Database not connected")
-        await asyncio.to_thread(db.collection('users').document(email).set, data)
+        if not config.db: raise Exception("Status: Database not connected")
+        await asyncio.to_thread(config.db.collection('users').document(email).set, data)
 
     async def update_user(self, user_id: str, data: Dict[str, Any]):
-        if not db: return
-        await asyncio.to_thread(db.collection('users').document(user_id).update, data)
+        if not config.db: return
+        await asyncio.to_thread(config.db.collection('users').document(user_id).update, data)
 
     async def delete_user(self, user_id: str):
-         if not db: return
-         await asyncio.to_thread(db.collection('users').document(user_id).delete)
+         if not config.db: return
+         await asyncio.to_thread(config.db.collection('users').document(user_id).delete)
 
     async def get_user_plans(self, user_id: str) -> List[Dict[str, Any]]:
-        if not db: return []
+        if not config.db: return []
         def _query():
-            plans_ref = db.collection('plans').where(filter=FieldFilter('userId', '==', user_id)).order_by('creation_date', direction='DESCENDING').stream()
+            plans_ref = config.db.collection('plans').where(filter=FieldFilter('userId', '==', user_id)).order_by('creation_date', direction='DESCENDING').stream()
             return [p.to_dict() | {'id': p.id} for p in plans_ref]
         return await asyncio.to_thread(_query)
         
     async def create_plan(self, plan_data: Dict[str, Any]) -> str:
-        if not db: raise Exception("Database Error")
+        if not config.db: raise Exception("Database Error")
         def _create():
-            update_time, ref = db.collection('plans').add(plan_data)
+            update_time, ref = config.db.collection('plans').add(plan_data)
             return ref.id
         return await asyncio.to_thread(_create)
 
     async def create_module(self, module_data: Dict[str, Any]) -> str:
-        if not db: raise Exception("Database Error")
+        if not config.db: raise Exception("Database Error")
         def _create():
-            update_time, ref = db.collection('modules').add(module_data)
+            update_time, ref = config.db.collection('modules').add(module_data)
             return ref.id
         return await asyncio.to_thread(_create)
 
     async def create_lesson(self, lesson_data: Dict[str, Any]):
-         if not db: return
-         await asyncio.to_thread(db.collection('lessons').add, lesson_data)
+         if not config.db: return
+         await asyncio.to_thread(config.db.collection('lessons').add, lesson_data)
 
     async def get_plan_details(self, plan_id: str) -> Optional[Dict[str, Any]]:
-        if not db: return None
+        if not config.db: return None
         def _get():
-            doc = db.collection('plans').document(plan_id).get()
+            doc = config.db.collection('plans').document(plan_id).get()
             if doc.exists:
                 return doc.to_dict() | {'id': doc.id}
             return None
@@ -135,29 +135,29 @@ class DBService:
 
     async def delete_plan_full(self, plan_id: str, user_id: str):
         """Transaction-like deletion of plan and sub-collections"""
-        if not db: return
+        if not config.db: return
 
         def _delete_logic():
             # Verify owner
-            plan_ref = db.collection('plans').document(plan_id)
+            plan_ref = config.db.collection('plans').document(plan_id)
             plan_doc = plan_ref.get()
             if not plan_doc.exists or plan_doc.to_dict().get('userId') != user_id:
                 raise ValueError("Unauthorized or Plan not found")
 
             # Get modules
-            modules = list(db.collection('modules').where(filter=FieldFilter('planId', '==', plan_id)).stream())
+            modules = list(config.db.collection('modules').where(filter=FieldFilter('planId', '==', plan_id)).stream())
             module_ids = [m.id for m in modules]
 
             # Delete lessons
             if module_ids:
-                lessons = db.collection('lessons').where(filter=FieldFilter('moduleId', 'in', module_ids)).stream()
+                lessons = config.db.collection('lessons').where(filter=FieldFilter('moduleId', 'in', module_ids)).stream()
                 for l in lessons: l.reference.delete()
             
             # Delete modules
             for m in modules: m.reference.delete()
 
             # Delete notes
-            notes = db.collection('notes').where(filter=FieldFilter('planId', '==', plan_id)).stream()
+            notes = config.db.collection('notes').where(filter=FieldFilter('planId', '==', plan_id)).stream()
             for n in notes: n.reference.delete()
 
             # Delete plan
@@ -167,39 +167,39 @@ class DBService:
 
     async def get_modules_by_plan(self, plan_id: str) -> List[Dict[str, Any]]:
         def _get():
-             return [m.to_dict() | {'id': m.id} for m in db.collection('modules').where(filter=FieldFilter('planId', '==', plan_id)).order_by('module_number').stream()]
+             return [m.to_dict() | {'id': m.id} for m in config.db.collection('modules').where(filter=FieldFilter('planId', '==', plan_id)).order_by('module_number').stream()]
         return await asyncio.to_thread(_get)
 
     async def get_lessons_by_module(self, module_id: str) -> List[Dict[str, Any]]:
         def _get():
-             return [l.to_dict() | {'id': l.id} for l in db.collection('lessons').where(filter=FieldFilter('moduleId', '==', module_id)).order_by('day_of_plan').stream()]
+             return [l.to_dict() | {'id': l.id} for l in config.db.collection('lessons').where(filter=FieldFilter('moduleId', '==', module_id)).order_by('day_of_plan').stream()]
         return await asyncio.to_thread(_get)
     
     async def get_lesson(self, lesson_id: str) -> Optional[Dict[str, Any]]:
         def _get():
-            doc = db.collection('lessons').document(lesson_id).get()
+            doc = config.db.collection('lessons').document(lesson_id).get()
             return doc.to_dict() | {'id': doc.id} if doc.exists else None
         return await asyncio.to_thread(_get)
 
     async def update_lesson(self, lesson_id: str, data: Dict[str, Any]):
-        await asyncio.to_thread(db.collection('lessons').document(lesson_id).update, data)
+        await asyncio.to_thread(config.db.collection('lessons').document(lesson_id).update, data)
 
     async def add_note(self, note_data: Dict[str, Any]) -> str:
         def _add():
-            _, ref = db.collection('notes').add(note_data)
+            _, ref = config.db.collection('notes').add(note_data)
             return ref.id
         return await asyncio.to_thread(_add)
 
     async def get_notes(self, user_id: str, lesson_id: Optional[str] = None) -> List[Dict[str, Any]]:
         def _get():
-            query = db.collection('notes').where(filter=FieldFilter('userId', '==', user_id))
+            query = config.db.collection('notes').where(filter=FieldFilter('userId', '==', user_id))
             if lesson_id:
                 query = query.where(filter=FieldFilter('lessonId', '==', lesson_id))
             return [n.to_dict() | {'id': n.id} for n in query.stream()]
         return await asyncio.to_thread(_get)
 
     async def get_completed_lessons_count(self, user_id: str) -> int:
-        if not db: return 0
+        if not config.db: return 0
         def _count():
             # Join is hard in Firestore. We need to find all plans for user, then all modules, then all lessons?
             # Or simpler: if we store userId on lessons (denormalization), it's easy.
@@ -209,7 +209,7 @@ class DBService:
             # Alternative: User has a 'completed_lessons' collection or array? No.
             
             # Fetch all plans for user
-            plans = db.collection('plans').where(filter=FieldFilter('userId', '==', user_id)).stream()
+            plans = config.db.collection('plans').where(filter=FieldFilter('userId', '==', user_id)).stream()
             plan_ids = [p.id for p in plans]
             
             if not plan_ids: return 0
@@ -225,7 +225,7 @@ class DBService:
             # Let's iterate plans.
             count = 0
             for pid in plan_ids:
-                modules = db.collection('modules').where(filter=FieldFilter('planId', '==', pid)).stream()
+                modules = config.db.collection('modules').where(filter=FieldFilter('planId', '==', pid)).stream()
                 mod_ids = [m.id for m in modules]
                 if not mod_ids: continue
                 
@@ -233,24 +233,24 @@ class DBService:
                 # Batch mod_ids in chunks of 10 for 'in' query
                 for i in range(0, len(mod_ids), 10):
                     chunk = mod_ids[i:i+10]
-                    lessons = db.collection('lessons').where(filter=FieldFilter('moduleId', 'in', chunk)).where(filter=FieldFilter('completed', '==', True)).count().get()
+                    lessons = config.db.collection('lessons').where(filter=FieldFilter('moduleId', 'in', chunk)).where(filter=FieldFilter('completed', '==', True)).count().get()
                     count += lessons[0][0].value
             return count
 
         return await asyncio.to_thread(_count)
 
     async def add_quiz_result(self, result_data: Dict[str, Any]) -> str:
-        if not db: return ""
+        if not config.db: return ""
         def _add():
-            _, ref = db.collection('quiz_results').add(result_data)
+            _, ref = config.db.collection('quiz_results').add(result_data)
             return ref.id
         return await asyncio.to_thread(_add)
 
     async def get_quiz_history(self, user_id: str) -> List[Dict[str, Any]]:
-        if not db: return []
+        if not config.db: return []
         def _get():
             # NOTE: Removed server-side order_by to avoid needing a composite index
-            query = db.collection('quiz_results').where(filter=FieldFilter('userId', '==', user_id))
+            query = config.db.collection('quiz_results').where(filter=FieldFilter('userId', '==', user_id))
             results = [q.to_dict() | {'id': q.id} for q in query.stream()]
             # Client-side sort by date descending
             results.sort(key=lambda x: x.get('date', ''), reverse=True)
@@ -258,9 +258,9 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def get_quiz_average(self, user_id: str) -> str:
-        if not db: return "N/A"
+        if not config.db: return "N/A"
         def _avg():
-            query = db.collection('quiz_results').where(filter=FieldFilter('userId', '==', user_id)).stream()
+            query = config.db.collection('quiz_results').where(filter=FieldFilter('userId', '==', user_id)).stream()
             scores = []
             for q in query:
                 d = q.to_dict()
@@ -273,11 +273,11 @@ class DBService:
         return await asyncio.to_thread(_avg)
 
     async def get_leaderboard(self) -> List[Dict[str, Any]]:
-        if not db: return []
+        if not config.db: return []
         def _get():
             # Fetch users (limit 20 to avoid loading too many, sort in memory)
             # We don't use order_by here to ensure we get users even if they lack 'total_points'
-            query = db.collection('users').limit(20).stream()
+            query = config.db.collection('users').limit(20).stream()
             users = [u.to_dict() | {'id': u.id} for u in query]
             # Sort by total_points descending, default to 0
             users.sort(key=lambda x: x.get('total_points', 0), reverse=True)
@@ -285,10 +285,10 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def update_user_score(self, user_id: str, points: int):
-        if not db: return
+        if not config.db: return
         def _update():
             # Atomic increment? Firestore supports FieldValue.increment
-            doc_ref = db.collection('users').document(user_id)
+            doc_ref = config.db.collection('users').document(user_id)
             doc = doc_ref.get()
             if doc.exists:
                 doc_ref.update({"total_points": firestore.Increment(points)})
@@ -297,10 +297,10 @@ class DBService:
         await asyncio.to_thread(_update)
 
     async def get_user_stats(self, user_id: str) -> Dict[str, Any]:
-        if not db: return {"streak": 0, "level": 1, "total_quizzes": 0}
+        if not config.db: return {"streak": 0, "level": 1, "total_quizzes": 0}
         def _calc():
             # 1. Get Quiz Count for Level Calculation
-            quizzes = db.collection('quiz_results').where(filter=FieldFilter('userId', '==', user_id)).count().get()
+            quizzes = config.db.collection('quiz_results').where(filter=FieldFilter('userId', '==', user_id)).count().get()
             total_quizzes = quizzes[0][0].value
             
             # Level Logic:
@@ -360,7 +360,7 @@ class DBService:
             # Inferring is expensive (fetching all dates).
             # Let's check 'users' collection for 'streak' and 'last_active'.
             # If not present, default to 0.
-            user_doc = db.collection('users').document(user_id).get()
+            user_doc = config.db.collection('users').document(user_id).get()
             user_data = user_doc.to_dict() if user_doc.exists else {}
             
             streak = user_data.get('streak', 0)

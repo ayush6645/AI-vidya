@@ -26,14 +26,12 @@ class Settings:
     STATIC_DIR = os.path.join(ROOT_DIR, 'Web_App')
     
     # RAG Settings
-    # RAG Settings
-    DATA_RAG_DIR: str = r"E:\AI_Edu_Bot_Project\data_rag"
+    DATA_RAG_DIR: str = os.path.join(ROOT_DIR, "data_rag")
     CHROMA_DB_DIR: str = os.path.join(ROOT_DIR, "backend", "data", "chroma_db")
     
     # Cloud Run specific overwrite: Use /tmp because system is read-only
     if os.environ.get("K_SERVICE") or os.environ.get("PORT"):
          CHROMA_DB_DIR = "/tmp/chroma_db"
-         DATA_RAG_DIR = "/tmp/data_rag"
 
     PROMPTS_DIR: str = os.path.join(ROOT_DIR, "backend", "app", "prompts")
 
@@ -57,12 +55,13 @@ def init_firebase():
 
         if not firebase_admin._apps:
             firebase_admin.initialize_app(cred)
+            logging.info("Firebase app initialized.")
         
         db = firestore.client()
-        logging.info("Firebase initialized successfully.")
+        logging.info("Firestore client created successfully.")
         return db
     except Exception as e:
-        logging.error(f"Error initializing Firebase: {e}")
+        logging.error(f"FATAL: Error initializing Firebase: {e}")
         return None
 
 # Initialize immediately for module-level access, 
