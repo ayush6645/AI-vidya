@@ -65,6 +65,10 @@ async def robots():
 async def sitemap():
     return FileResponse(os.path.join(settings.TEMPLATE_DIR, "sitemap.xml"), media_type="application/xml")
 
+@app.get("/googlef678fb188fe1851a.html", include_in_schema=False)
+async def google_verification():
+    return FileResponse(os.path.join(settings.TEMPLATE_DIR, "googlef678fb188fe1851a.html"))
+
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
     user_id = request.session.get("user_id")
