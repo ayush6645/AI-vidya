@@ -13,6 +13,10 @@ async def get_current_user(request: Request, token: Optional[str] = Depends(oaut
         token = request.cookies.get("access_token")
     
     if not token:
+        # 3. Last Resort: Check Session (Legacy/Test Script Support)
+        if request.session.get("user_id"):
+            return request.session.get("user_id")
+            
         # If we are in a purely API context, we might raise 401 here.
         # But because we share this for HTML views (which redirect on None),
         # we return None and let the endpoint/route decide.

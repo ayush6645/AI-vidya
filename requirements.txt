@@ -21,7 +21,7 @@ google-cloud-secret-manager
 google-genai
 numpy<2.0
 chromadb
-pysqlite3-binary  # Azure fix: chromadb needs sqlite >= 3.35.0
+# pysqlite3-binary (Linux/Cloud Run only)
 # sentence-transformers (Removed: Heavy and unused 2026-01-18)
 pypdf
 
@@ -35,3 +35,11 @@ python-dotenv
 pyjwt
 pytest
 httpx
+
+# --- LangChain ---
+langchain
+langchain-google-genai
+# langchain-chroma
+# chromadb
+faiss-cpu
+langchain-community

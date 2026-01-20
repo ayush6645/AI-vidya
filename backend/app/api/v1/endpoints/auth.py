@@ -103,6 +103,7 @@ async def login(request: Request, response: Response):
     
     # Store minimal user info in session
     request.session['name'] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+    request.session['user_id'] = user_id
 
     return {
         "status": "success",
