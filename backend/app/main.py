@@ -1,7 +1,8 @@
 print("Starting Application...")
 from fastapi import FastAPI, Request
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+import os
 from starlette.middleware.sessions import SessionMiddleware
 from backend.app.core.config import settings, init_firebase
 from backend.app.api.v1.api import api_router
@@ -55,6 +56,14 @@ app.include_router(api_router) # Auto-includes /api prefix if defined in api.py,
 @app.on_event("startup")
 async def startup_event():
     init_firebase()
+
+@app.get("/robots.txt", include_in_schema=False)
+async def robots():
+    return FileResponse(os.path.join(settings.TEMPLATE_DIR, "robots.txt"))
+
+@app.get("/sitemap.xml", include_in_schema=False)
+async def sitemap():
+    return FileResponse(os.path.join(settings.TEMPLATE_DIR, "sitemap.xml"), media_type="application/xml")
 
 @app.get("/", response_class=HTMLResponse)
 async def root(request: Request):
