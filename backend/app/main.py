@@ -42,17 +42,6 @@ async def add_proxy_headers(request: Request, call_next):
 
 app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
 
-@app.middleware("http")
-async def log_request_body(request: Request, call_next):
-    print(f"DEBUG REQUEST: {request.method} {request.url}")
-    # body = await request.body() # Consuming body here might break it for endpoint?
-    # Request body can only be consumed once!
-    # To log it safely, we'd need to re-create the stream, which is complex.
-    # Let's just log headers first. Content-Type is key.
-    print(f"DEBUG HEADERS: {request.headers}")
-    response = await call_next(request)
-    print(f"DEBUG RESPONSE: {response.status_code}")
-    return response
 
 # Static Files
 app.mount("/static", StaticFiles(directory=settings.STATIC_DIR), name="static")

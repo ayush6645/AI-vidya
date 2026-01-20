@@ -51,7 +51,7 @@ class DBService:
         # The argument name `user_id` in original code in line 40 was ambiguous.
         # In calling code (auth.py): await db_service.create_user(email, user_data)
         # So it was using email as document ID. 
-        if not db: raise Exception("Status: Database not connected")
+        if not config.db: raise Exception("Status: Database not connected")
         
         # We need to query by email first to check existence? Auth controller does that.
         # But wait, using email as Doc ID is risky if email changes (unlikely here but still).
