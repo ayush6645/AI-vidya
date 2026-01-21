@@ -9,28 +9,55 @@ from backend.app.core.config import settings
 class LLMService:
     def __init__(self):
         self.api_key = settings.GOOGLE_API_KEY
+        self.groq_key = settings.GROQ_API_KEY
+        
         if not self.api_key:
             print("Warning: GOOGLE_API_KEY is not set.")
             self.client = None
         else:
             self.client = genai.Client(api_key=self.api_key)
-        # Using gemini-2.0-flash for better limits (Unlimited RPD) and stability
+
+        if self.groq_key:
+            from groq import Groq
+            self.groq_client = Groq(api_key=self.groq_key)
+            # Use Llama model for regular text generation tasks
+            self.groq_model_id = 'llama-3.3-70b-versatile'
+        else:
+            self.groq_client = None
+            print("Warning: GROQ_API_KEY is not set.")
+
+        # Default fallback
         self.model_id = 'gemini-2.0-flash'
 
     async def generate_json(self, prompt: str) -> Optional[Dict[str, Any]]:
-        """Generic method to generate JSON from a prompt."""
+        """Generic method to generate JSON from a prompt using Groq (Primary) or Gemini (Fallback)."""
+        
+        # 1. Try Groq (Preferred for unlimited Llama 3.3 usage)
+        if self.groq_client:
+            def _call_groq():
+                try:
+                    response = self.groq_client.chat.completions.create(
+                        messages=[{"role": "user", "content": prompt}],
+                        model=self.groq_model_id,
+                        response_format={"type": "json_object"} # Native JSON mode
+                    )
+                    return json.loads(response.choices[0].message.content)
+                except Exception as e:
+                    print(f"Groq API Error: {e}. Falling back to Gemini...")
+                    return None
+            
+            result = await asyncio.to_thread(_call_groq)
+            if result: return result
+
+        # 2. Fallback to Gemini
         if not self.client: return None
         
         def _call_gemini():
             try:
-                # Add instructions for JSON if not present? 
-                # Better to assume prompt handles it or we enforce it here.
-                # But for now, just raw call.
                 response = self.client.models.generate_content(
                     model=self.model_id,
                     contents=[{"role": "user", "parts": [{"text": prompt}]}]
                 )
-                # Clean markdown code blocks if present
                 text = response.text
                 if "```json" in text:
                     text = text.split("```json")[1].split("```")[0]
@@ -47,61 +74,64 @@ class LLMService:
 
         return await asyncio.to_thread(_call_gemini)
 
-    async def generate_plan(self, topic: str, difficulty: str, timeline_months: int) -> Optional[Dict[str, Any]]:
+    async def generate_plan(self, topic: str, difficulty: str, timeline: str, time_investment: str = "2 hours/day") -> Optional[Dict[str, Any]]:
         """
         Generates a detailed, day-by-day learning plan using a high-quality prompt.
         Designed to create structured, academic-quality curriculum without RAG dependency.
         """
-        days_per_month = 20
-        total_days = int(timeline_months) * days_per_month
+        # Calculate total days based on timeline
+        if isinstance(timeline, int):
+             timeline_days = timeline * 30
+        elif str(timeline).isdigit():
+             timeline_days = int(timeline) * 30
+        else:
+            timeline_days = {
+                '1_month': 30,
+                '2_months': 60,
+                '3_months': 90,
+                '6_months': 180
+            }.get(str(timeline), 30)
+            
+        # Ensure minimum days per module
+        min_days_per_module = max(3, timeline_days // 10)  # At least 3 days per module
         
         prompt = f"""
-        Role: Expert Curriculum Designer.
-        Task: Create a comprehensive, detailed, and structured learning roadmap for:
+        Create a detailed learning plan for: {topic}
+        Difficulty: {difficulty}
+        Total Duration: {timeline} ({timeline_days} days)
+        Daily Time Investment: {time_investment}
         
-        Target Topic: "{topic}"
-        Current Level: "{difficulty}"
-        Timeline: {timeline_months} Month(s) ({total_days} total learning days)
-
-        Requirements:
-        1. **Curriculum Structure**: Break the timeline into logical 'Modules' (e.g., Fundamentals, Intermediate Concepts, Applied Skills, Advanced Projects).
-        2. **Day-wise Progression**: Plan exactly {total_days} days of content.
-           - Ensure a smooth learning curve (Basic -> Advanced).
-           - Every day must have a specific, actionable topic.
-           - NO "Review days" or "Filler days" unless strictly necessary for complex topics.
-        3. **Content Quality**:
-           - 'topic': Concise title of the concept (e.g., "Python List Comprehensions").
-           - 'description': A brief, clear explanation of what will be learned and why it's important.
-           - 'Youtube_keywords': High-intent search terms to find the specific video tutorial for this day (e.g., "python list comprehension tutorial").
-
-        Format Rules:
-        - Output strictly valid JSON.
-        - Do not include markdown formatting (like ```json).
-        - Follow this exact schema:
-
+        IMPORTANT RULES:
+        1. Create EXACTLY {timeline_days} days of content (MANDATORY)
+        2. Divide into logical modules (approx {max(1, timeline_days // 10)} modules)
+        3. Each module should have {min_days_per_module}-15 days
+        4. Each day should have a specific, actionable topic
+        5. Include project days and review days
+        6. Ensure the progression builds logically
+        
+        Format as JSON with strictly this structure:
         {{
-          "plan_title": "Mastering {topic}: Zero to Hero",
+          "plan_title": "Title",
           "difficulty_level": "{difficulty}",
-          "total_duration_months": {timeline_months},
+          "total_duration_months": "{timeline}",
           "modules": [
             {{
-              "module_title": "Module 1: [Module Name]",
               "module_number": 1,
+              "module_title": "Title",
               "lessons": [
                 {{
                   "day_of_plan": 1,
-                  "topic": "[Specific Topic]",
-                  "description": "[Educational Description]",
-                  "Youtube_keywords": "[Optimized Search Terms]"
-                }},
-                ... (continue for all days in this module)
+                  "topic": "Topic",
+                  "description": "Description",
+                  "Youtube_keywords": "educational search terms"
+                }}
               ]
-            }},
-            ... (continue for required number of modules)
+            }}
           ]
         }}
+        
+        Ensure day_of_plan counts strictly from 1 to {timeline_days}.
         """
-        # Increase token limit implicitly by using the robust prompt
         return await self.generate_json(prompt)
 
     async def generate_summary_and_quiz(self, title: str, description: str) -> Dict[str, Any]:
@@ -148,9 +178,7 @@ class LLMService:
         return result
 
     async def generate_youtube_search_query(self, topic: str, description: str) -> str:
-        """Generates an optimized YouTube search query."""
-        if not self.client: return f"{topic} tutorial"
-        
+        """Generates an optimized YouTube search query using Groq (Primary) or Gemini."""
         prompt = f"""
         Role: YouTube Search Expert
         Task: Create ONE optimized search query to find the best educational video for this lesson.
@@ -166,6 +194,25 @@ class LLMService:
         4. Output ONLY the search query string. No quotes.
         """
         
+        # 1. Try Groq
+        if self.groq_client:
+            def _call_groq_text():
+                try:
+                    response = self.groq_client.chat.completions.create(
+                        messages=[{"role": "user", "content": prompt}],
+                        model=self.groq_model_id,
+                    )
+                    return response.choices[0].message.content.strip().replace('"', '')
+                except Exception as e:
+                    print(f"Groq Query Gen Error: {e}")
+                    return None
+            
+            res = await asyncio.to_thread(_call_groq_text)
+            if res: return res
+
+        # 2. Fallback Gemini
+        if not self.client: return f"{topic} tutorial"
+
         def _call_gemini_text():
             try:
                 response = self.client.models.generate_content(
@@ -176,35 +223,141 @@ class LLMService:
             except Exception as e:
                 print(f"Gemini Query Gen Error: {e}")
                 return f"{topic} tutorial"
+                
+        return await asyncio.to_thread(_call_gemini_text)
 
     async def rank_video_candidates(self, topic: str, description: str, candidates: list) -> Optional[str]:
         """
-        Uses LLM to analyze video metadata and pick the best educational match.
+        Uses LLM (Groq Preferred) to analyze video metadata and pick the best educational match.
         candidates: List of dicts { 'videoId': str, 'title': str, 'description': str, 'channel': str }
         """
-        if not self.client or not candidates: return None
+        if not candidates: return None
 
         candidates_str = json.dumps(candidates, indent=2)
         
         prompt = f"""
-        Role: Senior Curriculum Curator
-        Task: Select the best YouTube video for the following lesson.
-
+        You are an AI Learning Architect and Content Quality Controller.
+        
+        Task: Select the BEST YouTube video for this lesson from the candidates below.
+        
         Lesson Topic: {topic}
         Lesson Description: {description}
 
         Candidate Videos:
         {candidates_str}
 
-        Criteria:
-        1. RELEVANCE: Content must strictly match the lesson topic.
-        2. QUALITY: Prefer "CrashCourse", "FreeCodeCamp", "Traversy Media", "Veritasium", "3Blue1Brown" or known educators if present.
-        3. AVOID: Clickbait, very short clips (<2 mins), or irrelevant gaming/vlog content.
-        4. SPECIFICITY: If the lesson is about specific syntax, prefer coding tutorials. If conceptual, prefer visual explainers.
-
-        Output:
-        Return ONLY the 'videoId' of the best single match. If none are good, return "None".
+        ═══════════════════════════════════════════════════════════
+        STRICT VIDEO SELECTION RULES (NON-NEGOTIABLE)
+        ═══════════════════════════════════════════════════════════
+        
+        HARD REJECTIONS (IMMEDIATE DISQUALIFICATION):
+        Reject ANY video if title/description contains:
+        ❌ "Official Video", "MusicVideo", "MV", "lyrics"
+        ❌ "song", "remix", "cover", "live performance", "concert"
+        ❌ YouTube Short (< 1 min)
+        ❌ Under 8 minutes duration
+        ❌ "reaction", "funny", "comedy", "prank", "challenge"
+        ❌ Entertainment, pop culture, celebrity content
+        ❌ "top 10", "best of", listicles (unless purely educational)
+        ❌ Clickbait or trend-based content
+        ❌ NOT primarily instructional
+        
+        TITLE/DESCRIPTION MUST CONTAIN (At least ONE):
+        ✅ "tutorial", "explained", "lecture", "course", "lesson"
+        ✅ "step by step", "guide", "introduction", "learn", "how to"
+        ✅ "crash course", "training", "workshop", "masterclass"
+        ❌ Has vague titles without educational intent
+        
+        ═══════════════════════════════════════════════════════════
+        VIDEO INCLUSION RULES (REQUIRED)
+        ═══════════════════════════════════════════════════════════
+        
+        Accept ONLY videos that:
+        ✅ Clearly explain the exact lesson topic
+        ✅ Include examples, demonstrations, or walkthroughs
+        ✅ Use educational intent terms:
+           - "tutorial", "explained", "lecture", "full course"
+           - "step by step", "guide", "introduction", "deep dive"
+        ✅ PRIMARY purpose is to TEACH (not entertain)
+        
+        ═══════════════════════════════════════════════════════════
+        SEMANTIC VALIDATION (CRITICAL - MUST PASS)
+        ═══════════════════════════════════════════════════════════
+        
+        Before accepting ANY video, ask yourself:
+        "Is the PRIMARY purpose of this video to TEACH {topic}?"
+        
+        If NOT a clear YES → REJECT IMMEDIATELY
+        
+        Validation Steps:
+        1. Title + Description STRONGLY align with lesson topic?
+        2. PRIMARY purpose is to TEACH this specific concept?
+        3. No partial matches or tangential content?
+        4. Not just mentioning topic, but INSTRUCTING on it?
+        
+        If ANY validation fails → REJECT the video
+        
+        ═══════════════════════════════════════════════════════════
+        QUALITY HIERARCHY
+        ═══════════════════════════════════════════════════════════
+        
+        Tier 1 (BEST):
+        - Established educators: "CrashCourse", "FreeCodeCamp", "Traversy Media"
+        - Academic channels: "MIT OpenCourseWare", "Stanford", "Khan Academy"
+        - Expert creators: "3Blue1Brown", "Veritasium", "Fireship"
+        
+        Tier 2 (GOOD):
+        - Professional tutorials matching exact topic
+        - Clear teaching structure
+        - Good production quality
+        
+        Tier 3 (ACCEPTABLE):
+        - Accurate content but lower production value
+        - Must still match ALL inclusion rules
+        
+        ═══════════════════════════════════════════════════════════
+        OUTPUT INSTRUCTIONS
+        ═══════════════════════════════════════════════════════════
+        
+        Return ONLY the 'videoId' of the best match.
+        
+        If NO video meets the standards:
+        - Return EXACTLY: "None"
+        
+        If multiple videos qualify:
+        - Select the highest quality (Tier 1 > Tier 2 > Tier 3)
+        - Prefer longer, comprehensive tutorials
+        - Prefer newer content (if quality is equal)
+        
+        ═══════════════════════════════════════════════════════════
+        REMEMBER
+        ═══════════════════════════════════════════════════════════
+        
+        User wants to STUDY seriously, not browse.
+        Prioritize ACCURACY and EDUCATIONAL VALUE.
+        When in doubt → REJECT.
         """
+        
+        # 1. Try Groq
+        if self.groq_client:
+            def _call_groq_rank():
+                try:
+                    response = self.groq_client.chat.completions.create(
+                        messages=[{"role": "user", "content": prompt}],
+                        model=self.groq_model_id,
+                    )
+                    result = response.choices[0].message.content.strip().replace('"', '').replace("'", "")
+                    if len(result) > 20 or "None" in result: return None
+                    return result
+                except Exception as e:
+                    print(f"Groq Ranking Error: {e}")
+                    return None
+            
+            res = await asyncio.to_thread(_call_groq_rank)
+            if res: return res
+
+        # 2. Fallback Gemini
+        if not self.client: return None
         
         def _call_gemini_rank():
             try:
@@ -213,7 +366,6 @@ class LLMService:
                     contents=[{"role": "user", "parts": [{"text": prompt}]}]
                 )
                 result = response.text.strip().replace('"', '').replace("'", "")
-                # Simple validation to ensure it looks like a video ID (usually 11 chars)
                 if len(result) > 20 or "None" in result: 
                     return None
                 return result

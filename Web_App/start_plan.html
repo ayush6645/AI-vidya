@@ -203,7 +203,8 @@
         }
 
         textarea,
-        input[type="number"] {
+        input[type="number"],
+        input[type="text"] {
             width: 100%;
             padding: 15px;
             border-radius: 10px;
@@ -219,7 +220,8 @@
             resize: vertical;
         }
 
-        input[type="number"] {
+        input[type="number"],
+        input[type="text"] {
             margin-top: 15px;
         }
 
@@ -824,6 +826,25 @@
                             <input type="number" id="customTimelineInput" placeholder="Enter number of months" min="1"
                                 style="display: none;">
                         </div>
+                        <div class="form-group">
+                            <label class="group-title">4. How much time can you invest?</label>
+                            <div class="card-select-group" id="timeInvestmentSelect">
+                                <input type="radio" id="ti-30min" name="time_investment" value="30 minutes/day"><label
+                                    for="ti-30min"><i class="fa-solid fa-mug-hot"></i><span>30 min/day</span></label>
+                                <input type="radio" id="ti-1hr" name="time_investment" value="1 hour/day"><label
+                                    for="ti-1hr"><i class="fa-solid fa-clock"></i><span>1 hour/day</span></label>
+                                <input type="radio" id="ti-2hr" name="time_investment" value="2 hours/day"
+                                    checked><label for="ti-2hr"><i class="fa-solid fa-fire"></i><span>2
+                                        hours/day</span></label>
+                                <input type="radio" id="ti-3hr" name="time_investment" value="3+ hours/day"><label
+                                    for="ti-3hr"><i class="fa-solid fa-battery-full"></i><span>3+
+                                        hours/day</span></label>
+                                <input type="radio" id="ti-custom" name="time_investment" value="custom"><label
+                                    for="ti-custom"><i class="fa-solid fa-pen-ruler"></i><span>Custom</span></label>
+                            </div>
+                            <input type="text" id="customTimeInvestmentInput"
+                                placeholder="e.g., 5 hours/week, 1.5 hours/day" style="display: none;">
+                        </div>
                         <div class="button-group">
                             <button id="generatePlanBtn">Generate Plan with AI <i
                                     class="fa-solid fa-arrow-right"></i></button>
@@ -838,6 +859,7 @@
                             <p><strong>Topic:</strong> <span id="preview-topic">_</span></p>
                             <p><strong>Level:</strong> <span id="preview-difficulty">_</span></p>
                             <p><strong>Timeline:</strong> <span id="preview-timeline">_</span></p>
+                            <p><strong>Time Investment:</strong> <span id="preview-time-investment">_</span></p>
                         </div>
                         <!-- ✨ NEW: Recommendations Panel -->
                         <div id="recommendationsPanel">
@@ -882,7 +904,7 @@
     </main>
 
     <!-- ✨ FIX: Use a single hidden element to store API configuration -->
-    <input type="hidden" id="apiConfig" data-user-id="{{ user_id }}" data-recommendations-url="#"
+    <input type="hidden" id="apiConfig" data-user-id="{{ user_id }}" data-recommendations-url="/api/recommendations"
         data-generate-plan-url="{{ url_for('generate_plan') }}" data-save-plan-url="{{ url_for('save_plan') }}">
 
     <script>
@@ -928,7 +950,10 @@
             const previewTopic = document.getElementById('preview-topic');
             const previewDifficulty = document.getElementById('preview-difficulty');
             const previewTimeline = document.getElementById('preview-timeline');
+            const previewTimeInvestment = document.getElementById('preview-time-investment');
             const customTimelineInput = document.getElementById('customTimelineInput');
+            const timeInvestmentGroup = document.getElementById('timeInvestmentSelect');
+            const customTimeInvestmentInput = document.getElementById('customTimeInvestmentInput');
             const recommendationsList = document.getElementById('recommendationsList');
 
 
@@ -946,13 +971,27 @@
                     }
                 }
                 previewTimeline.textContent = timelineText;
+
+                const timeInvestment = timeInvestmentGroup.querySelector('input:checked');
+                let timeInvestmentText = '_';
+                if (timeInvestment) {
+                    if (timeInvestment.value === 'custom') {
+                        timeInvestmentText = customTimeInvestmentInput.value || 'Custom';
+                    } else {
+                        timeInvestmentText = timeInvestment.value;
+                    }
+                }
+                previewTimeInvestment.textContent = timeInvestmentText;
             }
 
             topicInput.addEventListener('keyup', updatePreview);
             difficultyGroup.addEventListener('change', updatePreview);
             timelineGroup.addEventListener('change', updatePreview);
+            timeInvestmentGroup.addEventListener('change', updatePreview);
             customTimelineInput.addEventListener('keyup', updatePreview);
             customTimelineInput.addEventListener('change', updatePreview);
+            customTimeInvestmentInput.addEventListener('keyup', updatePreview);
+            customTimeInvestmentInput.addEventListener('change', updatePreview);
 
 
             timelineGroup.addEventListener('change', () => {
@@ -961,6 +1000,15 @@
                     customTimelineInput.style.display = 'block';
                 } else {
                     customTimelineInput.style.display = 'none';
+                }
+            });
+
+            timeInvestmentGroup.addEventListener('change', () => {
+                const selectedInvestment = timeInvestmentGroup.querySelector('input:checked');
+                if (selectedInvestment && selectedInvestment.value === 'custom') {
+                    customTimeInvestmentInput.style.display = 'block';
+                } else {
+                    customTimeInvestmentInput.style.display = 'none';
                 }
             });
 
@@ -1051,7 +1099,8 @@
                 const topic = topicInput.value.trim();
                 const difficultyRadio = difficultyGroup.querySelector('input:checked');
                 const timelineRadio = timelineGroup.querySelector('input:checked');
-                if (!topic || !difficultyRadio || !timelineRadio) {
+                const timeInvestmentRadio = timeInvestmentGroup.querySelector('input:checked');
+                if (!topic || !difficultyRadio || !timelineRadio || !timeInvestmentRadio) {
                     alert('Please fill out all fields.');
                     return;
                 }
@@ -1060,6 +1109,14 @@
                     timelineValue = customTimelineInput.value.trim();
                     if (!timelineValue || parseInt(timelineValue, 10) < 1) {
                         alert('Please enter a valid number of months for the custom timeline.');
+                        return;
+                    }
+                }
+                let timeInvestmentValue = timeInvestmentRadio.value;
+                if (timeInvestmentValue === 'custom') {
+                    timeInvestmentValue = customTimeInvestmentInput.value.trim();
+                    if (!timeInvestmentValue) {
+                        alert('Please enter your custom time investment.');
                         return;
                     }
                 }
@@ -1073,7 +1130,8 @@
                         body: JSON.stringify({
                             topic,
                             difficulty: difficultyRadio.value,
-                            timeline: timelineValue
+                            timeline: timelineValue,
+                            time_investment: timeInvestmentValue
                         })
                     });
                     const data = await response.json();

@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Request, HTTPException, Depends
+from typing import Optional
+from pydantic import BaseModel
 from fastapi.responses import HTMLResponse, RedirectResponse
 from backend.app.schemas.plan import GeneratePlanRequest, SavePlanRequest, CompletionRequest, NoteRequest, RoadmapRequest, QuizRequest, SummaryQuizResponse, QuizSubmission
 from backend.app.services.db_service import db_service
@@ -32,7 +34,7 @@ async def generate_plan(data: GeneratePlanRequest, user_id: str = Depends(get_cu
     logger = logging.getLogger(__name__)
     
     try:
-        result = await llm_service.generate_plan(data.topic, data.difficulty, data.timeline)
+        result = await llm_service.generate_plan(data.topic, data.difficulty, data.timeline, data.time_investment)
     except Exception as e:
         logger.error(f"Plan Generation Exception: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Plan generation failed: {str(e)}")
@@ -98,7 +100,21 @@ async def generate_quiz(data: QuizRequest, user_id: str = Depends(get_current_us
 async def generate_lesson_summary(lesson_id: str, user_id: str = Depends(get_current_user_required)):
     lesson = await db_service.get_lesson(lesson_id)
     if not lesson: return {"status": "error", "message": "Lesson not found"}
+    
+    # Check if summary/quiz already exists (Cache Hit)
+    if lesson.get('summary') and lesson.get('quiz_data'):
+        return {"status": "success", "summary": lesson.get('summary'), "quiz": lesson.get('quiz_data')}
+        
+    # Cache Miss: Generate
     result = await llm_service.generate_summary_and_quiz(lesson.get('topic'), lesson.get('description'))
+    
+    # Save to DB for future use
+    if result and result.get('summary'):
+        await db_service.update_lesson(lesson_id, {
+            'summary': result.get('summary'),
+            'quiz_data': result.get('quiz')
+        })
+        
     return {"status": "success", "summary": result.get("summary"), "quiz": result.get("quiz")}
 
 @router.post("/api/lessons/{lesson_id}/completion")
@@ -110,19 +126,80 @@ async def mark_lesson_completion(lesson_id: str, data: CompletionRequest, user_i
 @router.post("/api/get-video-for-lesson/{lesson_id}")
 async def get_video_for_lesson(lesson_id: str, user_id: str = Depends(get_current_user_required)):
     lesson = await db_service.get_lesson(lesson_id)
-    if not lesson: return {"video_url": "", "is_curated": False}
+    if not lesson:
+        return {
+            "video_url": youtube_service._get_fallback_video(),
+            "is_curated": False,
+            "message": "Lesson not found, using fallback"
+        }
     
-    video_url = lesson.get('youtube_link')
-    if not video_url:
-        topic = lesson.get('topic') or "Learning"
-        desc = lesson.get('description') or ""
-        # Search using topic + description context
-        video_url = await youtube_service.get_video_for_lesson(topic, desc)
-        # Cache it
-        if video_url:
-            await db_service.update_lesson(lesson_id, {'youtube_link': video_url})
+    # Use enhanced YouTube service
+    topic = lesson.get('topic', 'Learning')
+    description = lesson.get('description', '')
+    
+    video_url = await youtube_service.get_video_for_lesson(topic, description, lesson_id)
+    
+    # Only cache if it's a good quality video (not fallback)
+    if video_url != youtube_service._get_fallback_video():
+        await db_service.update_lesson(lesson_id, {
+            'youtube_link': video_url,
+            'video_last_updated': firestore.SERVER_TIMESTAMP
+        })
+    
+    return {
+        "video_url": video_url,
+        "is_curated": video_url != youtube_service._get_fallback_video(),
+        "quality_score": "high" if video_url != youtube_service._get_fallback_video() else "fallback",
+        "message": "Quality educational video found" if video_url != youtube_service._get_fallback_video() else "Using educational fallback"
+    }
+
+# Add admin endpoint to refresh all caches
+class RefreshCacheSchema(BaseModel):
+    plan_id: Optional[str] = None
+    lesson_id: Optional[str] = None
+
+@router.post("/api/admin/refresh-youtube-cache")
+async def refresh_youtube_cache(
+    request: RefreshCacheSchema,
+    user_id: str = Depends(get_current_user_required)
+):
+    """Refresh YouTube cache for all lessons, specific plan, or specific lesson"""
+    try:
+        if request.lesson_id:
+            # Refresh specific lesson
+            await youtube_service.refresh_cache_for_lesson(request.lesson_id)
+            # Also update the lesson document to reflect the clear (optional but good for consistency)
+            await db_service.update_lesson(request.lesson_id, {'youtube_link': '', 'video_last_updated': None})
+            return {
+                "status": "success",
+                "message": f"Refreshed cache for lesson {request.lesson_id}"
+            }
             
-    return {"video_url": video_url or "https://www.youtube.com/embed/dQw4w9WgXcQ", "is_curated": False}
+        elif request.plan_id:
+            # Refresh only for specific plan
+            modules = await db_service.get_modules_by_plan(request.plan_id)
+            refreshed = 0
+            for mod in modules:
+                lessons = await db_service.get_lessons_by_module(mod['id'])
+                for lesson in lessons:
+                    if await youtube_service.refresh_cache_for_lesson(lesson['id']):
+                        refreshed += 1
+            
+            return {
+                "status": "success",
+                "message": f"Refreshed cache for {refreshed} lessons in plan {request.plan_id}"
+            }
+        else:
+            # Refresh all lessons (admin only - fallback)
+            # This would require scanning all lessons, which is heavy. 
+            # For now, return error or mock.
+            return {
+                "status": "error", 
+                "message": "Please specify plan_id or lesson_id"
+            }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 @router.get("/api/lessons/{lesson_id}/notes")
 async def get_lesson_notes(lesson_id: str, user_id: str = Depends(get_current_user_required)):
@@ -256,3 +333,47 @@ async def view_quizzes(request: Request):
         "available_quizzes": available_quizzes,
         "leaderboard": leaderboard
     })
+
+@router.get("/api/recommendations")
+async def get_recommendations(user_id: str = Depends(get_current_user_required)):
+    """
+    Generate personalized course recommendations based on user's learning patterns.
+    Returns trending topics and AI-suggested learning paths.
+    """
+    # Get user's existing plans to avoid duplicates
+    user_plans = await db_service.get_user_plans(user_id)
+    existing_topics = [plan.get('plan_title', '').lower() for plan in user_plans]
+    
+    # Curated trending topics (can be expanded with ML/analytics later)
+    trending_topics = [
+        "Machine Learning with Python",
+        "Full-Stack Web Development",
+        "React & Next.js",
+        "Data Structures & Algorithms",
+        "Cloud Computing (AWS/Azure)",
+        "Cybersecurity Fundamentals",
+        "Python for Data Science",
+        "Mobile App Development (Flutter)",
+        "DevOps & CI/CD",
+        "Blockchain & Web3",
+        "UI/UX Design Principles",
+        "System Design Interview Prep"
+    ]
+    
+    # Filter out topics user already has
+    recommendations = [
+        topic for topic in trending_topics 
+        if not any(existing in topic.lower() for existing in existing_topics)
+    ][:5]  # Limit to 5 recommendations
+    
+    return {"status": "success", "recommendations": recommendations}
+
+@router.post("/api/plans/{plan_id}/delete")
+async def delete_single_plan(plan_id: str, user_id: str = Depends(get_current_user_required)):
+    # Check ownership
+    plan = await db_service.get_plan_details(plan_id)
+    if not plan or plan.get('userId') != user_id:
+         raise HTTPException(status_code=403, detail="Unauthorized")
+    
+    await db_service.delete_plan_full(plan_id, user_id)
+    return {"status": "success", "message": "Plan deleted"}

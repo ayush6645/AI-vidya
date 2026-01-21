@@ -5,6 +5,7 @@ class GeneratePlanRequest(BaseModel):
     topic: str
     difficulty: str
     timeline: int
+    time_investment: Optional[str] = "2 hours/day"
 
 class RoadmapRequest(BaseModel):
     topic: str

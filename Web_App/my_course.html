@@ -1263,20 +1263,79 @@
                     const data = await response.json();
                     if (data.is_curated) {
                         container.innerHTML = `
+                        <div class="video-quality-indicator" id="quality-${lessonId}" style="margin-bottom: 10px;">
+                            <span class="quality-badge quality-good" style="background: #e6f4ea; color: #1e8e3e; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                                <i class="fas fa-check-circle"></i> Quality Checked
+                            </span>
+                        </div>
                         <div class="curated-content">
                             <iframe src="${data.video_url}" frameborder="0" allowfullscreen></iframe>
                             <div class="video-resources">
                                 <h4>Resources</h4>
-                                <ul>${data.additional_resources.map(res => `<li><a href="${res.url}" target="_blank">${res.title || 'Res'}</a></li>`).join('')}</ul>
+                                <ul>${data.additional_resources ? data.additional_resources.map(res => `<li><a href="${res.url}" target="_blank">${res.title || 'Res'}</a></li>`).join('') : ''}</ul>
                             </div>
+                        </div>
+                        <div class="video-controls" style="margin-top: 10px; display: flex; gap: 10px;">
+                            <button class="btn-small" onclick="reportBadVideo('${lessonId}')" style="background: #fce8e6; color: #c5221f; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                <i class="fas fa-flag"></i> Report Bad Video
+                            </button>
+                            <button class="btn-small" onclick="refreshVideo('${lessonId}')" style="background: #e8f0fe; color: #1967d2; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                <i class="fas fa-sync-alt"></i> Find Better Video
+                            </button>
                         </div>`;
                     } else {
-                        container.innerHTML = `<iframe src="${data.video_url}" frameborder="0" allowfullscreen></iframe>`;
+                        // Fallback case
+                        container.innerHTML = `
+                        <div class="video-quality-indicator" style="margin-bottom: 10px;">
+                             <span class="quality-badge quality-fallback" style="background: #fce8e6; color: #c5221f; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: 600;">
+                                <i class="fas fa-info-circle"></i> Educational Fallback
+                            </span>
+                        </div>
+                        <iframe src="${data.video_url}" frameborder="0" allowfullscreen></iframe>
+                        <div class="video-controls" style="margin-top: 10px; display: flex; gap: 10px;">
+                            <button class="btn-small" onclick="refreshVideo('${lessonId}')" style="background: #e8f0fe; color: #1967d2; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                                <i class="fas fa-sync-alt"></i> Try Auto-Search Again
+                            </button>
+                        </div>`;
                     }
+
                     return { success: true, video_url: data.video_url };
                 } catch (error) {
                     container.innerHTML = `<div class="video-error"><p>Could not load video.</p></div>`;
                     return { success: false, error: error.message };
+                }
+            }
+
+            window.reportBadVideo = async function (lessonId) {
+                if (confirm('Report this video as poor quality? We will refresh the source.')) {
+                    await refreshVideo(lessonId);
+                }
+            };
+
+            window.refreshVideo = async function (lessonId) {
+                const btn = event.target.closest('button');
+                // Create a temporary container reference or find it again relative to the button
+                // Since the button is inside the container, we can find it.
+                // Wait, if we replace innerHTML, we lose the button context if we are not careful? No, we find container first.
+                let container = btn ? btn.closest('.video-container') : null;
+
+                // Fallback to finding by query if passed explicitly or something
+                if (!container) {
+                    // Try to find the container via other means if possible, or alert
+                    // Assuming standard structure: lesson-item -> lesson-content -> video-container
+                    // But we don't have lessonId based selector easily without modifying HTML structure higher up.
+                    // Rely on button click context.
+                    console.error("Could not find video container");
+                    return;
+                }
+
+                container.innerHTML = '<div class="loader">Refreshing video source...</div>';
+
+                try {
+                    await fetch(`/api/admin/refresh-youtube-cache?lesson_id=${lessonId}`, { method: 'POST' });
+                    await fetchVideo(lessonId, container);
+                } catch (e) {
+                    container.innerHTML = `<div class="video-error">Error refreshing: ${e.message}</div>`;
                 }
             }
 

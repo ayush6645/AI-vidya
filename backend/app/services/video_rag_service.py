@@ -249,7 +249,27 @@ class VideoRAGService:
                 if not audio_file:
                     return None
                     
-                # Upload to Gemini (via new SDK if available, else generic logic)
+                # 1. Try Groq Whisper (Preferred: Fast & Free-ish)
+                if llm_service.groq_client:
+                    try:
+                        logger.info("Transcribing audio with Groq Whisper...")
+                        
+                        def _call_groq_whisper():
+                            with open(audio_file, "rb") as file:
+                                transcription = llm_service.groq_client.audio.transcriptions.create(
+                                    file=(audio_file, file.read()),
+                                    model="whisper-large-v3",
+                                    response_format="json",
+                                    language="en",
+                                    temperature=0.0
+                                )
+                                return transcription.text
+                                
+                        return await asyncio.to_thread(_call_groq_whisper)
+                    except Exception as e:
+                        logger.error(f"Groq Whisper failed: {e}. Falling back to Gemini.")
+
+                # 2. Fallback to Gemini (via new SDK if available, else generic logic)
                 # Using llm_service.client to leverage existing config
                 if not llm_service.client:
                     logger.error("LLM Service client not ready")
@@ -271,7 +291,7 @@ class VideoRAGService:
                 # Generate Transcript
                 response = await asyncio.to_thread(
                     llm_service.client.models.generate_content,
-                    model='gemini-1.5-flash',
+                    model='gemini-2.0-flash',
                     contents=[upload_file, "Generate a full verbatim transcript of this audio."]
                 )
                 return response.text
