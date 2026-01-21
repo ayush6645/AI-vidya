@@ -19,6 +19,8 @@ google-cloud-secret-manager
 
 # --- AI & Data Science ---
 google-genai
+groq
+isodate
 numpy<2.0
 # chromadb
 # pysqlite3-binary (Linux/Cloud Run only)
