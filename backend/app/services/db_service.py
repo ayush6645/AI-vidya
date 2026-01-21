@@ -11,6 +11,8 @@ class DBService:
     """
 
     async def get_user(self, user_id: str) -> Optional[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return None
         def _get():
             doc = config.db.collection('users').document(user_id).get()
@@ -22,6 +24,8 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def get_user_by_email(self, email: str) -> Optional[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return None
         def _get():
             query = config.db.collection('users').where(filter=FieldFilter('email', '==', email)).limit(1).stream()
@@ -34,6 +38,8 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def get_user_by_username(self, username: str) -> Optional[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return None
         def _get():
             query = config.db.collection('users').where(filter=FieldFilter('username', '==', username)).limit(1).stream()
@@ -51,6 +57,8 @@ class DBService:
         # The argument name `user_id` in original code in line 40 was ambiguous.
         # In calling code (auth.py): await db_service.create_user(email, user_data)
         # So it was using email as document ID. 
+        if not config.db:
+            config.init_firebase()
         if not config.db: raise Exception("Status: Database not connected")
         
         # We need to query by email first to check existence? Auth controller does that.
@@ -88,10 +96,14 @@ class DBService:
         # Then `security.create_access_token(user['id'])` throws KeyError.
         # This causes the 500 error.
         
+        if not config.db:
+            config.init_firebase()
         if not config.db: raise Exception("Status: Database not connected")
         await asyncio.to_thread(config.db.collection('users').document(email).set, data)
 
     async def update_user(self, user_id: str, data: Dict[str, Any]):
+        if not config.db:
+            config.init_firebase()
         if not config.db: return
         await asyncio.to_thread(config.db.collection('users').document(user_id).update, data)
 
@@ -100,6 +112,8 @@ class DBService:
          await asyncio.to_thread(config.db.collection('users').document(user_id).delete)
 
     async def get_user_plans(self, user_id: str) -> List[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return []
         def _query():
             plans_ref = config.db.collection('plans').where(filter=FieldFilter('userId', '==', user_id)).order_by('creation_date', direction='DESCENDING').stream()
@@ -107,6 +121,8 @@ class DBService:
         return await asyncio.to_thread(_query)
         
     async def create_plan(self, plan_data: Dict[str, Any]) -> str:
+        if not config.db:
+            config.init_firebase()
         if not config.db: raise Exception("Database Error")
         def _create():
             update_time, ref = config.db.collection('plans').add(plan_data)
@@ -114,6 +130,8 @@ class DBService:
         return await asyncio.to_thread(_create)
 
     async def create_module(self, module_data: Dict[str, Any]) -> str:
+        if not config.db:
+            config.init_firebase()
         if not config.db: raise Exception("Database Error")
         def _create():
             update_time, ref = config.db.collection('modules').add(module_data)
@@ -121,10 +139,14 @@ class DBService:
         return await asyncio.to_thread(_create)
 
     async def create_lesson(self, lesson_data: Dict[str, Any]):
+         if not config.db:
+             config.init_firebase()
          if not config.db: return
          await asyncio.to_thread(config.db.collection('lessons').add, lesson_data)
 
     async def get_plan_details(self, plan_id: str) -> Optional[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return None
         def _get():
             doc = config.db.collection('plans').document(plan_id).get()
@@ -135,6 +157,8 @@ class DBService:
 
     async def delete_plan_full(self, plan_id: str, user_id: str):
         """Transaction-like deletion of plan and sub-collections"""
+        if not config.db:
+            config.init_firebase()
         if not config.db: return
 
         def _delete_logic():
@@ -176,6 +200,9 @@ class DBService:
         return await asyncio.to_thread(_get)
     
     async def get_lesson(self, lesson_id: str) -> Optional[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
+        if not config.db: return None
         def _get():
             doc = config.db.collection('lessons').document(lesson_id).get()
             return doc.to_dict() | {'id': doc.id} if doc.exists else None
@@ -199,6 +226,8 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def get_completed_lessons_count(self, user_id: str) -> int:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return 0
         def _count():
             # Join is hard in Firestore. We need to find all plans for user, then all modules, then all lessons?
@@ -240,6 +269,8 @@ class DBService:
         return await asyncio.to_thread(_count)
 
     async def add_quiz_result(self, result_data: Dict[str, Any]) -> str:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return ""
         def _add():
             _, ref = config.db.collection('quiz_results').add(result_data)
@@ -247,6 +278,8 @@ class DBService:
         return await asyncio.to_thread(_add)
 
     async def get_quiz_history(self, user_id: str) -> List[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return []
         def _get():
             # NOTE: Removed server-side order_by to avoid needing a composite index
@@ -258,6 +291,8 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def get_quiz_average(self, user_id: str) -> str:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return "N/A"
         def _avg():
             query = config.db.collection('quiz_results').where(filter=FieldFilter('userId', '==', user_id)).stream()
@@ -273,6 +308,8 @@ class DBService:
         return await asyncio.to_thread(_avg)
 
     async def get_leaderboard(self) -> List[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return []
         def _get():
             # Fetch users (limit 20 to avoid loading too many, sort in memory)
@@ -285,6 +322,8 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def update_user_score(self, user_id: str, points: int):
+        if not config.db:
+            config.init_firebase()
         if not config.db: return
         def _update():
             # Atomic increment? Firestore supports FieldValue.increment
@@ -297,6 +336,8 @@ class DBService:
         await asyncio.to_thread(_update)
 
     async def get_user_stats(self, user_id: str) -> Dict[str, Any]:
+        if not config.db:
+            config.init_firebase()
         if not config.db: return {"streak": 0, "level": 1, "total_quizzes": 0}
         def _calc():
             # 1. Get Quiz Count for Level Calculation

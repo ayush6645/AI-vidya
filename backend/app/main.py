@@ -56,7 +56,8 @@ app.include_router(api_router) # Auto-includes /api prefix if defined in api.py,
 
 @app.on_event("startup")
 async def startup_event():
-    init_firebase()
+    # Lazy initialization logic moved to services
+    pass
 
 @app.get("/robots.txt", include_in_schema=False)
 async def robots():
