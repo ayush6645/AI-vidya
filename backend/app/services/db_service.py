@@ -190,11 +190,17 @@ class DBService:
         await asyncio.to_thread(_delete_logic)
 
     async def get_modules_by_plan(self, plan_id: str) -> List[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
+        if not config.db: return []
         def _get():
              return [m.to_dict() | {'id': m.id} for m in config.db.collection('modules').where(filter=FieldFilter('planId', '==', plan_id)).order_by('module_number').stream()]
         return await asyncio.to_thread(_get)
 
     async def get_lessons_by_module(self, module_id: str) -> List[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
+        if not config.db: return []
         def _get():
              return [l.to_dict() | {'id': l.id} for l in config.db.collection('lessons').where(filter=FieldFilter('moduleId', '==', module_id)).order_by('day_of_plan').stream()]
         return await asyncio.to_thread(_get)
@@ -209,15 +215,24 @@ class DBService:
         return await asyncio.to_thread(_get)
 
     async def update_lesson(self, lesson_id: str, data: Dict[str, Any]):
+        if not config.db:
+            config.init_firebase()
+        if not config.db: return
         await asyncio.to_thread(config.db.collection('lessons').document(lesson_id).update, data)
 
     async def add_note(self, note_data: Dict[str, Any]) -> str:
+        if not config.db:
+            config.init_firebase()
+        if not config.db: raise Exception("Database Error")
         def _add():
             _, ref = config.db.collection('notes').add(note_data)
             return ref.id
         return await asyncio.to_thread(_add)
 
     async def get_notes(self, user_id: str, lesson_id: Optional[str] = None) -> List[Dict[str, Any]]:
+        if not config.db:
+            config.init_firebase()
+        if not config.db: return []
         def _get():
             query = config.db.collection('notes').where(filter=FieldFilter('userId', '==', user_id))
             if lesson_id:
