@@ -56,8 +56,16 @@ app.include_router(api_router) # Auto-includes /api prefix if defined in api.py,
 
 @app.on_event("startup")
 async def startup_event():
-    # Lazy initialization logic moved to services
-    pass
+    # Explicit initialization of critical services
+    try:
+        init_firebase()
+        logger.info("Firebase initialized on startup")
+    except Exception as e:
+        logger.error(f"Startup Firebase Init failed: {e}")
+
+# Explicitly Include TTS Router here to bypass any package import issues
+from backend.app.api.v1.endpoints import tts
+app.include_router(tts.router, prefix="/api/tts", tags=["tts"])
 
 @app.get("/robots.txt", include_in_schema=False)
 async def robots():
