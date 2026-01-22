@@ -1,9 +1,17 @@
-from google.cloud import texttospeech
 import logging
 import os
 from google.oauth2 import service_account
 
 logger = logging.getLogger(__name__)
+
+# Safe Import for Cloud Run environment where dependencies might conflict
+try:
+    from google.cloud import texttospeech
+    TTS_AVAILABLE = True
+except ImportError as e:
+    logger.error(f"CRITICAL: Could not import google.cloud.texttospeech: {e}")
+    TTS_AVAILABLE = False
+    texttospeech = None  # Define simple fallback or None
 
 class TTSService:
     def __init__(self):
@@ -28,6 +36,10 @@ class TTSService:
             self.client = None
 
     async def synthesize_speech(self, text: str, gender: str = "NEUTRAL", speed: float = 1.0):
+        if not TTS_AVAILABLE:
+            logger.error("TTS Service is unavailable due to import error.")
+            raise Exception("TTS Service unavailable on this server instance.")
+
         if not self.client:
             raise Exception("TTS Client not initialized")
         
