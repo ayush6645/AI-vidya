@@ -16,6 +16,7 @@ google-auth
 google-auth-oauthlib
 googleapis-common-protos
 google-cloud-secret-manager
+google-cloud-texttospeech
 
 # --- AI & Data Science ---
 google-genai

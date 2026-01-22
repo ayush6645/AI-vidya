@@ -10,4 +10,7 @@ backend_log.txt
 *.log
 .DS_Store
 
+# Google Cloud Credentials
 serviceAccountKey.json
+ai-vidya_IAM.json
+*_IAM.json
