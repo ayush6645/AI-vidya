@@ -1356,11 +1356,175 @@
             }
 
             function renderSummary(container, summaryText) {
+                // Escape text for attribute
+                const escapedText = summaryText.replace(/"/g, '&quot;');
+
+                // Styles for controls to match the generated design
+                const selectStyle = `
+                    background-color: var(--input-bg);
+                    color: var(--text-primary);
+                    border: 1px solid var(--border-color);
+                    padding: 6px 10px;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    outline: none;
+                    font-family: 'Poppins', sans-serif;
+                `;
+
+                const btnStyle = `
+                    background-color: var(--primary-blue);
+                    color: white;
+                    border: none;
+                    padding: 6px 12px;
+                    border-radius: 8px;
+                    font-size: 0.9rem;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                    font-family: 'Poppins', sans-serif;
+                    transition: all 0.3s ease;
+                `;
+
                 container.innerHTML = `
-                <div class="transcript-container">
-                    <div class="transcript-header"><h4>Predicted Summary</h4></div>
-                    <div class="transcript-content"><p style="white-space: pre-wrap; line-height: 1.6;">${summaryText}</p></div>
+                <div class="transcript-container" style="display: flex; flex-direction: column; gap: 15px;">
+                    <div class="transcript-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; padding-bottom: 10px; border-bottom: 1px solid var(--border-color);">
+                        <h4 style="margin: 0; font-size: 1.2rem; color: var(--primary-blue-light);">Predicted Summary</h4>
+                        <div class="tts-controls" style="display: flex; gap: 10px; align-items: center;">
+                            <select id="tts-gender" class="small-select" title="Select Voice" style="${selectStyle}">
+                                <option value="NEUTRAL">Neutral</option>
+                                <option value="MALE">Male</option>
+                                <option value="FEMALE">Female</option>
+                            </select>
+                            <select id="tts-speed" class="small-select" title="Playback Speed" style="${selectStyle}">
+                                <option value="0.75">0.75x</option>
+                                <option value="1.0" selected>1.0x</option>
+                                <option value="1.25">1.25x</option>
+                                <option value="1.5">1.5x</option>
+                            </select>
+                            <button class="btn-icon" title="Listen to Summary" onclick="handleListen(this)" data-text="${escapedText}" style="${btnStyle}">
+                                <i class="fas fa-headphones"></i> Listen
+                            </button>
+                        </div>
+                    </div>
+                    <div class="transcript-content" style="background-color: rgba(255, 255, 255, 0.02); padding: 15px; border-radius: 10px;">
+                        <p style="white-space: pre-wrap; line-height: 1.8; color: var(--text-secondary); margin: 0;">${summaryText}</p>
+                    </div>
+                    <div class="audio-player-wrapper" style="display: none; margin-top: 5px;">
+                        <audio id="tts-player" style="width: 100%; border-radius: 8px;" controls></audio>
+                    </div>
                 </div>`;
+            }
+
+            // Fallback: Global event delegation to catch the click if inline onclick fails
+            document.addEventListener('click', function (e) {
+                if (e.target && (e.target.matches('.btn-icon[onclick*="handleListen"]') || e.target.closest('.btn-icon[onclick*="handleListen"]'))) {
+                    console.log("Global click listener caught the Listen button!");
+                    // We don't need to do anything if the inline handler works, but this confirms the click is happening
+                }
+            });
+
+            // Expose the function to the global scope explicitly
+            // Expose the function to the global scope explicitly
+            window.handleListen = async function (btn) {
+                console.log("handleListen triggered!");
+
+                try {
+                    // Get the original RAW text (not the escaped HTML attribute)
+                    const transcriptContentDiv = btn.closest('.transcript-container').querySelector('.transcript-content p');
+                    const rawText = transcriptContentDiv.innerText;
+
+                    const container = btn.closest('.transcript-header');
+                    const genderSelect = container.querySelector('#tts-gender');
+                    const speedSelect = container.querySelector('#tts-speed');
+
+                    const gender = genderSelect ? genderSelect.value : 'NEUTRAL';
+                    const speed = speedSelect ? parseFloat(speedSelect.value) : 1.0;
+
+                    const playerWrapper = btn.closest('.transcript-container').querySelector('.audio-player-wrapper');
+                    const player = playerWrapper.querySelector('#tts-player');
+
+                    // Visual Loading State
+                    const originalText = btn.innerHTML;
+
+                    // Prevent double clicks
+                    if (btn.disabled) return;
+
+                    // Toggle play/pause if already playing context (optional, but good UX)
+                    if (!player.paused && player.src) {
+                        player.pause();
+                        btn.innerHTML = '<i class="fas fa-volume-up"></i> Listen';
+                        return;
+                    }
+
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
+                    btn.disabled = true;
+
+                    console.log('TTS Request:', { text: rawText.substring(0, 100) + '...', gender, speed });
+
+                    const response = await fetch('/api/tts/speak', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            text: rawText,
+                            gender: gender,
+                            speed: speed
+                        })
+                    });
+
+                    if (!response.ok) {
+                        const errText = await response.text();
+                        let errMsg = response.statusText;
+                        try {
+                            const errJson = JSON.parse(errText);
+                            errMsg = errJson.detail || errJson.message || errMsg;
+                        } catch (e) {
+                            errMsg = errText || errMsg;
+                        }
+                        throw new Error(errMsg || 'TTS Failed');
+                    }
+
+                    // Handle Binary Audio Response (Blob)
+                    const blob = await response.blob();
+                    const audioUrl = URL.createObjectURL(blob);
+
+                    // Setup Audio
+                    player.src = audioUrl;
+                    playerWrapper.style.display = 'block';
+
+                    // Cleanup on end
+                    player.onended = () => {
+                        btn.innerHTML = originalText; // Reset to original label (e.g. Listen)
+                        // URL.revokeObjectURL(audioUrl); // Optional
+                    };
+
+                    player.onpause = () => {
+                        btn.innerHTML = originalText;
+                    }
+
+                    player.onplay = () => {
+                        btn.innerHTML = '<i class="fas fa-stop"></i> Stop';
+                    }
+
+                    // Auto-play
+                    const playPromise = player.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.warn('Auto-play prevented:', error);
+                            btn.innerHTML = originalText;
+                        });
+                    }
+
+                } catch (error) {
+                    console.error('TTS Error:', error);
+                    alert('TTS Error: ' + error.message);
+                    btn.innerHTML = '<i class="fas fa-volume-up"></i> Listen';
+                } finally {
+                    btn.disabled = false;
+                }
             }
 
             function renderTranscriptError(container, lessonId, errorMsg) {
