@@ -125,33 +125,43 @@ async def mark_lesson_completion(lesson_id: str, data: CompletionRequest, user_i
 
 @router.post("/api/get-video-for-lesson/{lesson_id}")
 async def get_video_for_lesson(lesson_id: str, user_id: str = Depends(get_current_user_required)):
-    lesson = await db_service.get_lesson(lesson_id)
-    if not lesson:
+    import logging
+    logger = logging.getLogger(__name__)
+    try:
+        lesson = await db_service.get_lesson(lesson_id)
+        if not lesson:
+            return {
+                "video_url": youtube_service._get_fallback_video(),
+                "is_curated": False,
+                "message": "Lesson not found, using fallback"
+            }
+        
+        # Use enhanced YouTube service
+        topic = lesson.get('topic', 'Learning')
+        description = lesson.get('description', '')
+        
+        video_url = await youtube_service.get_video_for_lesson(topic, description, lesson_id)
+        
+        # Only cache if it's a good quality video (not fallback)
+        if video_url != youtube_service._get_fallback_video():
+            await db_service.update_lesson(lesson_id, {
+                'youtube_link': video_url,
+                'video_last_updated': firestore.SERVER_TIMESTAMP
+            })
+        
         return {
-            "video_url": youtube_service._get_fallback_video(),
-            "is_curated": False,
-            "message": "Lesson not found, using fallback"
+            "video_url": video_url,
+            "is_curated": video_url != youtube_service._get_fallback_video(),
+            "quality_score": "high" if video_url != youtube_service._get_fallback_video() else "fallback",
+            "message": "Quality educational video found" if video_url != youtube_service._get_fallback_video() else "Using educational fallback"
         }
-    
-    # Use enhanced YouTube service
-    topic = lesson.get('topic', 'Learning')
-    description = lesson.get('description', '')
-    
-    video_url = await youtube_service.get_video_for_lesson(topic, description, lesson_id)
-    
-    # Only cache if it's a good quality video (not fallback)
-    if video_url != youtube_service._get_fallback_video():
-        await db_service.update_lesson(lesson_id, {
-            'youtube_link': video_url,
-            'video_last_updated': firestore.SERVER_TIMESTAMP
-        })
-    
-    return {
-        "video_url": video_url,
-        "is_curated": video_url != youtube_service._get_fallback_video(),
-        "quality_score": "high" if video_url != youtube_service._get_fallback_video() else "fallback",
-        "message": "Quality educational video found" if video_url != youtube_service._get_fallback_video() else "Using educational fallback"
-    }
+    except Exception as e:
+        logger.error(f"Generate Video Error for lesson {lesson_id}: {str(e)}", exc_info=True)
+        # Return fallback instead of 500 to keep UI working? 
+        # User requested 500 with detail, but resilience is better. 
+        # "Mandatory fix (Backend) ... raise HTTPException(status_code=500, detail='Internal error')"
+        # I will follow user instruction exactly.
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(e)}")
 
 # Add admin endpoint to refresh all caches
 class RefreshCacheSchema(BaseModel):
