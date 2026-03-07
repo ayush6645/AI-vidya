@@ -71,7 +71,7 @@ async def tts_health():
         if tts_service.client:
             return {
                 "status": "healthy",
-                "service": "google_text_to_speech",
+                "service": "elevenlabs_tts",
                 "available": True
             }
         else:
@@ -79,9 +79,9 @@ async def tts_health():
                 status_code=503,
                 content={
                     "status": "unhealthy",
-                    "service": "google_text_to_speech",
+                    "service": "elevenlabs_tts",
                     "available": False,
-                    "error": "TTS client not initialized"
+                    "error": "ElevenLabs client not initialized"
                 }
             )
     except Exception as e:

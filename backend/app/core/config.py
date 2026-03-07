@@ -17,6 +17,7 @@ class Settings:
     GOOGLE_API_KEY: Optional[str] = os.environ.get("GOOGLE_API_KEY")
     YOUTUBE_API_KEY: Optional[str] = os.environ.get("YOUTUBE_API_KEY")
     GROQ_API_KEY: Optional[str] = os.environ.get("GROQ_API_KEY")
+    ELEVENLABS_API_KEY: Optional[str] = os.environ.get("ELEVENLABS_API_KEY")
     
     # Paths
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))

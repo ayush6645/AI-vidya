@@ -52,7 +52,7 @@ class VideoRAGService:
             return
 
         self.embeddings = GoogleGenerativeAIEmbeddings(
-            model="models/embedding-001",
+            model="models/gemini-embedding-001",
             google_api_key=settings.GOOGLE_API_KEY
         )
         
@@ -185,34 +185,33 @@ class VideoRAGService:
         try:
             from youtube_transcript_api.formatters import TextFormatter
             
-            # Helper to get transcript object handling version diffs
             def _get_transcript_obj():
-                # Check for static method (Standard)
-                if hasattr(YouTubeTranscriptApi, 'get_transcript'):
-                     return YouTubeTranscriptApi.get_transcript(video_id)
-                
-                # Check for list_transcripts static (Standard)
-                if hasattr(YouTubeTranscriptApi, 'list_transcripts'):
-                     transcript_list = YouTubeTranscriptApi.list_transcripts(video_id)
-                else:
-                     # Instance-based (Non-standard/Newer?)
-                     api = YouTubeTranscriptApi()
-                     transcript_list = api.list(video_id)
-
-                # Prioritize English, then auto-generated
                 try:
-                    transcript = transcript_list.find_transcript(['en'])
+                    # Instantiate for v1.2.3 compatibility (Environment specific)
+                    api = YouTubeTranscriptApi()
+                    transcript_list = api.list(video_id)
+                except Exception as e:
+                    logger.warning(f"YouTubeTranscriptApi().list fallback failed: {e}")
+                    # Most basic direct fetch (legacy)
+                    return YouTubeTranscriptApi.get_transcript(video_id)
+
+                # Prioritize English, then auto-generated English
+                try:
+                    return transcript_list.find_transcript(['en']).fetch()
                 except:
                     try:
-                        transcript = transcript_list.find_generated_transcript(['en'])
+                        return transcript_list.find_generated_transcript(['en']).fetch()
                     except:
-                        # Fallback to any
-                        transcript = transcript_list[0]
-                
-                return transcript.fetch()
+                        # Iterate to avoid 'TranscriptList object is not subscriptable'
+                        for transcript in transcript_list:
+                            return transcript.fetch()
+                return None
 
             transcript_data = await asyncio.to_thread(_get_transcript_obj)
             
+            if not transcript_data:
+                return await self._fallback_audio_transcription(video_id)
+
             # Format
             formatter = TextFormatter()
             text = formatter.format_transcript(transcript_data)
@@ -223,63 +222,70 @@ class VideoRAGService:
             return await self._fallback_audio_transcription(video_id)
 
     async def _fallback_audio_transcription(self, video_id: str) -> Optional[str]:
-        # yt-dlp download -> Gemini Audio Transcription
+        # Resilient Audio Fallback with Translation
         url = f"https://www.youtube.com/watch?v={video_id}"
         
         with tempfile.TemporaryDirectory() as temp_dir:
+            # Use 'android' player client to bypass 403 Forbidden effectively
             ydl_opts = {
                 'format': 'bestaudio/best',
                 'outtmpl': os.path.join(temp_dir, '%(id)s.%(ext)s'),
-                'quiet': True
+                'quiet': True,
+                'no_warnings': True,
+                'nocheckcertificate': True,
+                'extractor_args': {
+                    'youtube': {
+                        'player_client': ['android'],
+                    }
+                }
             }
             
             try:
-                logger.info(f"Downloading audio for {video_id}...")
+                logger.info(f"Downloading audio for {video_id} (Android Client Emulation)...")
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     await asyncio.to_thread(ydl.download, [url])
                 
-                # Find file
+                # Identify downloaded audio file
                 files = os.listdir(temp_dir)
                 audio_file = None
                 for f in files:
-                    if f.endswith(('.mp3', '.m4a', '.webm', '.wav', '.aac')):
+                    if f.endswith(('.mp3', '.m4a', '.webm', '.wav', '.aac', '.opus')):
                         audio_file = os.path.join(temp_dir, f)
                         break
                 
                 if not audio_file:
+                    logger.error(f"No audio file found in {temp_dir} after download")
                     return None
                     
-                # 1. Try Groq Whisper (Preferred: Fast & Free-ish)
+                # 1. Try Groq Whisper TRANSLATION (Best for multi-language)
                 if llm_service.groq_client:
                     try:
-                        logger.info("Transcribing audio with Groq Whisper...")
+                        logger.info("Transcribing & Translating audio with Groq Whisper...")
                         
-                        def _call_groq_whisper():
+                        def _call_groq_whisper_translate():
                             with open(audio_file, "rb") as file:
-                                transcription = llm_service.groq_client.audio.transcriptions.create(
+                                # USE .translations.create to automatically translate to English
+                                translation = llm_service.groq_client.audio.translations.create(
                                     file=(audio_file, file.read()),
                                     model="whisper-large-v3",
                                     response_format="json",
-                                    language="en",
                                     temperature=0.0
                                 )
-                                return transcription.text
+                                return translation.text
                                 
-                        return await asyncio.to_thread(_call_groq_whisper)
+                        return await asyncio.to_thread(_call_groq_whisper_translate)
                     except Exception as e:
-                        logger.error(f"Groq Whisper failed: {e}. Falling back to Gemini.")
+                        logger.error(f"Groq Translation failed: {e}. Falling back to Gemini.")
 
-                # 2. Fallback to Gemini (via new SDK if available, else generic logic)
-                # Using llm_service.client to leverage existing config
+                # 2. Fallback to Gemini Multimodal Translation
                 if not llm_service.client:
                     logger.error("LLM Service client not ready")
                     return None
                 
-                logger.info("Uploading audio to Gemini...")
-                upload_file = await asyncio.to_thread(llm_service.client.files.upload, file=audio_file)
+                logger.info("Uploading audio to Gemini for Translation...")
+                upload_file = await asyncio.to_thread(llm_service.client.files.upload, path=audio_file)
                 
                 # Wait for processing
-                import time
                 while True:
                     file_check = await asyncio.to_thread(llm_service.client.files.get, name=upload_file.name)
                     if file_check.state.name == "ACTIVE":
@@ -288,16 +294,16 @@ class VideoRAGService:
                         raise Exception("Gemini File Processing Failed")
                     await asyncio.sleep(2)
                 
-                # Generate Transcript
+                # Generate Translated Transcript
                 response = await asyncio.to_thread(
                     llm_service.client.models.generate_content,
                     model='gemini-2.0-flash',
-                    contents=[upload_file, "Generate a full verbatim transcript of this audio."]
+                    contents=[upload_file, "Generate a full verbatim transcript of this audio. If the audio is not in English, translate it to English. Output only the English transcript."]
                 )
                 return response.text
 
             except Exception as e:
-                logger.error(f"Fallback transcription failed: {e}")
+                logger.error(f"Fallback transcription/translation failed: {e}")
                 return None
 
 video_rag_service = VideoRAGService()
