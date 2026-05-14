@@ -220,6 +220,12 @@ class DBService:
         if not config.db: return
         await asyncio.to_thread(config.db.collection('lessons').document(lesson_id).update, data)
 
+    async def delete_note(self, note_id: str):
+        if not config.db:
+            config.init_firebase()
+        if not config.db: return
+        await asyncio.to_thread(config.db.collection('notes').document(note_id).delete)
+
     async def add_note(self, note_data: Dict[str, Any]) -> str:
         if not config.db:
             config.init_firebase()

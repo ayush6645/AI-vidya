@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AIvidya - Dashboard</title>
+  <title>अnukram.ai - Dashboard</title>
   <!-- Favicon: Brain Emoji -->
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
@@ -470,13 +470,66 @@
     }
 
     /* --- Responsive Design --- */
-    /* Mobile Menu Toggle */
+    /* Sidebar Toggle Button - always visible */
     .menu-toggle {
-      display: none;
-      font-size: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
       color: var(--text-primary);
       cursor: pointer;
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      flex-shrink: 0;
       margin-right: 15px;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    .menu-toggle:hover {
+      background: var(--primary-blue);
+      color: #fff;
+      border-color: var(--primary-blue);
+    }
+
+    /* Sidebar collapsed (desktop) */
+    .sidebar {
+      transition: width 0.3s ease, padding 0.3s ease;
+    }
+
+    .sidebar.collapsed {
+      width: 64px;
+      padding: 20px 8px;
+      overflow: hidden;
+    }
+
+    .sidebar.collapsed .sidebar-header img {
+      display: none;
+    }
+
+    .sidebar.collapsed .sidebar-header {
+      justify-content: center;
+      padding-bottom: 20px;
+    }
+
+    .sidebar.collapsed a span,
+    .sidebar.collapsed .logout span {
+      display: none;
+    }
+
+    .sidebar.collapsed a,
+    .sidebar.collapsed .logout {
+      justify-content: center;
+      gap: 0;
+      padding: 14px 0;
+    }
+
+    .sidebar.collapsed a i,
+    .sidebar.collapsed .logout i {
+      font-size: 1.25rem;
+      width: auto;
     }
 
     .sidebar-overlay {
@@ -567,9 +620,7 @@
         justify-content: flex-start;
       }
 
-      .menu-toggle {
-        display: block;
-      }
+      /* menu-toggle always visible, no override needed */
 
       /* Search bar adjustment for mobile header */
       .search-bar {
@@ -609,7 +660,8 @@
   <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">AI-vidya</div>
+    <div class="sidebar-header"><img src="/static/anukram_logo.png" alt="अnukram.ai"
+        style="height:36px;max-width:100%;object-fit:contain;"></div>
     <nav class="nav-links">
       <a href="{{ url_for('view_dashboard') }}" class="active"><i
           class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
@@ -761,16 +813,24 @@
       const sidebar = document.getElementById('sidebar');
       const overlay = document.getElementById('sidebarOverlay');
 
-      if (menuToggle && sidebar && overlay) {
+      if (menuToggle && sidebar) {
         menuToggle.addEventListener('click', () => {
-          sidebar.classList.toggle('active');
-          overlay.classList.toggle('active');
+          if (window.innerWidth <= 992) {
+            sidebar.classList.toggle('active');
+            if (overlay) overlay.classList.toggle('active');
+          } else {
+            sidebar.classList.toggle('collapsed');
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+          }
         });
-
-        overlay.addEventListener('click', () => {
+        if (overlay) overlay.addEventListener('click', () => {
           sidebar.classList.remove('active');
           overlay.classList.remove('active');
         });
+        // Restore collapsed state
+        if (window.innerWidth > 992 && localStorage.getItem('sidebarCollapsed') === 'true') {
+          sidebar.classList.add('collapsed');
+        }
       }
 
       // Search Box Logic

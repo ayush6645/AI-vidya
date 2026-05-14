@@ -1,3 +1,4 @@
+import logging
 from fastapi import APIRouter, Request, HTTPException, Response, status
 from fastapi.responses import JSONResponse, RedirectResponse, HTMLResponse
 from backend.app.schemas.auth import AuthCheckResponse
@@ -9,6 +10,7 @@ from backend.app.core.config import settings
 from backend.app.core.templates import templates
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 @router.get("/login", response_class=HTMLResponse)
 async def login_page(request: Request):
@@ -38,7 +40,7 @@ async def login(request: Request, response: Response):
     auth_type = data.get('authType')
     auth_value = data.get('auth_value', '').strip()
 
-    print(f"DEBUG: Login attempt: Type={login_type}, Value={login_value}")
+    logger.info("Login attempt: type=%s", login_type)
 
     if not all([login_type, login_value, auth_type, auth_value]):
         raise HTTPException(status_code=400, detail="Missing fields")
@@ -68,27 +70,21 @@ async def login(request: Request, response: Response):
         raise HTTPException(status_code=400, detail="Login type not supported")
 
     if not user:
-        print(f"DEBUG: User not found for {db_field}={login_value}")
+        logger.warning("Login failed: user not found for %s", db_field)
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    # Debug Password Hash (SAFETY: Do not log real passwords in prod, but for debug here we check status)
     stored_hash = user.get('password_hash', '')
-    print(f"DEBUG: User found. ID={user.get('id')}. Checking password...")
-    
     if not check_password_hash(stored_hash, auth_value):
-        print("DEBUG: Password mismatch.")
+        logger.warning("Login failed: password mismatch for %s", db_field)
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
-    print("DEBUG: Password matched. Generating token...")
+    logger.info("Login successful for user id=%s", user.get('id'))
 
-    # Generate Token
-    # Critical Fix: Ensure ID is present.
     user_id = user.get('id')
     if not user_id:
-        # Fallback if ID missing in dict but using email/username as ID.
         if db_field == 'email': user_id = login_value.lower()
         elif db_field == 'username': user_id = login_value
-        print(f"DEBUG: ID missing in user dict. Using fallback: {user_id}")
+        logger.warning("ID missing in user dict, using fallback id")
         
     access_token = security.create_access_token(user_id)
     

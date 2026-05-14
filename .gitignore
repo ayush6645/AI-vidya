@@ -1,4 +1,4 @@
-﻿serviceAccountKey.json
+serviceAccountKey.json
 .env
 app.yaml
 __pycache__/
@@ -9,8 +9,24 @@ backend_err.txt
 backend_log.txt
 *.log
 .DS_Store
+backend/data/
 
 # Google Cloud Credentials
 serviceAccountKey.json
 ai-vidya_IAM.json
 *_IAM.json
+
+# Tool and IDE specific
+.claude/
+.vscode/
+.idea/
+
+# Temporary and build artifacts
+_temp_cleanup/
+_server_run.log
+node_modules/
+dist/
+build/
+*.mp3
+*.mp4
+test_output/

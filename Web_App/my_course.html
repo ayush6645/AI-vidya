@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{{ plan.plan_title or 'Course Details' }} - AI-vidya</title>
+    <title>{{ plan.plan_title or 'Course Details' }} - अnukram.ai</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -99,13 +98,65 @@
             transform: translateX(0);
         }
 
-        /* --- Mobile Responsive Sidebar Updates --- */
+        /* Sidebar Toggle - always visible */
         .menu-toggle {
-            display: none;
-            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            font-size: 1.1rem;
             color: var(--text-primary);
             cursor: pointer;
-            width: fit-content;
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            flex-shrink: 0;
+            margin-right: 15px;
+            transition: background 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--primary-blue);
+            color: #fff;
+            border-color: var(--primary-blue);
+        }
+
+        .sidebar {
+            transition: width 0.3s ease, padding 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 64px;
+            padding: 20px 8px;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .sidebar-header img {
+            display: none;
+        }
+
+        .sidebar.collapsed .sidebar-header {
+            justify-content: center;
+            padding-bottom: 20px;
+        }
+
+        .sidebar.collapsed a span,
+        .sidebar.collapsed .logout span {
+            display: none;
+        }
+
+        .sidebar.collapsed a,
+        .sidebar.collapsed .logout {
+            justify-content: center;
+            gap: 0;
+            padding: 14px 0;
+        }
+
+        .sidebar.collapsed a i,
+        .sidebar.collapsed .logout i {
+            font-size: 1.25rem;
+            width: auto;
         }
 
         .sidebar-overlay {
@@ -956,10 +1007,7 @@
                 overflow-x: hidden;
             }
 
-            .menu-toggle {
-                display: block;
-                margin-bottom: 20px;
-            }
+            /* menu-toggle always visible */
 
             .notes-layout {
                 grid-template-columns: 1fr !important;
@@ -984,7 +1032,8 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">AI-vidya</div>
+        <div class="sidebar-header"><img src="/static/anukram_logo.png" alt="अnukram.ai"
+                style="height:36px;max-width:100%;object-fit:contain;"></div>
         <nav class="nav-links">
             <a href="{{ url_for('view_dashboard') }}"><i
                     class="fa-solid fa-table-columns"></i><span>Dashboard</span></a>
@@ -1085,23 +1134,6 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // Mobile Menu Toggle Logic
-            const menuToggle = document.getElementById('menuToggle');
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-
-            if (menuToggle && sidebar && overlay) {
-                menuToggle.addEventListener('click', () => {
-                    sidebar.classList.toggle('active');
-                    overlay.classList.toggle('active');
-                });
-
-                overlay.addEventListener('click', () => {
-                    sidebar.classList.remove('active');
-                    overlay.classList.remove('active');
-                });
-            }
-
             // --- State Variable ---
             const urlParams = new URLSearchParams(window.location.search);
             const lessonIdToOpen = urlParams.get('lesson_id');
@@ -1131,6 +1163,9 @@
             const notesEmptyState = document.getElementById('notes-empty-state');
             const planId = "{{ plan_id }}";
 
+            // Set correct initial progress from server-rendered checkbox states
+            updateOverallProgress();
+
             // --- Accordion Logic ---
             document.querySelectorAll('.module-header').forEach(header => {
                 header.addEventListener('click', () => header.parentElement.classList.toggle('open'));
@@ -1140,9 +1175,11 @@
             document.querySelectorAll('.lesson-topic').forEach(topicLink => {
                 topicLink.addEventListener('click', async (e) => {
                     e.preventDefault();
-                    const currentLessonItem = e.target.closest('.lesson-item');
-                    const lessonId = e.target.dataset.lessonId;
-                    const lessonTitleText = e.target.textContent.trim();
+                    // Use topicLink (the <a> element) not e.target, which may be a child
+                    // element like <strong> and would have no dataset.lessonId
+                    const currentLessonItem = topicLink.closest('.lesson-item');
+                    const lessonId = topicLink.dataset.lessonId;
+                    const lessonTitleText = topicLink.textContent.trim();
 
                     activeLessonId = lessonId;
 
@@ -1337,6 +1374,12 @@
                 return (match && match[2].length === 11) ? match[2] : null;
             }
 
+            function escapeHtml(str) {
+                const div = document.createElement('div');
+                div.textContent = str;
+                return div.innerHTML;
+            }
+
             // --- Notes Functionality ---
             async function loadNotes(lessonId) {
                 if (!lessonId) {
@@ -1359,12 +1402,12 @@
                         const notesHtml = notes.map(note => `
                         <div class="note-card" data-note-id="${note.id}">
                             <div class="note-header">
-                                <span class="note-date">${new Date(note.created_at?.seconds * 1000).toLocaleString()}</span>
+                                <span class="note-date">${note.created_at ? new Date(typeof note.created_at === 'object' && note.created_at.seconds ? note.created_at.seconds * 1000 : note.created_at).toLocaleString() : 'Just now'}</span>
                                 <div class="note-actions">
                                     <button class="delete-note" data-note-id="${note.id}"><i class="fas fa-trash"></i></button>
                                 </div>
                             </div>
-                            <div class="note-content">${note.body.replace(/\n/g, '<br>')}</div>
+                            <div class="note-content">${escapeHtml(note.body).replace(/\n/g, '<br>')}</div>
                         </div>
                     `).join('');
                         notesListDiv.innerHTML = notesHtml;
@@ -1408,6 +1451,12 @@
             async function fetchVideo(lessonId, container) {
                 try {
                     const response = await fetch(`/api/get-video-for-lesson/${lessonId}`, { method: 'POST' });
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        const msg = errData.detail || `Server error ${response.status}`;
+                        container.innerHTML = `<div class="video-error"><p>Could not load video: ${msg}</p></div>`;
+                        return { success: false, error: msg };
+                    }
                     const data = await response.json();
                     if (data.is_curated) {
                         container.innerHTML = `
@@ -1424,10 +1473,10 @@
                             </div>
                         </div>
                         <div class="video-controls" style="margin-top: 10px; display: flex; gap: 10px;">
-                            <button class="btn-small" onclick="reportBadVideo('${lessonId}')" style="background: #fce8e6; color: #c5221f; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                            <button class="btn-small" onclick="reportBadVideo('${lessonId}', this)" style="background: #fce8e6; color: #c5221f; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
                                 <i class="fas fa-flag"></i> Report Bad Video
                             </button>
-                            <button class="btn-small" onclick="refreshVideo('${lessonId}')" style="background: #e8f0fe; color: #1967d2; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                            <button class="btn-small" onclick="refreshVideo('${lessonId}', this)" style="background: #e8f0fe; color: #1967d2; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
                                 <i class="fas fa-sync-alt"></i> Find Better Video
                             </button>
                         </div>`;
@@ -1441,7 +1490,7 @@
                         </div>
                         <iframe src="${data.video_url}" frameborder="0" allowfullscreen></iframe>
                         <div class="video-controls" style="margin-top: 10px; display: flex; gap: 10px;">
-                            <button class="btn-small" onclick="refreshVideo('${lessonId}')" style="background: #e8f0fe; color: #1967d2; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
+                            <button class="btn-small" onclick="refreshVideo('${lessonId}', this)" style="background: #e8f0fe; color: #1967d2; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer;">
                                 <i class="fas fa-sync-alt"></i> Try Auto-Search Again
                             </button>
                         </div>`;
@@ -1454,33 +1503,27 @@
                 }
             }
 
-            window.reportBadVideo = async function (lessonId) {
+            window.reportBadVideo = async function (lessonId, btn) {
                 if (confirm('Report this video as poor quality? We will refresh the source.')) {
-                    await refreshVideo(lessonId);
+                    await refreshVideo(lessonId, btn);
                 }
             };
 
-            window.refreshVideo = async function (lessonId) {
-                const btn = event.target.closest('button');
-                // Create a temporary container reference or find it again relative to the button
-                // Since the button is inside the container, we can find it.
-                // Wait, if we replace innerHTML, we lose the button context if we are not careful? No, we find container first.
-                let container = btn ? btn.closest('.video-container') : null;
-
-                // Fallback to finding by query if passed explicitly or something
+            window.refreshVideo = async function (lessonId, btn) {
+                const container = btn ? btn.closest('.video-pane') : null;
                 if (!container) {
-                    // Try to find the container via other means if possible, or alert
-                    // Assuming standard structure: lesson-item -> lesson-content -> video-container
-                    // But we don't have lessonId based selector easily without modifying HTML structure higher up.
-                    // Rely on button click context.
-                    console.error("Could not find video container");
+                    console.error("Could not find video-pane container");
                     return;
                 }
 
                 container.innerHTML = '<div class="loader">Refreshing video source...</div>';
 
                 try {
-                    await fetch(`/api/admin/refresh-youtube-cache?lesson_id=${lessonId}`, { method: 'POST' });
+                    await fetch(`/api/admin/refresh-youtube-cache`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ lesson_id: lessonId })
+                    });
                     await fetchVideo(lessonId, container);
                 } catch (e) {
                     container.innerHTML = `<div class="video-error">Error refreshing: ${e.message}</div>`;
@@ -1493,9 +1536,13 @@
 
                 try {
                     const response = await fetch(`/api/lesson/${lessonId}/generate-summary`, { method: 'POST' });
+                    if (!response.ok) {
+                        const errData = await response.json().catch(() => ({}));
+                        throw new Error(errData.detail || `Server error ${response.status}`);
+                    }
                     const result = await response.json();
-                    if (result.status !== 'success') throw new Error(result.message);
-                    renderSummary(summaryContainer, result.summary);
+                    if (result.status !== 'success') throw new Error(result.message || 'Unknown error');
+                    renderSummary(summaryContainer, result.summary || 'No summary available.');
                     renderQuiz(result.quiz, quizContainer);
                 } catch (error) {
                     renderTranscriptError(summaryContainer, lessonId, error.message);
@@ -1778,6 +1825,10 @@
             }
 
             function renderQuiz(quizData, container) {
+                if (!quizData || !quizData.length) {
+                    container.innerHTML = '<p style="color: var(--text-secondary); padding: 15px;">No quiz available for this lesson.</p>';
+                    return;
+                }
                 let quizHtml = '<form class="quiz-form">';
                 quizData.forEach((q, index) => {
                     const optionsHtml = q.options.map(opt => `<label><input type="radio" name="question-${index}" value="${opt}" required><span>${opt}</span></label>`).join('');
@@ -1816,6 +1867,28 @@
                 });
             }
         });
+        // Sidebar Toggle Logic
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        const overlay = document.getElementById('sidebarOverlay');
+        if (menuToggle && sidebar) {
+            menuToggle.addEventListener('click', () => {
+                if (window.innerWidth <= 992) {
+                    sidebar.classList.toggle('active');
+                    if (overlay) overlay.classList.toggle('active');
+                } else {
+                    sidebar.classList.toggle('collapsed');
+                    localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+                }
+            });
+            if (overlay) overlay.addEventListener('click', () => {
+                sidebar.classList.remove('active');
+                overlay.classList.remove('active');
+            });
+            if (window.innerWidth > 992 && localStorage.getItem('sidebarCollapsed') === 'true') {
+                sidebar.classList.add('collapsed');
+            }
+        }
     </script>
 </body>
 

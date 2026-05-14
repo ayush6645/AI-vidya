@@ -22,9 +22,9 @@ class TTSService:
         else:
             try:
                 self.client = ElevenLabs(api_key=self.api_key)
-                logger.info("✅ ElevenLabs Client initialized successfully")
+                logger.info("ElevenLabs Client initialized successfully")
             except Exception as e:
-                logger.error(f"❌ Failed to initialize ElevenLabs Client: {e}")
+                logger.error("Failed to initialize ElevenLabs Client: %s", e)
                 self.client = None
 
         # Voice IDs for standard ElevenLabs voices

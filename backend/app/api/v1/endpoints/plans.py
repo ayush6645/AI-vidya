@@ -7,7 +7,6 @@ from backend.app.services.db_service import db_service
 from backend.app.services.llm_service import llm_service
 from backend.app.services.rag_service import rag_service
 from backend.app.services.youtube_service import youtube_service
-from backend.app.services.rag_service import rag_service
 from backend.app.core.templates import templates
 from backend.app.core.deps import get_current_user_required
 from google.cloud import firestore
@@ -119,9 +118,23 @@ async def generate_lesson_summary(lesson_id: str, user_id: str = Depends(get_cur
 
 @router.post("/api/lessons/{lesson_id}/completion")
 async def mark_lesson_completion(lesson_id: str, data: CompletionRequest, user_id: str = Depends(get_current_user_required)):
-    # Toggle boolean based on request or just set true? Request has is_completed
     await db_service.update_lesson(lesson_id, {"completed": data.is_completed, "is_completed": data.is_completed})
-    return {"status": "success", "progress": 50} # TODO: Calculate real progress
+
+    # Calculate real progress for this plan
+    progress = 0
+    try:
+        modules = await db_service.get_modules_by_plan(data.plan_id)
+        total, completed = 0, 0
+        for mod in modules:
+            lessons = await db_service.get_lessons_by_module(mod['id'])
+            total += len(lessons)
+            completed += sum(1 for l in lessons if l.get('is_completed'))
+        if total > 0:
+            progress = round((completed / total) * 100)
+    except Exception:
+        pass
+
+    return {"status": "success", "progress": progress}
 
 @router.post("/api/get-video-for-lesson/{lesson_id}")
 async def get_video_for_lesson(lesson_id: str, user_id: str = Depends(get_current_user_required)):
@@ -231,7 +244,7 @@ async def add_note_to_lesson(plan_id: str, note: NoteRequest, user_id: str = Dep
 
 @router.delete("/api/notes/{note_id}")
 async def delete_note(note_id: str, user_id: str = Depends(get_current_user_required)):
-    # await db_service.delete_note(note_id) # Pending implementation
+    await db_service.delete_note(note_id)
     return {"status": "success"}
 
 @router.post("/api/lesson/{lesson_id}/submit-quiz")

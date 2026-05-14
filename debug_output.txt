@@ -1,8 +1,0 @@
-Python Executable: E:\AI_Edu_Bot_Project\.venv\Scripts\python.exe
-Python Path: ['E:\\AI_Edu_Bot_Project', 'e:\\AI_Edu_Bot_Project', 'C:\\Users\\gyang\\AppData\\Local\\Programs\\Python\\Python312\\python312.zip', 'C:\\Users\\gyang\\AppData\\Local\\Programs\\Python\\Python312\\DLLs', 'C:\\Users\\gyang\\AppData\\Local\\Programs\\Python\\Python312\\Lib', 'C:\\Users\\gyang\\AppData\\Local\\Programs\\Python\\Python312', 'E:\\AI_Edu_Bot_Project\\.venv', 'E:\\AI_Edu_Bot_Project\\.venv\\Lib\\site-packages']
-Module youtube_transcript_api: <module 'youtube_transcript_api' from 'E:\\AI_Edu_Bot_Project\\.venv\\Lib\\site-packages\\youtube_transcript_api\\__init__.py'>
-File: E:\AI_Edu_Bot_Project\.venv\Lib\site-packages\youtube_transcript_api\__init__.py
-Type of YouTubeTranscriptApi: <class 'type'>
-Dir: ['__class__', '__delattr__', '__dict__', '__dir__', '__doc__', '__eq__', '__format__', '__ge__', '__getattribute__', '__getstate__', '__gt__', '__hash__', '__init__', '__init_subclass__', '__le__', '__lt__', '__module__', '__ne__', '__new__', '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__sizeof__', '__str__', '__subclasshook__', '__weakref__', 'fetch', 'list']
-list_transcripts MISSING.
-get_transcript MISSING.

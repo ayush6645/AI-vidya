@@ -1,7 +1,7 @@
 
 <div align="center">
 
-  <h1>🧠 AI-Vidya</h1>
+  <img src="Web_App/anukram_logo.png" alt="अnukram.ai" width="320" />
   
   <p>
     <b>Architect Your Future with AI-Powered Personalized Learning</b>
@@ -28,9 +28,9 @@
 
 ## 📖 Overview
 
-**AI-Vidya** is a next-generation education platform that solves the "tutorial hell" problem. Instead of endless searching, it uses **Google's Gemini 1.5 Flash** to act as your personal academic advisor.
+**अnukram.ai** is a next-generation education platform that solves the "tutorial hell" problem. Instead of endless searching, it uses **Google's Gemini 1.5 Flash** to act as your personal academic advisor.
 
-Simply tell it what you want to learn (e.g., *"Full Stack Development in 3 months"*), and AI-Vidya generates a **structured, day-by-day curriculum** tailored to your timeline. It doesn't just list topics; it provides resources, tracks your progress, and even quizzes you.
+Simply tell it what you want to learn (e.g., *"Full Stack Development in 3 months"*), and अnukram.ai generates a **structured, day-by-day curriculum** tailored to your timeline. It doesn't just list topics; it provides resources, tracks your progress, and even quizzes you.
 
 Now deployed on **Google Cloud Run** for distinct scalability and performance.
 
@@ -122,7 +122,7 @@ Now deployed on **Google Cloud Run** for distinct scalability and performance.
 ## 📂 Project Structure
 
 ```
-AI-Vidya/
+अnukram.ai/
 ├── backend/            # FastAPI Application
 │   ├── app/
 │   │   ├── api/        # REST API Routes

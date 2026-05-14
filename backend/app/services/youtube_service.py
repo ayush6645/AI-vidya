@@ -4,6 +4,8 @@ import httpx
 import asyncio
 import re
 import json
+import isodate
+import logging
 from typing import Optional, Dict, Any, List
 from urllib.parse import quote_plus
 from datetime import datetime, timedelta
@@ -11,6 +13,8 @@ from youtube_transcript_api import YouTubeTranscriptApi, TranscriptsDisabled, No
 from backend.app.core.config import settings
 from backend.app.core import config
 from google.cloud import firestore
+
+logger = logging.getLogger(__name__)
 
 class EnhancedYouTubeService:
     def __init__(self):
@@ -47,27 +51,26 @@ class EnhancedYouTubeService:
         # Step 1: Check cache with expiry (7 days)
         cached = await self._get_cached_video(lesson_id)
         if cached and not await self._is_cache_expired(cached.get('cached_at')):
-            print(f"✅ Using cached video for lesson {lesson_id}")
+            logger.info("Using cached video for lesson %s", lesson_id)
             return cached.get('embed_url')
-        
+
         # Step 2: Generate optimized search queries
         search_queries = self._generate_search_queries(topic, description)
-        
-        print(f"\n🔍 Searching YouTube for: {topic}")
-        print(f"📝 Generated queries: {search_queries}")
-        
+
+        logger.info("Searching YouTube for: %s", topic)
+        logger.debug("Generated queries: %s", search_queries)
+
         # Step 3: Try each query until we find a good video
         for query in search_queries:
             video_data = await self._search_youtube(query, lesson_id)
             if video_data and self._is_high_quality(video_data):
-                # Cache the good video
                 await self._cache_video(lesson_id, video_data)
-                print(f"✅ Found quality video: {video_data.get('title')}")
+                logger.info("Found quality video: %s", video_data.get('title'))
                 return video_data.get('embed_url')
-        
+
         # Step 4: If no good video found, use fallback but don't cache it
         fallback = self._get_fallback_video()
-        print(f"⚠️ Using fallback video for {topic}")
+        logger.warning("No quality video found for '%s', using fallback", topic)
         return fallback
     
     def _generate_search_queries(self, topic: str, description: str) -> List[str]:
@@ -120,72 +123,71 @@ class EnhancedYouTubeService:
                 f"?part=snippet"
                 f"&q={encoded_query}"
                 f"&type=video"
-                f"&maxResults=10"  # Get more results to choose from
-                f"&videoDuration=medium"  # Prefer medium length videos (4-20 min)
+                f"&maxResults=10"
+                f"&videoDuration=medium"
                 f"&relevanceLanguage=en"
                 f"&videoEmbeddable=true"
                 f"&key={self.api_key}"
             )
-            
-            async with httpx.AsyncClient(timeout=10.0) as client:
+
+            async with httpx.AsyncClient(timeout=15.0) as client:
                 response = await client.get(url)
                 response.raise_for_status()
                 items = response.json().get('items', [])
-                
+
                 if not items:
                     return None
-                
-                # Process results
+
+                # Batch all video IDs into a single detail call instead of N+1 calls.
+                # This drops API cost from (1 + N) calls/query to 2 calls/query.
+                video_ids = [item['id']['videoId'] for item in items]
+                detail_url = (
+                    f"https://www.googleapis.com/youtube/v3/videos"
+                    f"?part=contentDetails,statistics"
+                    f"&id={','.join(video_ids)}"
+                    f"&key={self.api_key}"
+                )
+
+                detail_resp = await client.get(detail_url)
+                details_map: Dict[str, Dict] = {}
+                if detail_resp.status_code == 200:
+                    details_map = {d['id']: d for d in detail_resp.json().get('items', [])}
+
                 videos = []
                 for item in items:
                     video_id = item['id']['videoId']
-                    title = item['snippet']['title'].lower()
                     channel = item['snippet']['channelTitle'].lower()
-                    
-                    # Get video details for duration
-                    detail_url = (
-                        f"https://www.googleapis.com/youtube/v3/videos"
-                        f"?part=contentDetails,statistics"
-                        f"&id={video_id}"
-                        f"&key={self.api_key}"
-                    )
-                    
-                    detail_resp = await client.get(detail_url)
-                    if detail_resp.status_code == 200:
-                        detail = detail_resp.json().get('items', [{}])[0]
-                        duration = detail.get('contentDetails', {}).get('duration', 'PT0S')
-                        stats = detail.get('statistics', {})
-                        
-                        # Calculate duration in minutes
-                        import isodate
-                        try:
-                            dur_seconds = isodate.parse_duration(duration).total_seconds()
-                            duration_min = dur_seconds / 60
-                        except:
-                            duration_min = 0
-                        
-                        video_data = {
-                            'video_id': video_id,
-                            'title': item['snippet']['title'],
-                            'channel': channel,
-                            'description': item['snippet'].get('description', ''),
-                            'duration_minutes': duration_min,
-                            'views': int(stats.get('viewCount', 0)),
-                            'likes': int(stats.get('likeCount', 0)),
-                            'embed_url': f"https://www.youtube.com/embed/{video_id}",
-                            'search_query': query,
-                            'searched_at': datetime.utcnow().isoformat()
-                        }
-                        
-                        videos.append(video_data)
-                
-                # Rank videos by quality
+
+                    detail = details_map.get(video_id, {})
+                    duration = detail.get('contentDetails', {}).get('duration', 'PT0S')
+                    stats = detail.get('statistics', {})
+
+                    try:
+                        dur_seconds = isodate.parse_duration(duration).total_seconds()
+                        duration_min = dur_seconds / 60
+                    except Exception:
+                        duration_min = 0
+
+                    video_data = {
+                        'video_id': video_id,
+                        'title': item['snippet']['title'],
+                        'channel': channel,
+                        'description': item['snippet'].get('description', ''),
+                        'duration_minutes': duration_min,
+                        'views': int(stats.get('viewCount', 0)),
+                        'likes': int(stats.get('likeCount', 0)),
+                        'embed_url': f"https://www.youtube.com/embed/{video_id}",
+                        'search_query': query,
+                        'searched_at': datetime.utcnow().isoformat()
+                    }
+
+                    videos.append(video_data)
+
                 ranked = sorted(videos, key=lambda v: self._calculate_quality_score(v), reverse=True)
-                
                 return ranked[0] if ranked else None
-                
+
         except Exception as e:
-            print(f"❌ YouTube search error for query '{query}': {e}")
+            logger.error("YouTube search error for query '%s': %s", query, e)
             return None
     
     def _calculate_quality_score(self, video: Dict) -> float:
@@ -278,7 +280,7 @@ class EnhancedYouTubeService:
                 doc_ref = config.db.collection('youtube_cache').document(lesson_id)
                 doc_ref.set(cache_data)
             except Exception as e:
-                print(f"⚠️ Failed to cache video: {e}")
+                logger.warning("Failed to cache video: %s", e)
 
         await asyncio.to_thread(_set)
     
@@ -286,12 +288,15 @@ class EnhancedYouTubeService:
         """Check if cache is expired"""
         if not cached_at:
             return True
-        
+
         if isinstance(cached_at, datetime):
-            cache_time = cached_at
-        else:
             cache_time = cached_at.replace(tzinfo=None)
-        
+        else:
+            try:
+                cache_time = cached_at.replace(tzinfo=None)
+            except Exception:
+                return True
+
         return datetime.utcnow() - cache_time > timedelta(days=7)
     
     def _get_fallback_video(self) -> str:
@@ -319,7 +324,7 @@ class EnhancedYouTubeService:
             try:
                 doc_ref = config.db.collection('youtube_cache').document(lesson_id)
                 doc_ref.delete()
-                print(f"♻️ Cache cleared for lesson {lesson_id}")
+                logger.info("Cache cleared for lesson %s", lesson_id)
                 return True
             except Exception:
                 return False
